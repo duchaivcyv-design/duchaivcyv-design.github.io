@@ -18,13 +18,12 @@ jobs:
       - name: Install Dependencies (dpkg, llvm)
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev bzip2 fakeroot llvm file
+          sudo apt-get install -y dpkg-dev bzip2 fakeroot llvm file python3
 
       - name: Auto-Patch and Split to 3 Environments
         run: |
           mkdir -p final_debs
           
-          # Quét tất cả file .deb gốc
           for deb in debs/*.deb; do
             if [ -f "$deb" ]; then
               echo "========================================"
@@ -38,38 +37,40 @@ jobs:
               # ==========================================
               echo "--> Đang tạo bản Rootful..."
               dpkg-deb -R "$deb" temp_rootful
-              sed -i 's/^Architecture: .*/Architecture: iphoneos-arm/' temp_rootful/DEBIAN/control
+              # Dùng python để sửa Architecture chuẩn xác 100%
+              python3 -c "
+import re
+with open('temp_rootful/DEBIAN/control', 'r') as f: lines = f.readlines()
+with open('temp_rootful/DEBIAN/control', 'w') as f:
+    for line in lines:
+        if line.startswith('Architecture:'): f.write('Architecture: iphoneos-arm\n')
+        else: f.write(line)
+"
               dpkg-deb -b temp_rootful "final_debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
               rm -rf temp_rootful
 
               # ==========================================
               # 2. TẠO BẢN ROOTLESS (iphoneos-arm64)
               # ==========================================
-              echo "--> Đang tạo bản Rootless (Deep Patch)..."
+              echo "--> Đang tạo bản Rootless..."
               dpkg-deb -R "$deb" temp_rootless
-              
-              # Sửa file control
-              sed -i 's/^Architecture: .*/Architecture: iphoneos-arm64/' temp_rootless/DEBIAN/control
-              
-              # Sửa path trong .plist (Text)
+              python3 -c "
+with open('temp_rootless/DEBIAN/control', 'r') as f: lines = f.readlines()
+with open('temp_rootless/DEBIAN/control', 'w') as f:
+    for line in lines:
+        if line.startswith('Architecture:'): f.write('Architecture: iphoneos-arm64\n')
+        else: f.write(line)
+"
+              # Patch path
               find temp_rootless -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
-              
-              # SỬA PATH TRONG BINARY (Dylib & Executables)
-              # Tìm tất cả file Mach-O và patch path
-              find temp_rootless -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho_files.txt
+              find temp_rootless -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho.txt
               while read -r bin; do
                 chmod +x "$bin"
-                # Lấy tất cả các path đang có trong binary
                 paths=$(llvm-objdump -p "$bin" 2>/dev/null | grep -E "path|name" | grep -v "/System" | grep -v "/usr/lib/libSystem" | awk '{print $2}')
                 for p in $paths; do
-                  if [[ "$p" == /Library/* ]] || [[ "$p" == /usr/lib/* ]]; then
-                    # Thêm /var/jb vào trước path (xử lý cả path dài)
-                    new_p="/var/jb$p"
-                    llvm-install-name-tool -change "$p" "$new_p" "$bin" 2>/dev/null || true
-                  fi
+                  [[ "$p" == /Library/* || "$p" == /usr/lib/* ]] && llvm-install-name-tool -change "$p" "/var/jb$p" "$bin" 2>/dev/null || true
                 done
-              done < macho_files.txt
-              rm macho_files.txt
+              done < macho.txt; rm macho.txt
 
               dpkg-deb -b temp_rootless "final_debs/${PKG_NAME}_${PKG_VER}_rootless_iphoneos-arm64.deb" > /dev/null
               rm -rf temp_rootless
@@ -77,48 +78,45 @@ jobs:
               # ==========================================
               # 3. TẠO BẢN ROOTHIDE (iphoneos-arm64e)
               # ==========================================
-              echo "--> Đang tạo bản RootHide (Deep Patch & Depends)..."
+              echo "--> Đang tạo bản RootHide..."
               dpkg-deb -R "$deb" temp_roothide
-              
-              # Sửa control: Đổi Arch, Đổi Tên Package, Ép Depends sang roothide
-              sed -i 's/^Architecture: .*/Architecture: iphoneos-arm64e/' temp_roothide/DEBIAN/control
-              sed -i "s/^Package: .*/Package: ${PKG_NAME}.roothide/" temp_roothide/DEBIAN/control
-              sed -i 's/^Depends: .*mobilesubstrate.*/Depends: roothide, preferenceloader/' temp_roothide/DEBIAN/control
-              sed -i 's/^Depends: mobilesubstrate.*/Depends: roothide/' temp_roothide/DEBIAN/control
-
-              # Sửa path trong .plist (RootHide cũng dùng /var/jb/)
+              python3 -c "
+with open('temp_roothide/DEBIAN/control', 'r') as f: lines = f.readlines()
+with open('temp_roothide/DEBIAN/control', 'w') as f:
+    for line in lines:
+        if line.startswith('Architecture:'): f.write('Architecture: iphoneos-arm64e\n')
+        elif line.startswith('Package:'): f.write(f'Package: ${PKG_NAME}.roothide\n')
+        elif line.startswith('Depends:'): 
+            deps = line.replace('Depends:', '').replace('mobilesubstrate', 'roothide').strip()
+            f.write(f'Depends: {deps}\n')
+        else: f.write(line)
+"
               find temp_roothide -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
-              
-              # SỬA PATH TRONG BINARY
-              find temp_roothide -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho_files.txt
+              find temp_roothide -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho.txt
               while read -r bin; do
                 chmod +x "$bin"
                 paths=$(llvm-objdump -p "$bin" 2>/dev/null | grep -E "path|name" | grep -v "/System" | grep -v "/usr/lib/libSystem" | awk '{print $2}')
                 for p in $paths; do
-                  if [[ "$p" == /Library/* ]] || [[ "$p" == /usr/lib/* ]]; then
-                    new_p="/var/jb$p"
-                    llvm-install-name-tool -change "$p" "$new_p" "$bin" 2>/dev/null || true
-                  fi
+                  [[ "$p" == /Library/* || "$p" == /usr/lib/* ]] && llvm-install-name-tool -change "$p" "/var/jb$p" "$bin" 2>/dev/null || true
                 done
-              done < macho_files.txt
-              rm macho_files.txt
+              done < macho.txt; rm macho.txt
 
               dpkg-deb -b temp_roothide "final_debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
               rm -rf temp_roothide
               
-              echo "Đã xử lý xong: $PKG_NAME"
             fi
           done
           
-          # Xóa file gốc, chỉ giữ lại 3 bản đã tách
           rm -rf debs
           mkdir -p debs
-          mv final_debs/*.deb debs/ 2>/dev/null || true
+          mv final_debs/*.deb debs/
           rm -rf final_debs
 
       - name: Generate Packages
         run: |
           dpkg-scanpackages -m ./debs /dev/null > Packages
+          echo "=== KIỂM TRA FILE PACKAGES ==="
+          grep "^Package:\|^Architecture:" Packages
           bzip2 -kf Packages
           
       - name: Generate Release
@@ -138,5 +136,5 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add Packages Packages.bz2 Release debs/
-          git commit -m "Auto-split 3 environments (Rootful, Rootless, RootHide)" || exit 0
+          git commit -m "Auto-split 3 environments (Python Patched)" || exit 0
           git push
