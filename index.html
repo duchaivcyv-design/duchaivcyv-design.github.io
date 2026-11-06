@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaoJB Repo</title>
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.25);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --text-color: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-color);
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Hiệu ứng Liquid Glass Container */
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            box-shadow: var(--glass-shadow);
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            /* SVG Filter cho hiệu ứng khúc xạ (nếu trình duyệt hỗ trợ) */
+            filter: url(#liquid-glass-filter);
+        }
+
+        /* Lớp phủ bên trong để tạo cảm giác kính dày */
+        .liquid-glass::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.1) 100%);
+            pointer-events: none;
+            border-radius: 28px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 20px;
+            border-radius: 16px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover, .btn:active {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.02);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-sileo { background: rgba(0, 122, 255, 0.25); border-color: rgba(0, 122, 255, 0.4); }
+        .btn-sileo:hover { background: rgba(0, 122, 255, 0.4); }
+        
+        .btn-zebra { background: rgba(255, 149, 0, 0.25); border-color: rgba(255, 149, 0, 0.4); }
+        .btn-zebra:hover { background: rgba(255, 149, 0, 0.4); }
+
+        .btn-copy { background: rgba(52, 199, 89, 0.25); border-color: rgba(52, 199, 89, 0.4); }
+        .btn-copy:hover { background: rgba(52, 199, 89, 0.4); }
+
+        .package-list {
+            text-align: left;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .package-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .package-item:last-child { border-bottom: none; }
+        .package-name { font-weight: 500; }
+        .package-version { opacity: 0.6; font-size: 0.8rem; }
+
+        /* SVG Filter Definition (chỉ hoạt động trên một số trình duyệt) */
+        .svg-filters { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- SVG Filter cho hiệu ứng Liquid Glass -->
+    <svg class="svg-filters">
+        <filter id="liquid-glass-filter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+    </svg>
+
+    <div class="liquid-glass">
+        <h1>TaoJB Repo</h1>
+        <p class="subtitle">Kho tweak cá nhân · Tương thích Sileo & Zebra</p>
+
+        <div class="btn-group">
+            <!-- Nút thêm vào Sileo -->
+            <a href="sileo://source/https://duchaivcyv-design.github.io/" class="btn btn-sileo">
+                🧊 Thêm vào Sileo
+            </a>
+            <!-- Nút thêm vào Zebra -->
+            <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn btn-zebra">
+                🦓 Thêm vào Zebra
+            </a>
+            <!-- Nút copy link repo -->
+            <button onclick="copyRepoLink()" class="btn btn-copy" id="copyBtn">
+                📋 Sao chép URL Repo
+            </button>
+        </div>
+
+        <!-- Danh sách gói (có thể sửa tay cho đúng với repo của bạn) -->
+        <div class="package-list">
+            <div class="package-item">
+                <span class="package-name">27CC Ios 14-18.0</span>
+                <span class="package-version">6.0.2-5</span>
+            </div>
+            <div class="package-item">
+                <span class="package-name">DynaFake 14-18.0</span>
+                <span class="package-version">6.0.2-5</span>
+            </div>
+            <div class="package-item">
+                <span class="package-name">Liquid Tab Ios 14-18.0</span>
+                <span class="package-version">6.0.2-5</span>
+            </div>
+            <div class="package-item">
+                <span class="package-name">26Morph 14-18.0</span>
+                <span class="package-version">6.0.2-5</span>
+            </div>
+            <div class="package-item">
+                <span class="package-name">UnlockCode ios 14-18.0</span>
+                <span class="package-version">6.0.2-5</span>
+            </div>
+            <div class="package-item">
+                <span class="package-name">OpenWave Ios 14-18.0</span>
+                <span class="package-version">6.0.2-5</span>
+            </div>
+            <div class="package-item">
+                <span class="package-name">2712 (trọn bộ) ios 14-18</span>
+                <span class="package-version">6.0.2-5</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyRepoLink() {
+            const url = "https://duchaivcyv-design.github.io/";
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ Đã sao chép!';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                }, 2000);
+            }).catch(err => {
+                // Fallback cho trình duyệt cũ
+                alert("URL Repo: " + url);
+            });
+        }
+    </script>
+</body>
+</html>
