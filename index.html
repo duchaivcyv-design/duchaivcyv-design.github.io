@@ -6,7 +6,7 @@
     <title>TaoJB Repo - Liquid Glass</title>
     <style>
         /* ==========================================================================
-           1. CHỐNG SAO CHÉP & RESET
+           1. CHỐNG ZOOM, CHỐNG COPY VÀ RESET CƠ BẢN
            ========================================================================== */
         * {
             box-sizing: border-box;
@@ -14,6 +14,8 @@
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            
+            /* Chặn copy & menu ngữ cảnh */
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
@@ -21,8 +23,11 @@
 
         html, body {
             height: 100vh;
+            width: 100vw;
             overflow: hidden;
-            background-color: #000;
+            background-color: #021206;
+            /* Chặn zoom trên iOS */
+            touch-action: pan-y; 
         }
 
         body {
@@ -34,7 +39,7 @@
         }
 
         /* ==========================================================================
-           2. WEBGL BACKGROUND (NỀN XANH SÁNG & CÂY CHI TIẾT)
+           2. HÌNH NỀN WEBGL (XANH SÁNG, CÂY CHI TIẾT)
            ========================================================================== */
         #bg-canvas {
             position: fixed;
@@ -43,11 +48,11 @@
             width: 100vw;
             height: 100vh;
             z-index: 0;
-            pointer-events: none;
+            pointer-events: none; /* Không cản trở chạm */
         }
 
         /* ==========================================================================
-           3. CỰC PHẨM LIQUID GLASS (15 LỚP ĐỔ BÓNG)
+           3. KHUNG KÍNH PHA LÊ 15 LỚP (LIQUID GLASS MASTERPIECE)
            ========================================================================== */
         .app-wrapper {
             position: relative;
@@ -56,7 +61,6 @@
             max-width: 420px;
             height: 88vh;
             padding: 15px;
-            perspective: 1200px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -68,97 +72,115 @@
             position: relative;
             border-radius: 50px;
             
-            /* Nền siêu trong suốt */
-            background: rgba(255, 255, 255, 0.02); 
+            /* Lớp nền siêu trong suốt pha chút xanh ngọc */
+            background: linear-gradient(
+                135deg, 
+                rgba(255, 255, 255, 0.05) 0%, 
+                rgba(255, 255, 255, 0.01) 50%, 
+                rgba(255, 255, 255, 0.03) 100%
+            ); 
             
-            /* Bộ lọc khúc xạ khổng lồ */
-            backdrop-filter: blur(60px) saturate(300%) brightness(1.2) contrast(1.1);
-            -webkit-backdrop-filter: blur(60px) saturate(300%) brightness(1.2) contrast(1.1);
+            /* Bộ lọc khúc xạ khổng lồ (Blur siêu mạnh, bão hòa cao) */
+            backdrop-filter: blur(50px) saturate(250%) brightness(1.3) contrast(1.1);
+            -webkit-backdrop-filter: blur(50px) saturate(250%) brightness(1.3) contrast(1.1);
             
-            /* VIỀN VÀ BÓNG ĐỔ 15 LỚP (TẠO CẢM GIÁC KÍNH PHA LÊ DÀY) */
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            /* VIỀN VÀ BÓNG ĐỔ 15 LỚP TẠO CẢM GIÁC KÍNH DÀY VÀ LỒI LÕM */
+            border: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 
-                /* Bóng đổ ngoài trời */
-                0 40px 100px rgba(0, 0, 0, 0.8),
-                0 10px 30px rgba(0, 0, 0, 0.5),
+                /* 1. Bóng đổ ngoài trời tạo chiều sâu */
+                0 40px 100px rgba(0, 0, 0, 0.9),
                 
-                /* Viền sáng ngoài cùng */
-                0 0 0 1px rgba(255, 255, 255, 0.3),
-                0 0 0 4px rgba(255, 255, 255, 0.05),
+                /* 2. Quầng sáng xanh môi trường */
+                0 0 80px rgba(100, 255, 150, 0.15),
                 
-                /* Viền tối cấu trúc */
-                inset 0 0 0 1px rgba(0, 0, 0, 0.3),
-                inset 0 0 0 3px rgba(255, 255, 255, 0.1),
+                /* 3. Viền phản chiếu ngoài cùng */
+                0 0 0 1px rgba(255, 255, 255, 0.4),
                 
-                /* Ánh sáng đỉnh kính (Highlight) */
-                inset 0 3px 5px rgba(255, 255, 255, 0.8),
-                inset 0 15px 30px -10px rgba(255, 255, 255, 0.3),
+                /* 4. Viền đen cấu trúc bên trong */
+                inset 0 0 0 1px rgba(0, 0, 0, 0.6),
                 
-                /* Bóng tối đáy kính */
-                inset 0 -3px 5px rgba(0, 0, 0, 0.6),
-                inset 0 -15px 30px -10px rgba(0, 0, 0, 0.5),
+                /* 5. Ánh sáng đỉnh kính (Highlight) */
+                inset 0 4px 6px rgba(255, 255, 255, 0.9),
                 
-                /* Quầng sáng xanh môi trường */
-                inset 0 0 50px rgba(50, 255, 100, 0.1),
-                inset 0 0 100px rgba(50, 255, 100, 0.05),
+                /* 6. Bóng tối đáy kính */
+                inset 0 -4px 6px rgba(0, 0, 0, 0.8),
                 
-                /* Lớp phản chiếu mờ */
-                inset 20px 20px 40px -20px rgba(255, 255, 255, 0.2),
-                inset -20px -20px 40px -20px rgba(0, 0, 0, 0.3);
+                /* 7. Ánh sáng viền trái */
+                inset 4px 0 10px rgba(255, 255, 255, 0.2),
+                
+                /* 8. Ánh sáng viền phải */
+                inset -4px 0 10px rgba(255, 255, 255, 0.2),
+                
+                /* 9. Quầng sáng xanh lục bảo lan tỏa trong kính */
+                inset 0 0 40px rgba(50, 255, 100, 0.1),
+                
+                /* 10. Phản chiếu lớp trên cùng */
+                inset 0 20px 40px -20px rgba(255, 255, 255, 0.3),
+                
+                /* 11. Bóng đổ lớp dưới cùng */
+                inset 0 -20px 40px -20px rgba(0, 0, 0, 0.5),
+                
+                /* 12. Viền pha lê mỏng kép */
+                inset 0 0 0 4px rgba(255, 255, 255, 0.03);
             
-            will-change: transform;
-            transition: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: transform 0.2s ease;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            overflow: hidden; /* Quan trọng: Giữ nội dung bên trong */
         }
 
-        /* Lớp phủ ánh sáng lướt theo ngón tay (Specular Highlight) */
+        /* Lớp viền pha lê thứ 2 (Nằm trong cùng) */
         .glass-panel::before {
+            content: '';
+            position: absolute;
+            inset: 6px; /* Cách viền ngoài 6px */
+            border-radius: 44px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.02);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Lớp ánh sáng lướt (Specular highlight) */
+        .glass-panel::after {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             border-radius: 50px;
             background: radial-gradient(
                 circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.15) 0%,
                 rgba(255, 255, 255, 0) 60%
             );
-            pointer-events: none; /* Quan trọng: Để click xuyên qua */
-            z-index: 1;
+            pointer-events: none;
+            z-index: 3;
             mix-blend-mode: overlay;
         }
 
-        /* Lớp viền pha lê thứ 2 */
-        .glass-panel::after {
-            content: '';
-            position: absolute;
-            inset: 4px;
-            border-radius: 46px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: none;
-            z-index: 1;
-            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
-        }
-
         /* ==========================================================================
-           4. NỘI DUNG CUỘN BÊN TRONG
+           4. NỘI DUNG CUỘN (QUAN TRỌNG: ĐỂ FIX LỖI VUỐT)
            ========================================================================== */
         .scrollable-content {
             position: relative;
-            z-index: 5; /* Nằm trên lớp kính */
+            z-index: 5;
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
             padding: 30px 20px 50px;
             -webkit-overflow-scrolling: touch;
-            pointer-events: auto; /* Bắt buộc phải có để cuộn và click được */
+            /* Bắt buộc phải có để sự kiện chạm hoạt động đúng */
+            pointer-events: auto; 
+            /* Chỉ cho phép vuốt dọc, chặn vuốt ngang */
+            touch-action: pan-y; 
         }
 
+        /* Ẩn thanh cuộn */
         .scrollable-content::-webkit-scrollbar { width: 0; }
 
-        /* Header */
-        .header { text-align: center; margin-bottom: 25px; }
+        /* ==========================================================================
+           5. HEADER VÀ THANH TAB (VIÊN THUỐC)
+           ========================================================================== */
+        .header { text-align: center; margin-bottom: 25px; pointer-events: none; }
         h1 {
             font-size: 2.8rem;
             font-weight: 900;
@@ -166,61 +188,62 @@
             background: linear-gradient(180deg, #ffffff 0%, #a3c9a8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.9);
         }
         .subtitle {
             font-size: 0.8rem;
-            color: rgba(200, 255, 200, 0.8);
+            color: rgba(200, 255, 200, 0.9);
             letter-spacing: 4px;
             text-transform: uppercase;
             margin-top: 5px;
             font-weight: 800;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
 
-        /* ==========================================================================
-           5. VIÊN THUỐC (TAB BAR) - ĐÃ SỬA LỖI CLICK
-           ========================================================================== */
+        /* Thanh Tab */
         .ios-tab-bar {
             position: relative;
             display: flex;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             border-radius: 50px;
             padding: 6px;
             margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 
-                inset 0 5px 15px rgba(0, 0, 0, 0.8),
-                0 5px 15px rgba(0, 0, 0, 0.3);
+                inset 0 5px 15px rgba(0, 0, 0, 0.9),
+                0 5px 15px rgba(0, 0, 0, 0.4);
             z-index: 10;
         }
 
+        /* Viên thuốc trượt */
         .tab-indicator {
             position: absolute;
             top: 6px; bottom: 6px;
             width: calc(33.333% - 4px);
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
+            
+            /* Nền viên thuốc trong suốt */
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 40px;
             
-            /* Viên thuốc 5 lớp đổ bóng */
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            /* Viền pha lê đa lớp cho viên thuốc */
+            border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 
-                0 10px 20px rgba(0, 0, 0, 0.6),
-                inset 0 2px 5px rgba(255, 255, 255, 1),
-                inset 0 -3px 5px rgba(0, 0, 0, 0.6),
-                inset 0 0 15px rgba(255, 255, 255, 0.4),
-                0 0 15px rgba(100, 255, 150, 0.3);
+                0 10px 20px rgba(0, 0, 0, 0.7),             /* Bóng đổ ngoài */
+                inset 0 2px 5px rgba(255, 255, 255, 1),      /* Highlight đỉnh */
+                inset 0 -3px 5px rgba(0, 0, 0, 0.7),         /* Bóng đáy */
+                inset 0 0 15px rgba(255, 255, 255, 0.5),     /* Quầng sáng trong */
+                0 0 20px rgba(100, 255, 150, 0.4);           /* Hào quang xanh */
             
             transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             z-index: 1;
-            pointer-events: none; /* Để nó không chặn click vào nút */
+            pointer-events: none; /* Để không chặn click */
         }
 
         .tab-indicator.pressing {
             transform: scale(1.08) !important;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.4);
         }
 
         .tab-item {
@@ -237,8 +260,7 @@
             background: transparent;
             outline: none;
             transition: color 0.3s ease;
-            /* Đảm bảo nút nhận click */
-            pointer-events: auto; 
+            pointer-events: auto; /* Nhận click */
             -webkit-appearance: none;
         }
 
@@ -248,7 +270,7 @@
         }
 
         /* ==========================================================================
-           6. COMPONENTS (BUTTONS, LISTS)
+           6. NỘI DUNG CÁC TAB
            ========================================================================== */
         .tab-pane { display: none; animation: slideUp 0.4s ease forwards; }
         .tab-pane.active { display: block; }
@@ -258,15 +280,15 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 2px;
-            color: rgba(150, 255, 180, 0.9);
+            color: rgba(150, 255, 180, 1);
             margin: 20px 0 12px 10px;
             font-weight: 800;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
         }
 
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 15px; }
 
-        /* Nút bấm kính siêu nặng */
+        /* Nút bấm kính nặng */
         .btn {
             display: flex;
             flex-direction: column;
@@ -279,28 +301,31 @@
             font-weight: 700;
             font-size: 0.95rem;
             color: #fff;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
             
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 
                 0 10px 20px rgba(0,0,0,0.5),
-                inset 0 2px 4px rgba(255,255,255,0.6),
-                inset 0 -2px 4px rgba(0,0,0,0.4),
+                inset 0 2px 4px rgba(255,255,255,0.8), /* Viền sáng trên */
+                inset 0 -2px 4px rgba(0,0,0,0.5),     /* Viền tối dưới */
                 inset 0 0 15px rgba(255,255,255,0.1);
             
             transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            /* Cho phép click */
+            pointer-events: auto;
+            -webkit-appearance: none;
         }
 
         .btn:active {
             transform: scale(0.92);
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.2);
             box-shadow: 
                 0 5px 10px rgba(0,0,0,0.6),
-                inset 0 4px 8px rgba(255,255,255,0.8),
-                inset 0 -1px 2px rgba(0,0,0,0.6);
+                inset 0 4px 8px rgba(255,255,255,0.9),
+                inset 0 -1px 2px rgba(0,0,0,0.7);
         }
 
         .btn-icon { font-size: 1.8rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.8)); }
@@ -312,8 +337,8 @@
             width: 100%;
             padding: 16px;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, rgba(52, 199, 89, 0.4) 0%, rgba(52, 199, 89, 0.1) 100%);
-            border-color: rgba(52, 199, 89, 0.6);
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.5) 0%, rgba(52, 199, 89, 0.1) 100%);
+            border-color: rgba(52, 199, 89, 0.8);
             color: #fff;
         }
 
@@ -323,7 +348,7 @@
             padding: 5px 18px;
             border: 1px solid rgba(255, 255, 255, 0.15);
             box-shadow: 
-                inset 0 8px 25px rgba(0, 0, 0, 0.6),
+                inset 0 8px 25px rgba(0, 0, 0, 0.7),
                 inset 0 -2px 5px rgba(255, 255, 255, 0.1);
         }
 
@@ -356,9 +381,9 @@
             border-radius: 24px;
             border: 1px solid rgba(255, 255, 255, 0.15);
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.95);
             line-height: 1.6;
-            box-shadow: inset 0 4px 15px rgba(0,0,0,0.3), inset 0 -2px 5px rgba(255,255,255,0.2);
+            box-shadow: inset 0 4px 15px rgba(0,0,0,0.4), inset 0 -2px 5px rgba(255,255,255,0.2);
         }
         .guide-box h3 { color: #fff; margin-bottom: 5px; font-size: 1rem; }
     </style>
@@ -372,7 +397,7 @@
     <div class="app-wrapper">
         <div class="glass-panel" id="glassPanel">
             
-            <div class="scrollable-content">
+            <div class="scrollable-content" id="scrollContent">
                 <!-- Header -->
                 <div class="header">
                     <h1>TaoJB Repo</h1>
@@ -396,15 +421,11 @@
                         <div class="guide-box">
                             <div>
                                 <h3>1. Thêm Nguồn</h3>
-                                <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">Mở Sileo/Zebra > Sources > Edit > Add. Dán URL repo và nhấn Add Source.</p>
+                                <p style="color: rgba(255,255,255,0.8); font-size: 0.85rem;">Mở Sileo/Zebra > Sources > Edit > Add. Dán URL repo và nhấn Add Source.</p>
                             </div>
                             <div>
                                 <h3>2. Tìm kiếm Tweak</h3>
-                                <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">Các tweak sẽ xuất hiện trong tab Repo. Bạn có thể tìm kiếm trực tiếp trên trình quản lý gói.</p>
-                            </div>
-                            <div>
-                                <h3>3. Trải nghiệm Kính Lỏng</h3>
-                                <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">Chạm và vuốt lên màn hình. Ánh sáng sẽ phản chiếu trên mặt kính và nền nước sẽ gợn sóng.</p>
+                                <p style="color: rgba(255,255,255,0.8); font-size: 0.85rem;">Các tweak sẽ xuất hiện trong tab Repo. Bạn có thể tìm kiếm trực tiếp trên trình quản lý gói.</p>
                             </div>
                         </div>
                     </div>
@@ -419,12 +440,6 @@
                             <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn">
                                 <span class="btn-icon">🦓</span> Zebra
                             </a>
-                            <a href="saily://source/https://duchaivcyv-design.github.io/" class="btn">
-                                <span class="btn-icon">🛍️</span> Saily
-                            </a>
-                            <a href="cydia://url/https://cydia.saurik.com/api/share#?source=https://duchaivcyv-design.github.io/" class="btn">
-                                <span class="btn-icon">📦</span> Cydia
-                            </a>
                         </div>
 
                         <button onclick="copyRepoLink()" class="btn btn-copy" id="copyBtn">
@@ -435,11 +450,6 @@
                         <div class="package-list">
                             <div class="package-item"><span class="package-name">27CC Ios 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
                             <div class="package-item"><span class="package-name">DynaFake 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                            <div class="package-item"><span class="package-name">Liquid Tab 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                            <div class="package-item"><span class="package-name">26Morph 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                            <div class="package-item"><span class="package-name">UnlockCode 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                            <div class="package-item"><span class="package-name">OpenWave 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                            <div class="package-item"><span class="package-name">2712 (trọn bộ)</span><span class="package-version">v6.0.2-5</span></div>
                         </div>
                     </div>
 
@@ -448,7 +458,6 @@
                         <div class="section-title">About TaoJB</div>
                         <div class="guide-box">
                             <p>Welcome to <strong>TaoJB Repo</strong>, your premier destination for meticulously crafted iOS tweaks.</p>
-                            <p>Founded by <strong>TaoJB</strong>, we push the boundaries of jailbroken devices. We specialize in fluid user interface enhancements.</p>
                         </div>
                     </div>
 
@@ -459,34 +468,45 @@
     </div>
 
     <!-- ==========================================================================
-         JAVASCRIPT: UI LOGIC (ĐÃ SỬA LỖI CLICK) & WEBGL BACKGROUND
+         JAVASCRIPT: UI LOGIC & WEBGL
          ========================================================================== -->
     <script>
-    // 1. CHẶN HÀNH VI SAO CHÉP
+    // 1. CHẶN HÀNH VI SAO CHÉP & ZOOM
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('selectstart', e => e.preventDefault());
+    
+    // Chặn double tap để zoom trên iOS
+    document.addEventListener('touchend', function(event) {
+        if (event.touches.length === 0) {
+            const now = (new Date()).getTime();
+            if (now - (window.lastTouchEnd || 0) <= 300) {
+                event.preventDefault();
+            }
+            window.lastTouchEnd = now;
+        }
+    }, false);
 
-    // 2. UI LOGIC (SỬA LỖI CLICK TAB)
+    // 2. UI LOGIC (CHUYỂN TAB MƯỢT MÀ)
     const tabButtons = document.querySelectorAll('.tab-item');
     const tabPanes = document.querySelectorAll('.tab-pane');
     const tabIndicator = document.getElementById('tabIndicator');
     const glassPanel = document.getElementById('glassPanel');
 
-    // Gắn sự kiện click cho từng nút Tab
-    tabButtons.forEach((btn, index) => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const i = parseInt(btn.getAttribute('data-index'));
+    // Xử lý chuyển Tab
+    tabButtons.forEach((btn) => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault(); // Ngăn chặn hành vi mặc định
+            const i = parseInt(this.getAttribute('data-index'));
 
-            // Xóa active cũ
+            // Xóa class active ở tất cả
             tabButtons.forEach(b => b.classList.remove('active'));
             tabPanes.forEach(p => p.classList.remove('active'));
 
-            // Thêm active mới
-            btn.classList.add('active');
+            // Thêm active cho tab được chọn
+            this.classList.add('active');
             document.getElementById(`pane-${i}`).classList.add('active');
 
-            // Hiệu ứng viên thuốc nổi lên
+            // Hiệu ứng viên thuốc nổi lên (Scale nhẹ)
             tabIndicator.classList.add('pressing');
             setTimeout(() => {
                 tabIndicator.classList.remove('pressing');
@@ -497,45 +517,28 @@
         });
     });
 
-    // Hiệu ứng 3D Tilt (Đã tối ưu để không cản trở click)
+    // Hiệu ứng ánh sáng theo ngón tay (Chỉ dùng cho Desktop, Mobile không dùng để tránh cản trở vuốt)
     function handlePointerMove(e) {
+        // Nếu là thiết bị cảm ứng (điện thoại), không chạy hiệu ứng này để đảm bảo mượt
+        if (e.pointerType === 'touch') return; 
+        
         const rect = glassPanel.getBoundingClientRect();
-        let clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        let clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
         
         glassPanel.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
         glassPanel.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
-
-        const rotateX = ((y / rect.height) - 0.5) * -4; // Giảm độ nghiêng để dễ đọc
-        const rotateY = ((x / rect.width) - 0.5) * 4;
-        
-        glassPanel.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
     }
+    glassPanel.addEventListener('pointermove', handlePointerMove);
 
-    function resetTilt() {
-        glassPanel.style.transform = `rotateX(0deg) rotateY(0deg)`;
-        glassPanel.style.transition = 'transform 0.5s ease';
-        glassPanel.style.setProperty('--mouse-x', '50%');
-        glassPanel.style.setProperty('--mouse-y', '50%');
-        setTimeout(() => { glassPanel.style.transition = 'transform 0.1s ease-out'; }, 500);
-    }
-
-    // Chỉ áp dụng Tilt lên vùng khung kính, không áp dụng lên ruột bên trong để tránh lỗi click
-    glassPanel.addEventListener('mousemove', handlePointerMove);
-    glassPanel.addEventListener('touchmove', handlePointerMove, {passive: true});
-    glassPanel.addEventListener('mouseleave', resetTilt);
-    glassPanel.addEventListener('touchend', resetTilt);
-
+    // Hàm Copy
     window.copyRepoLink = function() {
         const url = "https://duchaivcyv-design.github.io/";
         navigator.clipboard.writeText(url).then(() => {
             const btn = document.getElementById('copyBtn');
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<span class="btn-icon">✅</span> <span>Đã sao chép!</span>';
-            btn.style.background = 'rgba(52, 199, 89, 0.6)';
+            btn.style.background = 'rgba(52, 199, 89, 0.8)';
             setTimeout(() => {
                 btn.innerHTML = originalHTML;
                 btn.style.background = '';
@@ -585,30 +588,29 @@
             tp.y += 0.1;
             float trunk = length(max(abs(tp) - vec2(0.05, 0.4), 0.0));
             
-            // Tán lá (Nhiều lớp nhiễu để tạo chi tiết lởm chởm)
+            // Tán lá
             vec2 cp = p - vec2(0.0, 0.35);
             float canopy = length(cp) - 0.4;
             
-            // Thêm 4 lớp nhiễu để tán lá siêu chi tiết
             canopy += noise(cp * 15.0 + u_time * 0.1) * 0.1;
             canopy += noise(cp * 30.0 - u_time * 0.2) * 0.05;
             canopy += noise(cp * 60.0 + u_time * 0.3) * 0.02;
             
             float treeShape = min(trunk, canopy);
             
-            // Màu sắc (Xanh tươi sáng)
+            // Màu sắc
             vec3 trunkColor = vec3(0.1, 0.2, 0.1);
-            vec3 leafColor = mix(vec3(0.1, 0.6, 0.2), vec3(0.4, 1.0, 0.5), noise(cp * 20.0));
+            vec3 leafColor = mix(vec3(0.1, 0.7, 0.2), vec3(0.5, 1.0, 0.6), noise(cp * 20.0));
             
             vec3 finalColor = mix(trunkColor, leafColor, smoothstep(0.05, -0.05, trunk - canopy));
             
             // Ánh sáng chiếu từ trên xuống (Volumetric light)
             float light = smoothstep(-0.3, 0.5, cp.y);
-            finalColor += vec3(0.3, 0.8, 0.4) * light;
+            finalColor += vec3(0.4, 0.9, 0.5) * light;
 
-            // Viền phát sáng mạnh (Neon Glow)
-            float glow = smoothstep(0.15, 0.0, abs(treeShape)) * 0.8;
-            finalColor += vec3(0.3, 1.0, 0.4) * glow;
+            // Viền phát sáng (Neon Glow)
+            float glow = smoothstep(0.15, 0.0, abs(treeShape)) * 1.0;
+            finalColor += vec3(0.4, 1.0, 0.5) * glow;
 
             return vec4(finalColor, smoothstep(0.02, -0.02, treeShape));
         }
@@ -618,27 +620,27 @@
             vec2 aspect = vec2(u_resolution.x / u_resolution.y, 1.0);
             vec2 p = (uv - 0.5) * aspect;
 
-            // 1. NỀN XANH SÁNG RỰC RỠ (Để kính khúc xạ)
-            vec3 bgColor = mix(vec3(0.05, 0.2, 0.15), vec3(0.1, 0.4, 0.2), uv.y);
-            bgColor += vec3(0.05, 0.15, 0.1) * noise(uv * 5.0); // Thêm mây mù
+            // 1. NỀN XANH SÁNG RỰC RỠ
+            vec3 bgColor = mix(vec3(0.1, 0.3, 0.2), vec3(0.15, 0.5, 0.3), uv.y);
+            bgColor += vec3(0.1, 0.2, 0.15) * noise(uv * 5.0);
 
             // 2. Vẽ cây
             vec4 tree = drawTree(uv);
             vec3 color = mix(bgColor, tree.rgb, tree.a);
 
-            // 3. Đom đóm bay xung quanh (Tăng sự sống động)
+            // 3. Đom đóm bay xung quanh
             for(int i=0; i<10; i++) {
                 float fi = float(i);
                 vec2 fp = vec2(sin(fi*2.3 + u_time*0.5)*0.6, cos(fi*1.7 + u_time*0.4)*0.6);
                 float dist = length(p - fp);
                 float firefly = smoothstep(0.02, 0.0, dist) * (0.5 + 0.5*sin(u_time*3.0 + fi));
-                color += vec3(0.5, 1.0, 0.6) * firefly;
+                color += vec3(0.6, 1.0, 0.7) * firefly;
             }
 
             // 4. Sóng nước khi chạm
             float mDist = distance(uv * aspect, u_mouse * aspect);
             float ripple = sin(mDist * 50.0 - u_time * 10.0) * exp(-mDist * 8.0) * u_isPressed * 0.15;
-            color += vec3(0.2, 0.6, 0.4) * ripple;
+            color += vec3(0.3, 0.8, 0.5) * ripple;
 
             gl_FragColor = vec4(color, 1.0);
         }
@@ -682,18 +684,12 @@
     window.addEventListener('resize', resize);
     resize();
 
-    window.addEventListener('mousemove', e => mouse = [e.clientX / window.innerWidth, 1.0 - (e.clientY / window.innerHeight)]);
-    window.addEventListener('mousedown', () => isPressed = 1.0);
-    window.addEventListener('mouseup', () => isPressed = 0.0);
-    
-    window.addEventListener('touchmove', e => {
-        if (e.touches.length > 0) mouse = [e.touches[0].clientX / window.innerWidth, 1.0 - (e.touches[0].clientY / window.innerHeight)];
-    }, { passive: true });
-    window.addEventListener('touchstart', e => {
-        if (e.touches.length > 0) mouse = [e.touches[0].clientX / window.innerWidth, 1.0 - (e.touches[0].clientY / window.innerHeight)];
-        isPressed = 1.0;
-    }, { passive: true });
-    window.addEventListener('touchend', () => isPressed = 0.0);
+    // Lắng nghe sự kiện chạm để tạo gợn sóng trên nền
+    window.addEventListener('pointermove', e => {
+        mouse = [e.clientX / window.innerWidth, 1.0 - (e.clientY / window.innerHeight)];
+    });
+    window.addEventListener('pointerdown', () => isPressed = 1.0);
+    window.addEventListener('pointerup', () => isPressed = 0.0);
 
     function render() {
         const time = (performance.now() - startTime) / 1000;
