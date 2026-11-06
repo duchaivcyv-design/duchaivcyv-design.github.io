@@ -1,4 +1,4 @@
-name: Build Sileo Repo (Keep Arm64, Auto-Split Arm & Arm64e)
+name: Build Sileo Repo (Clean & Auto-Split)
 
 on:
   push:
@@ -20,16 +20,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y dpkg-dev bzip2 fakeroot llvm file python3
 
-      - name: Clean and Auto-Patch to 2 Environments
+      - name: Clean and Rebuild Environments
         run: |
-          echo "=== 1. DỌN DẸP FILE CŨ (XÓA ARM VÀ ARM64E) ==="
-          # Xóa các bản build cũ để tránh trùng lặp, chỉ giữ lại file arm64 gốc
-          rm -f debs/*_rootful_iphoneos-arm.deb
-          rm -f debs/*_roothide_iphoneos-arm64e.deb
+          mkdir -p processed_debs
           
-          mkdir -p final_debs
-          
-          # Tạo script Python để xử lý an toàn
+          # Tạo script Python để xử lý file control cực kỳ an toàn
           cat << 'PYEOF' > patch.py
           import sys
 
@@ -40,8 +35,12 @@ jobs:
                   for line in lines:
                       if line.startswith('Architecture:'):
                           f.write(f'Architecture: {target_arch}\n')
+                      elif line.startswith('Package:'):
+                          # Xóa các đuôi rác do lần build trước để lấy ID gốc
+                          pkg_id = line.replace('Package:', '').strip()
+                          pkg_id = pkg_id.replace('.roothide', '').replace('.rootless', '').replace('.rootful', '')
+                          f.write(f'Package: {pkg_id}\n') # Giữ nguyên ID gốc, Sileo tự phân vùng
                       elif line.startswith('Depends:') and is_roothide:
-                          # Đổi mobilesubstrate thành roothide
                           f.write(line.replace('mobilesubstrate', 'roothide'))
                       else:
                           f.write(line)
@@ -55,70 +54,89 @@ jobs:
                   patch_control(control_path, 'iphoneos-arm64e', True)
           PYEOF
 
-          echo "=== 2. BẮT ĐẦU TÁCH TỪ FILE ARM64 GỐC ==="
+          echo "=== 1. QUÉT VÀ XỬ LÝ FILE GỐC ==="
           for deb in debs/*.deb; do
             if [ -f "$deb" ]; then
-              # Chỉ xử lý những file có chứa chữ arm64 (file gốc bạn up lên)
-              if [[ "$deb" == *"arm64"* ]]; then
-                echo "Đang xử lý file gốc: $deb"
-                PKG_NAME=$(dpkg-deb -f "$deb" Package)
-                PKG_VER=$(dpkg-deb -f "$deb" Version)
-                
-                # ==========================================
-                # A. TẠO BẢN ROOTFUL (iphoneos-arm)
-                # ==========================================
-                echo "--> Đang tạo bản Rootful..."
-                dpkg-deb -R "$deb" temp_rootful
-                python3 patch.py rootful temp_rootful/DEBIAN/control
-                
-                # Đảo ngược đường dẫn: Từ /var/jb/Library/ -> /Library/
-                find temp_rootful -type f -name "*.plist" -exec sed -i 's|/var/jb/Library/|/Library/|g' {} +
-                
-                # Sửa đường dẫn trong file binary (nếu có)
-                find temp_rootful -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho.txt
-                while read -r bin; do
-                  chmod +x "$bin"
-                  paths=$(llvm-objdump -p "$bin" 2>/dev/null | grep -E "path|name" | grep "/var/jb" | awk '{print $2}')
-                  for p in $paths; do
-                    new_p=$(echo "$p" | sed 's|/var/jb||g')
-                    llvm-install-name-tool -change "$p" "$new_p" "$bin" 2>/dev/null || true
-                  done
-                done < macho.txt; rm macho.txt
-
-                dpkg-deb -b temp_rootful "final_debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
-                rm -rf temp_rootful
-
-                # ==========================================
-                # B. TẠO BẢN ROOTHIDE (iphoneos-arm64e)
-                # ==========================================
-                echo "--> Đang tạo bản RootHide..."
-                dpkg-deb -R "$deb" temp_roothide
-                python3 patch.py roothide temp_roothide/DEBIAN/control
-                
-                # Giữ nguyên đường dẫn /var/jb/ cho RootHide (nó dùng chung)
-                find temp_roothide -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
-                
-                find temp_roothide -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho.txt
-                while read -r bin; do
-                  chmod +x "$bin"
-                  paths=$(llvm-objdump -p "$bin" 2>/dev/null | grep -E "path|name" | grep -v "/System" | grep -v "/usr/lib/libSystem" | awk '{print $2}')
-                  for p in $paths; do
-                    [[ "$p" == /Library/* || "$p" == /usr/lib/* ]] && llvm-install-name-tool -change "$p" "/var/jb$p" "$bin" 2>/dev/null || true
-                  done
-                done < macho.txt; rm macho.txt
-
-                dpkg-deb -b temp_roothide "final_debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
-                rm -rf temp_roothide
-                
-                echo "=== Đã tách xong cho: $PKG_NAME ==="
+              # Bỏ qua các file rác do bot tạo ra từ lần trước
+              if [[ "$deb" == *"_rootful_"* ]] || [[ "$deb" == *"_roothide_"* ]] || [[ "$deb" == *"_rootless_"* ]]; then
+                continue
               fi
+              
+              echo "--> Đang xử lý file gốc: $deb"
+              PKG_NAME=$(dpkg-deb -f "$deb" Package)
+              PKG_VER=$(dpkg-deb -f "$deb" Version)
+              
+              # ==========================================
+              # A. TẠO BẢN ROOTFUL (iphoneos-arm)
+              # ==========================================
+              dpkg-deb -R "$deb" temp_rootful
+              python3 patch.py rootful temp_rootful/DEBIAN/control
+              
+              # Đảo ngược đường dẫn: Từ /var/jb/Library/ -> /Library/
+              find temp_rootful -type f -name "*.plist" -exec sed -i 's|/var/jb/|/|g' {} +
+              
+              # Sửa đường dẫn trong file binary
+              find temp_rootful -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho.txt
+              while read -r bin; do
+                chmod +x "$bin"
+                paths=$(llvm-objdump -p "$bin" 2>/dev/null | grep -E "path|name" | grep "/var/jb" | awk '{print $2}')
+                for p in $paths; do
+                  new_p=$(echo "$p" | sed 's|/var/jb||g')
+                  llvm-install-name-tool -change "$p" "$new_p" "$bin" 2>/dev/null || true
+                done
+              done < macho.txt; rm macho.txt
+
+              dpkg-deb -b temp_rootful "processed_debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
+              rm -rf temp_rootful
+
+              # ==========================================
+              # B. TẠO BẢN ROOTLESS (iphoneos-arm64)
+              # ==========================================
+              dpkg-deb -R "$deb" temp_rootless
+              # Chỉ sửa Arch, giữ nguyên ID
+              python3 -c "
+with open('temp_rootless/DEBIAN/control', 'r') as f: lines = f.readlines()
+with open('temp_rootless/DEBIAN/control', 'w') as f:
+    for line in lines:
+        if line.startswith('Architecture:'): f.write('Architecture: iphoneos-arm64\n')
+        else: f.write(line)
+"
+              # Đảm bảo đường dẫn Rootless chuẩn
+              find temp_rootless -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
+              
+              dpkg-deb -b temp_rootless "processed_debs/${PKG_NAME}_${PKG_VER}_rootless_iphoneos-arm64.deb" > /dev/null
+              rm -rf temp_rootless
+
+              # ==========================================
+              # C. TẠO BẢN ROOTHIDE (iphoneos-arm64e)
+              # ==========================================
+              dpkg-deb -R "$deb" temp_roothide
+              python3 patch.py roothide temp_roothide/DEBIAN/control
+              
+              # Giữ nguyên đường dẫn /var/jb/ cho RootHide
+              find temp_roothide -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
+              
+              find temp_roothide -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho.txt
+              while read -r bin; do
+                chmod +x "$bin"
+                paths=$(llvm-objdump -p "$bin" 2>/dev/null | grep -E "path|name" | grep -v "/System" | grep -v "/usr/lib/libSystem" | awk '{print $2}')
+                for p in $paths; do
+                  [[ "$p" == /Library/* || "$p" == /usr/lib/* ]] && llvm-install-name-tool -change "$p" "/var/jb$p" "$bin" 2>/dev/null || true
+                done
+              done < macho.txt; rm macho.txt
+
+              dpkg-deb -b temp_roothide "processed_debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
+              rm -rf temp_roothide
+              
+              echo "=== Đã xử lý xong 3 bản cho: $PKG_NAME ==="
             fi
           done
           
-          # Đưa 2 file mới tách vào thư mục debs, file arm64 gốc vẫn được giữ nguyên
-          mv final_debs/*.deb debs/ 2>/dev/null || true
-          rm -rf final_debs
-          rm patch.py
+          # XÓA SẠCH THƯ MỤC CŨ VÀ CHỈ ĐƯA 3 FILE CHUẨN VÀO
+          rm -rf debs
+          mkdir -p debs
+          mv processed_debs/*.deb debs/ 2>/dev/null || true
+          rm -rf processed_debs patch.py
 
       - name: Generate Packages
         run: |
@@ -136,7 +154,7 @@ jobs:
           Version: 1.0
           Architectures: iphoneos-arm iphoneos-arm64 iphoneos-arm64e
           Components: main
-          Description: Kho tweak ca nhan cua TaoJB (Keep Arm64, Auto Split)
+          Description: Kho tweak ca nhan cua TaoJB (Clean Repo)
           EOF
           
       - name: Commit and Push
@@ -144,5 +162,5 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add Packages Packages.bz2 Release debs/
-          git commit -m "Auto-clean & Split 2 environments from Arm64" || exit 0
+          git commit -m "Deep Clean & Auto-Split 3 Environments" || exit 0
           git push
