@@ -3,144 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TaoJB Repo - Liquid Glass Siêu Sáng</title>
+    <title>TaoJB Repo - Liquid Glass Pro</title>
     <style>
-        /* 1. RESET & CHỐNG ZOOM */
+        /* ==========================================================================
+           1. CORE VARIABLES & RESET
+           ========================================================================== */
+        :root {
+            --text-main: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* Màu chủ đạo của kính */
+            --glass-tint: rgba(15, 20, 25, 0.2); 
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: var(--font-family);
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
             user-select: none;
         }
 
-        html, body {
-            width: 100%;
-            min-height: 100vh;
-            overflow-x: hidden;
-            overflow-y: auto; /* Cho phép cuộn tự nhiên */
-            background-color: #000;
-            color: #fff;
-            touch-action: pan-y; /* Chặn zoom, chỉ cho vuốt dọc */
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
         }
 
         body {
+            min-height: 100vh;
+            background-color: #000;
+            color: var(--text-main);
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 20px;
         }
 
-        /* 2. HÌNH NỀN WEBGL */
+        /* ==========================================================================
+           2. WEBGL BACKGROUND (CÂY XANH TĨNH & NỀN TỐI)
+           ========================================================================== */
         #bg-canvas {
             position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            z-index: 0; /* Nằm dưới cùng */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
             pointer-events: none;
         }
 
-        /* 3. KHUNG KÍNH LIQUID GLASS */
-        .glass-panel {
-            width: 100%;
-            max-width: 400px;
+        /* ==========================================================================
+           3. UI WRAPPER
+           ========================================================================== */
+        .app-wrapper {
             position: relative;
-            z-index: 10; /* Nằm trên nền */
-            border-radius: 45px;
-            
-            /* Nền siêu trong suốt (chỉ 5% màu trắng) */
-            background: rgba(255, 255, 255, 0.05); 
-            
-            /* Làm mờ hình nền phía sau */
-            backdrop-filter: blur(30px) saturate(200%);
-            -webkit-backdrop-filter: blur(30px) saturate(200%);
-            
-            /* Viền kính đa lớp */
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 
-                0 25px 50px rgba(0, 0, 0, 0.5), /* Bóng đổ ra ngoài */
-                inset 0 1px 2px rgba(255, 255, 255, 0.7), /* Sáng đỉnh */
-                inset 0 -1px 2px rgba(0, 0, 0, 0.3), /* Tối đáy */
-                inset 0 0 20px rgba(255, 255, 255, 0.05);
-            
-            padding: 30px 20px;
+            z-index: 10;
+            width: 100%;
+            max-width: 440px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-top: 50px;
+            padding-bottom: 80px;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            perspective: 1200px; /* Tăng không gian 3D */
         }
 
-        /* 4. HEADER */
-        .header { text-align: center; margin-bottom: 25px; }
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            letter-spacing: -1px;
-            background: linear-gradient(180deg, #ffffff 0%, #a0f0ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-        .subtitle {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.8);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-top: 5px;
-            font-weight: 700;
+        /* ==========================================================================
+           4. THE "HEAVY" LIQUID GLASS PANEL
+           ========================================================================== */
+        .glass-panel {
+            width: 100%;
+            position: relative;
+            border-radius: 45px;
+            padding: 35px 20px;
+            
+            /* Nền kính cực kỳ trong suốt, chỉ phủ một lớp tint tối mỏng */
+            background: var(--glass-tint); 
+            
+            /* Blur siêu mạnh, độ bão hòa cao để tách biệt lớp kính */
+            backdrop-filter: blur(45px) saturate(200%) contrast(120%) brightness(0.9);
+            -webkit-backdrop-filter: blur(45px) saturate(200%) contrast(120%) brightness(0.9);
+            
+            /* VIỀN VÀ BÓNG ĐỔ ĐA LỚP (TẠO CẢM GIÁC KÍNH DÀY) */
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 
+                0 40px 80px rgba(0, 0, 0, 0.8),           /* Bóng đổ sâu ra ngoài */
+                inset 0 1px 2px rgba(255, 255, 255, 0.6), /* Viền sáng trên đỉnh */
+                inset 0 -1px 3px rgba(0, 0, 0, 0.5),      /* Viền tối dưới đáy */
+                inset 0 0 40px rgba(255, 255, 255, 0.05), /* Quầng sáng trong kính */
+                inset 0 0 0 2px rgba(255, 255, 255, 0.05);/* Lớp viền phụ bên trong */
+            
+            will-change: transform, backdrop-filter;
+            transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1);
+            transform-style: preserve-3d;
         }
 
-        /* 5. THANH TAB - ĐÃ SỬA LỖI CLICK */
-        .tab-bar {
-            display: flex;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 50px;
-            padding: 5px;
+        /* Lớp ánh sáng phản chiếu lướt theo ngón tay */
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 45px;
+            background: radial-gradient(
+                circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0) 70%
+            );
+            pointer-events: none;
+            z-index: 1;
+            mix-blend-mode: screen;
+        }
+
+        /* ==========================================================================
+           5. TYPOGRAPHY
+           ========================================================================== */
+        .header {
+            text-align: center;
             margin-bottom: 25px;
             position: relative;
-            z-index: 20; /* Đảm bảo nó nằm trên cùng để nhận click */
+            z-index: 2;
         }
 
-        .tab-btn {
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(180deg, #ffffff 0%, #999999 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        /* ==========================================================================
+           6. iOS PILL TAB BAR (VIÊN THUỐC LỎNG)
+           ========================================================================== */
+        .ios-tab-bar {
+            position: relative;
+            display: flex;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50px;
+            padding: 6px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.6);
+            z-index: 10;
+        }
+
+        /* Viên thuốc trượt */
+        .tab-indicator {
+            position: absolute;
+            top: 6px;
+            bottom: 6px;
+            width: calc(33.333% - 4px);
+            
+            /* Viên thuốc trong suốt */
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 40px;
+            
+            /* Viền sáng dày, nặng */
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 
+                0 10px 20px rgba(0, 0, 0, 0.5),
+                inset 0 2px 4px rgba(255, 255, 255, 0.7), /* Highlight đỉnh */
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3);    /* Bóng đáy */
+            
+            /* Hiệu ứng nhún khi trượt */
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 1;
+            will-change: transform;
+        }
+
+        /* Hiệu ứng nhấn nổi lên */
+        .tab-indicator.pressing {
+            transform: scale(1.05) !important;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .tab-item {
             flex: 1;
+            position: relative;
+            z-index: 2;
             padding: 12px 0;
             text-align: center;
             font-size: 0.9rem;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.5);
-            background: transparent;
-            border: none;
-            border-radius: 40px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.4);
             cursor: pointer;
-            transition: all 0.3s ease;
-            /* Đảm bảo nhận click */
-            position: relative;
-            z-index: 30;
-            -webkit-appearance: none;
+            transition: color 0.3s ease;
+            border: none;
+            background: transparent;
+            outline: none;
         }
 
-        .tab-btn.active {
+        .tab-item.active {
             color: #fff;
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 
-                0 4px 10px rgba(0, 0, 0, 0.3),
-                inset 0 1px 2px rgba(255, 255, 255, 0.8);
-            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
 
-        /* 6. NỘI DUNG CÁC TAB */
-        .tab-content {
-            display: none; /* Ẩn mặc định */
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .tab-content.active {
-            display: block; /* Hiện khi active */
+        /* ==========================================================================
+           7. TAB CONTENT & COMPONENTS
+           ========================================================================== */
+        .content-area {
+            position: relative;
+            z-index: 2;
+            min-height: 350px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+        .tab-pane {
+            display: none;
+            animation: slideUp 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -148,297 +242,491 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            color: #00f2fe; /* Màu xanh sáng */
-            margin: 15px 0 10px 10px;
-            font-weight: 800;
+            color: rgba(255, 255, 255, 0.5);
+            margin: 20px 0 12px 10px;
+            font-weight: 700;
         }
 
-        /* Nút bấm */
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 15px;
+        }
 
+        /* Nút bấm kính nặng */
         .btn {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 16px 10px;
-            border-radius: 20px;
+            padding: 18px 10px;
+            border-radius: 22px;
             text-decoration: none;
-            font-weight: 700;
-            font-size: 0.9rem;
+            font-weight: 600;
+            font-size: 0.95rem;
             color: #fff;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: inset 0 1px 2px rgba(255,255,255,0.5);
-            transition: all 0.2s ease;
+            
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 10px 20px rgba(0,0,0,0.3),
+                inset 0 1px 1px rgba(255,255,255,0.4),
+                inset 0 -1px 2px rgba(0,0,0,0.2);
+            
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            will-change: transform;
         }
 
         .btn:active {
-            transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.2);
+            transform: scale(0.94);
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 
+                0 5px 10px rgba(0,0,0,0.4),
+                inset 0 2px 5px rgba(255,255,255,0.6);
         }
 
-        .btn-icon { font-size: 1.6rem; }
+        .btn-icon { 
+            font-size: 1.8rem; 
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); 
+        }
 
         .btn-copy {
             display: flex;
             flex-direction: row;
+            gap: 10px;
             width: 100%;
-            padding: 14px;
-            margin-bottom: 15px;
-            background: linear-gradient(135deg, rgba(52, 199, 89, 0.4) 0%, rgba(52, 199, 89, 0.1) 100%);
-            border-color: rgba(52, 199, 89, 0.6);
+            padding: 16px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.2) 0%, rgba(52, 199, 89, 0.05) 100%);
+            border-color: rgba(52, 199, 89, 0.3);
+            color: #fff;
         }
 
-        /* Hộp hướng dẫn & Danh sách */
-        .guide-box, .package-list {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 20px;
-            padding: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.5;
+        .package-list {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 22px;
+            padding: 5px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 5px 20px rgba(0, 0, 0, 0.5);
         }
-
-        .guide-box h3 { color: #fff; margin-bottom: 5px; font-size: 1rem; }
 
         .package-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
+
         .package-item:last-child { border-bottom: none; }
-        .package-name { font-weight: 600; }
+
+        .package-name { font-weight: 500; font-size: 0.95rem; }
         .package-version {
+            color: rgba(255, 255, 255, 0.8);
             font-size: 0.75rem;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 3px 8px;
-            border-radius: 10px;
+            font-family: monospace;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
         }
+
+        .guide-box {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
+        }
+
+        .guide-box h3 { color: #fff; margin-bottom: 5px; font-size: 1rem; }
+        .about-text { font-size: 0.95rem; line-height: 1.6; color: rgba(255, 255, 255, 0.8); padding: 10px; }
+        .about-text p { margin-bottom: 15px; }
+        .about-text strong { color: #fff; font-weight: 700; }
     </style>
 </head>
 <body>
 
-    <!-- Hình nền sáng xanh -->
+    <!-- WebGL Canvas: Vẽ nền tối và cây xanh tĩnh -->
     <canvas id="bg-canvas"></canvas>
 
-    <!-- Khung kính trong suốt -->
-    <div class="glass-panel">
+    <!-- Lớp giao diện người dùng -->
+    <div class="app-wrapper">
         
-        <div class="header">
-            <h1>TaoJB Repo</h1>
-            <p class="subtitle">Liquid Glass</p>
-        </div>
+        <!-- Khung kính chính (Kính Nặng) -->
+        <div class="glass-panel" id="glassPanel">
+            
+            <!-- Header -->
+            <div class="header">
+                <h1>TaoJB Repo</h1>
+                <p class="subtitle">Liquid Glass</p>
+            </div>
 
-        <!-- Thanh Tab -->
-        <div class="tab-bar">
-            <button class="tab-btn active" onclick="switchTab(0)">Trang Chủ</button>
-            <button class="tab-btn" onclick="switchTab(1)">Repo</button>
-            <button class="tab-btn" onclick="switchTab(2)">Giới Thiệu</button>
-        </div>
+            <!-- Thanh Tab iOS -->
+            <div class="ios-tab-bar" id="tabBar">
+                <!-- Viên thuốc trượt -->
+                <div class="tab-indicator" id="tabIndicator"></div>
+                
+                <!-- Các nút tab -->
+                <button class="tab-item active" onclick="switchTab(0)">Trang Chủ</button>
+                <button class="tab-item" onclick="switchTab(1)">Repo</button>
+                <button class="tab-item" onclick="switchTab(2)">Giới Thiệu</button>
+            </div>
 
-        <!-- Nội dung -->
-        <!-- Tab 1 -->
-        <div class="tab-content active" id="tab-0">
-            <div class="section-title">Hướng dẫn cài đặt</div>
-            <div class="guide-box">
-                <div>
-                    <h3>1. Thêm Nguồn</h3>
-                    <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">Mở Sileo/Zebra > Sources > Edit > Add. Dán URL repo và nhấn Add Source.</p>
+            <!-- Nội dung -->
+            <div class="content-area">
+                
+                <!-- Tab 1: Trang Chủ -->
+                <div class="tab-pane active" id="pane-0">
+                    <div class="section-title">Hướng dẫn cài đặt</div>
+                    <div class="guide-box">
+                        <div>
+                            <h3>1. Thêm Nguồn</h3>
+                            <p style="color: var(--text-muted); font-size: 0.85rem;">Mở Sileo/Zebra > Sources > Edit > Add. Dán URL repo và nhấn Add Source.</p>
+                        </div>
+                        <div>
+                            <h3>2. Tìm kiếm Tweak</h3>
+                            <p style="color: var(--text-muted); font-size: 0.85rem;">Các tweak sẽ xuất hiện trong tab Repo. Bạn có thể tìm kiếm trực tiếp trên trình quản lý gói.</p>
+                        </div>
+                        <div>
+                            <h3>3. Trải nghiệm Kính Lỏng</h3>
+                            <p style="color: var(--text-muted); font-size: 0.85rem;">Chạm và vuốt lên màn hình. Ánh sáng sẽ phản chiếu trên mặt kính và nền nước sẽ gợn sóng.</p>
+                        </div>
+                    </div>
                 </div>
-                <div style="margin-top: 10px;">
-                    <h3>2. Tìm kiếm Tweak</h3>
-                    <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">Các tweak sẽ xuất hiện trong tab Repo.</p>
+
+                <!-- Tab 2: Repo -->
+                <div class="tab-pane" id="pane-1">
+                    <div class="section-title">Cài đặt nhanh</div>
+                    <div class="btn-grid">
+                        <a href="sileo://source/https://duchaivcyv-design.github.io/" class="btn">
+                            <span class="btn-icon">🧊</span> Sileo
+                        </a>
+                        <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn">
+                            <span class="btn-icon">🦓</span> Zebra
+                        </a>
+                        <a href="saily://source/https://duchaivcyv-design.github.io/" class="btn">
+                            <span class="btn-icon">🛍️</span> Saily
+                        </a>
+                        <a href="cydia://url/https://cydia.saurik.com/api/share#?source=https://duchaivcyv-design.github.io/" class="btn">
+                            <span class="btn-icon">📦</span> Cydia
+                        </a>
+                    </div>
+
+                    <button onclick="copyRepoLink()" class="btn btn-copy" id="copyBtn">
+                        <span class="btn-icon">📋</span> <span>Sao chép URL Repo</span>
+                    </button>
+
+                    <div class="section-title">Danh sách Tweak</div>
+                    <div class="package-list">
+                        <div class="package-item"><span class="package-name">27CC Ios 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                        <div class="package-item"><span class="package-name">DynaFake 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                        <div class="package-item"><span class="package-name">Liquid Tab 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                        <div class="package-item"><span class="package-name">26Morph 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                        <div class="package-item"><span class="package-name">UnlockCode 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                        <div class="package-item"><span class="package-name">OpenWave 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                        <div class="package-item"><span class="package-name">2712 (trọn bộ)</span><span class="package-version">v6.0.2-5</span></div>
+                    </div>
                 </div>
+
+                <!-- Tab 3: Giới thiệu -->
+                <div class="tab-pane" id="pane-2">
+                    <div class="section-title">About TaoJB</div>
+                    <div class="about-text">
+                        <p>Welcome to <strong>TaoJB Repo</strong>, your premier destination for meticulously crafted iOS tweaks.</p>
+                        <p>Founded by <strong>TaoJB</strong>, we push the boundaries of jailbroken devices. We specialize in fluid user interface enhancements, stunning visual effects, and deep system customizations.</p>
+                    </div>
+                </div>
+
             </div>
         </div>
-
-        <!-- Tab 2 -->
-        <div class="tab-content" id="tab-1">
-            <div class="section-title">Cài đặt nhanh</div>
-            <div class="btn-grid">
-                <a href="sileo://source/https://duchaivcyv-design.github.io/" class="btn">
-                    <span class="btn-icon">🧊</span> Sileo
-                </a>
-                <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn">
-                    <span class="btn-icon">🦓</span> Zebra
-                </a>
-            </div>
-
-            <button onclick="copyLink()" class="btn btn-copy" id="copyBtn">
-                <span class="btn-icon">📋</span> <span>Sao chép URL Repo</span>
-            </button>
-
-            <div class="section-title">Danh sách Tweak</div>
-            <div class="package-list">
-                <div class="package-item"><span class="package-name">27CC Ios 14-18.0</span><span class="package-version">v6.0.2</span></div>
-                <div class="package-item"><span class="package-name">DynaFake 14-18.0</span><span class="package-version">v6.0.2</span></div>
-            </div>
-        </div>
-
-        <!-- Tab 3 -->
-        <div class="tab-content" id="tab-2">
-            <div class="section-title">About TaoJB</div>
-            <div class="guide-box">
-                <p>Welcome to <strong>TaoJB Repo</strong>. We provide high-quality visual tweaks for iOS.</p>
-            </div>
-        </div>
-
     </div>
 
+    <!-- ==========================================================================
+         JAVASCRIPT: UI LOGIC & WEBGL BACKGROUND
+         ========================================================================== -->
     <script>
-    // 1. CHẶN COPY/ZOOM
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('selectstart', e => e.preventDefault());
+    (function() {
+        "use strict";
 
-    // 2. LOGIC CHUYỂN TAB (ĐÃ SỬA LỖI)
-    window.switchTab = function(index) {
-        // Lấy tất cả các nút và nội dung
-        const btns = document.querySelectorAll('.tab-btn');
-        const contents = document.querySelectorAll('.tab-content');
+        // ======================================================================
+        // PHẦN 1: UI LOGIC (TABS & 3D TILT)
+        // ======================================================================
+        
+        const tabButtons = document.querySelectorAll('.tab-item');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        const tabIndicator = document.getElementById('tabIndicator');
+        const glassPanel = document.getElementById('glassPanel');
 
-        // Xóa active ở tất cả
-        btns.forEach(btn => btn.classList.remove('active'));
-        contents.forEach(content => content.classList.remove('active'));
-
-        // Thêm active cho cái được chọn
-        btns[index].classList.add('active');
-        document.getElementById('tab-' + index).classList.add('active');
-    };
-
-    // 3. HÀM COPY LINK
-    window.copyLink = function() {
-        const url = "https://duchaivcyv-design.github.io/";
-        navigator.clipboard.writeText(url).then(() => {
-            const btn = document.getElementById('copyBtn');
-            const original = btn.innerHTML;
-            btn.innerHTML = '<span class="btn-icon">✅</span> <span>Đã sao chép!</span>';
-            setTimeout(() => btn.innerHTML = original, 2000);
-        }).catch(() => alert("URL: " + url));
-    };
-
-    // 4. WEBGL BACKGROUND (NỀN SÁNG XANH & CÂY NEON)
-    const canvas = document.getElementById('bg-canvas');
-    const gl = canvas.getContext('webgl');
-    if (!gl) return;
-
-    const vertSrc = `attribute vec2 p; varying vec2 uv; void main() { uv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }`;
-    
-    // Shader tạo nền xanh sáng và cây
-    const fragSrc = `
-        precision highp float;
-        varying vec2 uv;
-        uniform float t;
-        uniform vec2 res;
-        uniform vec2 mouse;
-        uniform float press;
-
-        float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-        float noise(vec2 p) {
-            vec2 i = floor(p); vec2 f = fract(p);
-            f = f * f * (3.0 - 2.0 * f);
-            return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
-                       mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
-        }
-
-        void main() {
-            vec2 p = (uv - 0.5) * vec2(res.x / res.y, 1.0);
+        // Hàm chuyển Tab (Có hiệu ứng viên thuốc nổi lên)
+        window.switchTab = function(index) {
+            tabButtons.forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            tabPanes.forEach((pane, i) => {
+                pane.classList.toggle('active', i === index);
+            });
             
-            // NỀN XANH SÁNG (Cyan/Blue)
-            vec3 color = mix(vec3(0.0, 0.8, 1.0), vec3(0.1, 0.3, 0.8), uv.y);
-            
-            // Ánh sáng trung tâm
-            float glow = smoothstep(0.8, 0.0, length(p));
-            color += vec3(0.5, 1.0, 1.0) * glow * 0.4;
+            // Hiệu ứng viên thuốc phình lên khi chuyển
+            tabIndicator.classList.add('pressing');
+            setTimeout(() => {
+                tabIndicator.classList.remove('pressing');
+            }, 200);
 
-            // VẼ CÂY (Màu xanh lá Neon)
-            vec2 cp = p - vec2(0.0, 0.1);
-            float canopy = length(cp) - 0.35 + noise(cp * 10.0) * 0.05 + noise(cp * 20.0) * 0.02;
+            // Cục trượt di chuyển
+            tabIndicator.style.transform = `translateX(${index * 100}%)`;
+        };
+
+        // Hiệu ứng 3D Tilt & Ánh sáng theo ngón tay (Cực nhạy)
+        function handlePointerMove(e) {
+            const rect = glassPanel.getBoundingClientRect();
+            let clientX, clientY;
             
-            if(canopy < 0.0) {
-                vec3 leaf = mix(vec3(0.0, 1.0, 0.5), vec3(0.5, 1.0, 0.0), noise(cp * 15.0));
-                color = mix(color, leaf, smoothstep(0.02, -0.02, canopy));
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
             }
 
-            // Thân cây
-            float trunk = length(max(abs(p - vec2(0.0, -0.35)) - vec2(0.04, 0.2), 0.0));
-            if(trunk < 0.0) color = mix(color, vec3(0.1, 0.3, 0.1), smoothstep(0.02, -0.02, trunk));
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            
+            const xPercent = (x / rect.width) * 100;
+            const yPercent = (y / rect.height) * 100;
+            
+            glassPanel.style.setProperty('--mouse-x', `${xPercent}%`);
+            glassPanel.style.setProperty('--mouse-y', `${yPercent}%`);
 
-            // Đốm sáng bay (Fireflies)
-            for(int i=0; i<10; i++) {
-                float fi = float(i);
-                vec2 fp = vec2(sin(fi*2.3 + t)*0.6, cos(fi*1.7 + t)*0.6);
-                color += vec3(1.0, 1.0, 0.5) * smoothstep(0.02, 0.0, length(p - fp)) * (0.5 + 0.5*sin(t*3.0 + fi));
+            // Nghiêng 3D nhẹ thôi để không bị vỡ chữ
+            const rotateX = ((y / rect.height) - 0.5) * -6;
+            const rotateY = ((x / rect.width) - 0.5) * 6;
+            
+            glassPanel.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        }
+
+        function resetTilt() {
+            glassPanel.style.transform = `rotateX(0deg) rotateY(0deg)`;
+            glassPanel.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+            glassPanel.style.setProperty('--mouse-x', '50%');
+            glassPanel.style.setProperty('--mouse-y', '50%');
+            setTimeout(() => { glassPanel.style.transition = 'transform 0.1s ease-out'; }, 600);
+        }
+
+        glassPanel.addEventListener('mousemove', handlePointerMove);
+        glassPanel.addEventListener('touchmove', handlePointerMove, {passive: true});
+        glassPanel.addEventListener('mouseleave', resetTilt);
+        glassPanel.addEventListener('touchend', resetTilt);
+
+        window.copyRepoLink = function() {
+            const url = "https://duchaivcyv-design.github.io/";
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<span class="btn-icon">✅</span> <span>Đã sao chép!</span>';
+                btn.style.background = 'rgba(52, 199, 89, 0.4)';
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                alert("URL Repo: " + url);
+            });
+        };
+
+        // ======================================================================
+        // PHẦN 2: WEBGL BACKGROUND ENGINE (CÂY XANH TĨNH)
+        // ======================================================================
+        
+        const canvas = document.getElementById('bg-canvas');
+        const gl = canvas.getContext('webgl', { premultipliedAlpha: false, antialias: false, alpha: false });
+
+        if (!gl) return;
+
+        const VERTEX_SHADER = `
+            attribute vec2 a_position;
+            varying vec2 v_uv;
+            void main() {
+                v_uv = a_position * 0.5 + 0.5;
+                gl_Position = vec4(a_position, 0.0, 1.0);
+            }
+        `;
+
+        // Shader Nền: Tối, Cây xanh đứng im, Đom đóm
+        const FRAGMENT_SHADER = `
+            precision highp float;
+            varying vec2 v_uv;
+            uniform float u_time;
+            uniform vec2 u_resolution;
+            uniform vec2 u_mouse;
+            uniform float u_isPressed;
+
+            float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+            float noise(vec2 p) {
+                vec2 i = floor(p); vec2 f = fract(p);
+                f = f * f * (3.0 - 2.0 * f);
+                return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
+                           mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
             }
 
-            // SÓNG NƯỚC KHI CHẠM
-            float mDist = distance(uv * vec2(res.x / res.y, 1.0), mouse * vec2(res.x / res.y, 1.0));
-            float ripple = sin(mDist * 40.0 - t * 10.0) * exp(-mDist * 8.0) * press * 0.3;
-            color += vec3(1.0, 1.0, 1.0) * ripple; // Sóng màu trắng sáng
+            // Hàm vẽ cây tĩnh
+            vec4 drawTree(vec2 uv, vec2 center) {
+                vec2 p = uv - center;
+                
+                // Thân cây
+                float trunk = length(p - vec2(0.0, -0.3)) - 0.04;
+                trunk = max(trunk, abs(p.x) - 0.03); // Kéo thẳng thân
+                
+                // Tán lá (Hình tròn to + nhiễu)
+                vec2 canopyP = p - vec2(0.0, 0.15);
+                float canopy = length(canopyP) - 0.25;
+                canopy += noise(canopyP * 15.0) * 0.08; // Làm méo viền lá
+                canopy += noise(canopyP * 30.0) * 0.03;
 
-            gl_FragColor = vec4(color, 1.0);
+                float treeShape = min(trunk, canopy);
+                
+                // Màu cây (Xanh tối, lấp lánh)
+                vec3 treeColor = mix(vec3(0.01, 0.05, 0.02), vec3(0.05, 0.2, 0.1), noise(p * 10.0));
+                
+                // Phát sáng viền lá
+                float glow = smoothstep(0.05, 0.0, abs(canopy)) * 0.5;
+                treeColor += vec3(0.2, 0.8, 0.4) * glow;
+
+                return vec4(treeColor, smoothstep(0.02, -0.02, treeShape));
+            }
+
+            void main() {
+                vec2 uv = v_uv;
+                vec2 aspect = vec2(u_resolution.x / u_resolution.y, 1.0);
+                vec2 p = (uv - 0.5) * aspect;
+
+                // 1. Nền tối sâu thẳm (Đen xanh)
+                vec3 color = vec3(0.01, 0.02, 0.03);
+
+                // 2. Thêm quầng sáng xanh mờ ảo phía sau
+                float aura = smoothstep(0.8, 0.0, length(p - vec2(0.0, 0.2)));
+                color += vec3(0.0, 0.1, 0.05) * aura;
+
+                // 3. Vẽ cây đứng im ở giữa
+                vec4 tree = drawTree(uv, vec2(0.5, 0.5));
+                color = mix(color, tree.rgb, tree.a);
+
+                // 4. Đom đóm (Fireflies) bay lơ lửng
+                for(int i = 0; i < 15; i++) {
+                    float fi = float(i);
+                    // Chuyển động rất chậm
+                    vec2 fp = vec2(
+                        sin(fi * 1.5 + u_time * 0.2) * 0.5,
+                        cos(fi * 2.5 + u_time * 0.15) * 0.5
+                    );
+                    float dist = length(p - fp);
+                    float light = smoothstep(0.02, 0.0, dist);
+                    // Nhấp nháy
+                    light *= 0.5 + 0.5 * sin(u_time * 2.0 + fi);
+                    color += vec3(0.4, 1.0, 0.5) * light;
+                }
+
+                // 5. Sóng nước khi chạm
+                float mDist = distance(uv * aspect, u_mouse * aspect);
+                float ripple = sin(mDist * 50.0 - u_time * 10.0) * exp(-mDist * 10.0) * u_isPressed * 0.1;
+                color += vec3(0.2, 0.5, 0.8) * ripple;
+
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
+
+        function compileShader(type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) return null;
+            return shader;
         }
-    `;
 
-    function createShader(type, src) {
-        const s = gl.createShader(type);
-        gl.shaderSource(s, src);
-        gl.compileShader(s);
-        return s;
-    }
+        const program = gl.createProgram();
+        gl.attachShader(program, compileShader(gl.VERTEX_SHADER, VERTEX_SHADER));
+        gl.attachShader(program, compileShader(gl.FRAGMENT_SHADER, FRAGMENT_SHADER));
+        gl.linkProgram(program);
 
-    const prog = gl.createProgram();
-    gl.attachShader(prog, createShader(gl.VERTEX_SHADER, vertSrc));
-    gl.attachShader(prog, createShader(gl.FRAGMENT_SHADER, fragSrc));
-    gl.linkProgram(prog);
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
 
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+        const posLoc = gl.getAttribLocation(program, 'a_position');
+        const timeLoc = gl.getUniformLocation(program, 'u_time');
+        const resLoc = gl.getUniformLocation(program, 'u_resolution');
+        const mouseLoc = gl.getUniformLocation(program, 'u_mouse');
+        const pressLoc = gl.getUniformLocation(program, 'u_isPressed');
 
-    const pLoc = gl.getAttribLocation(prog, 'p');
-    const tLoc = gl.getUniformLocation(prog, 't');
-    const rLoc = gl.getUniformLocation(prog, 'res');
-    const mLoc = gl.getUniformLocation(prog, 'mouse');
-    const pressLoc = gl.getUniformLocation(prog, 'press');
+        let width, height;
+        let mouse = [0.5, 0.5];
+        let isPressed = 0.0;
+        let startTime = performance.now();
 
-    let W, H, mouse = [0.5, 0.5], press = 0, start = performance.now();
+        function resize() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            width = window.innerWidth * dpr;
+            height = window.innerHeight * dpr;
+            canvas.width = width;
+            canvas.height = height;
+        }
 
-    function resize() {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        W = window.innerWidth * dpr; H = window.innerHeight * dpr;
-        canvas.width = W; canvas.height = H;
-    }
-    window.addEventListener('resize', resize);
-    resize();
+        window.addEventListener('resize', resize);
+        resize();
 
-    // Lắng nghe chạm để tạo sóng
-    window.addEventListener('pointermove', e => mouse = [e.clientX / window.innerWidth, 1.0 - (e.clientY / window.innerHeight)]);
-    window.addEventListener('pointerdown', () => press = 1.0);
-    window.addEventListener('pointerup', () => press = 0.0);
+        window.addEventListener('mousemove', (e) => {
+            mouse = [e.clientX / window.innerWidth, 1.0 - (e.clientY / window.innerHeight)];
+        });
+        window.addEventListener('mousedown', () => { isPressed = 1.0; });
+        window.addEventListener('mouseup', () => { isPressed = 0.0; });
+        
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                mouse = [e.touches[0].clientX / window.innerWidth, 1.0 - (e.touches[0].clientY / window.innerHeight)];
+            }
+        }, { passive: true });
+        window.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                mouse = [e.touches[0].clientX / window.innerWidth, 1.0 - (e.touches[0].clientY / window.innerHeight)];
+            }
+            isPressed = 1.0;
+        }, { passive: true });
+        window.addEventListener('touchend', () => { isPressed = 0.0; });
 
-    function render() {
-        const time = (performance.now() - start) / 1000;
-        gl.viewport(0, 0, W, H);
-        gl.useProgram(prog);
-        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-        gl.enableVertexAttribArray(pLoc);
-        gl.vertexAttribPointer(pLoc, 2, gl.FLOAT, false, 0, 0);
+        function render() {
+            const time = (performance.now() - startTime) / 1000;
 
-        gl.uniform1f(tLoc, time);
-        gl.uniform2f(rLoc, W, H);
-        gl.uniform2f(mLoc, mouse[0], mouse[1]);
-        gl.uniform1f(pressLoc, press);
+            gl.viewport(0, 0, width, height);
+            gl.useProgram(program);
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.enableVertexAttribArray(posLoc);
+            gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
+            gl.uniform1f(timeLoc, time);
+            gl.uniform2f(resLoc, width, height);
+            gl.uniform2f(mouseLoc, mouse[0], mouse[1]);
+            gl.uniform1f(pressLoc, isPressed);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            requestAnimationFrame(render);
+        }
+
         requestAnimationFrame(render);
-    }
-    requestAnimationFrame(render);
+
+    })();
     </script>
 </body>
 </html>
