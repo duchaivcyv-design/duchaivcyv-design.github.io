@@ -3,164 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TaoJB Repo - Fluid Liquid Glass</title>
+    <title>TaoJB Repo - Liquid Glass</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-        
+        :root {
+            --text-color: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #0a0a0a;
-            color: #fff;
+            background-color: #050510;
+            color: var(--text-color);
             padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Nền màu chuyển động để kính khúc xạ */
+        .bg-blobs {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
             overflow: hidden;
+            background: #050510;
         }
 
-        /* Nền màu chuyển động (cần thiết để kính khúc xạ) */
-        .bg-shapes {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; overflow: hidden;
-            background: radial-gradient(circle at 20% 30%, #007aff 0%, transparent 40%),
-                        radial-gradient(circle at 80% 70%, #ff2d55 0%, transparent 40%),
-                        radial-gradient(circle at 50% 50%, #af52de 0%, transparent 40%);
+        .blob {
+            position: absolute;
+            border-radius: 50%;
             filter: blur(80px);
-            animation: pulse 8s infinite alternate;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.1); }
+            opacity: 0.8;
+            animation: float 12s infinite alternate ease-in-out;
         }
 
-        /* Lớp bao bọc khung kính */
+        .blob-1 { width: 350px; height: 350px; background: #007aff; top: -10%; left: -20%; animation-duration: 10s; }
+        .blob-2 { width: 300px; height: 300px; background: #ff2d55; bottom: -10%; right: -10%; animation-duration: 14s; animation-delay: -2s; }
+        .blob-3 { width: 250px; height: 250px; background: #af52de; top: 40%; left: 50%; animation-duration: 8s; animation-delay: -5s; }
+        .blob-4 { width: 200px; height: 200px; background: #34c759; bottom: 20%; left: 10%; animation-duration: 15s; animation-delay: -7s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(60px, 40px) scale(1.2); }
+        }
+
+        /* Khung kính chính */
         .glass-wrapper {
             width: 100%;
             max-width: 420px;
             position: relative;
-            z-index: 1;
+            z-index: 10;
         }
 
-        /* Khung kính - liquidGL sẽ can thiệp vào phần tử này */
-        .glass-container {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px); /* Dự phòng cho trình duyệt không hỗ trợ WebGL */
-            -webkit-backdrop-filter: blur(10px);
+        .liquidGL {
+            background: transparent;
             border-radius: 40px;
             padding: 30px 20px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.1);
+            /* Viền sáng mảnh để tăng cảm giác kính */
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), inset 0 -1px 1px rgba(255,255,255,0.1);
+        }
+
+        /* Nội dung bên trong kính */
+        .content {
+            position: relative;
+            z-index: 2;
         }
 
         h1 {
-            font-size: 2.2rem; font-weight: 800; text-align: center; margin-bottom: 6px;
-            background: linear-gradient(180deg, #fff, #aaa);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 2.2rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(180deg, #fff, #b0b0b0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
-        .subtitle { text-align: center; font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 25px; }
+        .subtitle {
+            text-align: center;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 25px;
+        }
 
-        .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.5); margin: 20px 0 10px 10px; font-weight: 700; }
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255, 255, 255, 0.6);
+            margin: 20px 0 10px 10px;
+            font-weight: 700;
+        }
 
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        /* Nút bấm */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
         .btn {
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-            padding: 16px 10px; border-radius: 22px; text-decoration: none; font-weight: 600; font-size: 0.95rem; color: #fff;
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 8px 16px rgba(0,0,0,0.3);
-            transition: all 0.2s; cursor: pointer; position: relative; overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 10px;
+            border-radius: 22px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 8px 16px rgba(0,0,0,0.2);
+            transition: transform 0.2s, background 0.2s;
+            cursor: pointer;
+            -webkit-appearance: none;
         }
-        .btn:active { transform: scale(0.92); background: rgba(255, 255, 255, 0.15); }
-        .btn-icon { font-size: 1.6rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+
+        .btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-icon { font-size: 1.6rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
 
         .btn-copy {
-            display: flex; flex-direction: row; gap: 10px; width: 100%; padding: 16px; margin-bottom: 10px;
-            background: linear-gradient(135deg, rgba(52, 199, 89, 0.2) 0%, rgba(52, 199, 89, 0.05) 100%);
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.25) 0%, rgba(52, 199, 89, 0.05) 100%);
             border-color: rgba(52, 199, 89, 0.4);
         }
 
-        .package-list { background: rgba(0, 0, 0, 0.3); border-radius: 24px; padding: 5px 15px; border: 1px solid rgba(255, 255, 255, 0.05); }
-        .package-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .package-item:last-child { border-bottom: none; }
-        .package-name { font-weight: 500; font-size: 0.95rem; }
-        .package-version { color: rgba(255, 255, 255, 0.8); font-size: 0.75rem; background: rgba(255, 255, 255, 0.1); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); }
+        /* Danh sách tweak */
+        .package-list {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 24px;
+            padding: 5px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 4px 15px rgba(0,0,0,0.3);
+        }
 
-        .guide-box { display: flex; gap: 12px; align-items: flex-start; padding: 15px; margin-top: 10px; background: rgba(255, 255, 255, 0.03); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); line-height: 1.4; }
+        .package-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .package-item:last-child { border-bottom: none; }
+
+        .package-name { font-weight: 500; font-size: 0.95rem; }
+        .package-version { 
+            color: rgba(255, 255, 255, 0.8); 
+            font-size: 0.75rem; 
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
+        }
+
+        /* Hướng dẫn */
+        .guide-box {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 15px;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
 
     <!-- Nền màu -->
-    <div class="bg-shapes"></div>
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        <div class="blob blob-4"></div>
+    </div>
 
-    <!-- Khung kính -->
+    <!-- Khung kính với liquidGL -->
     <div class="glass-wrapper">
-        <div class="glass-container liquidGL">
-            <h1>TaoJB Repo</h1>
-            <p class="subtitle">Fluid Liquid Glass Edition</p>
+        <div class="liquidGL">
+            <div class="content">
+                <h1>TaoJB Repo</h1>
+                <p class="subtitle">Liquid Glass · Fluid Interaction</p>
 
-            <div class="section-title">Cài đặt nhanh</div>
-            <div class="btn-grid">
-                <a href="sileo://source/https://duchaivcyv-design.github.io/" class="btn">
-                    <span class="btn-icon">🧊</span> Sileo
-                </a>
-                <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn">
-                    <span class="btn-icon">🦓</span> Zebra
-                </a>
-                <a href="saily://source/https://duchaivcyv-design.github.io/" class="btn">
-                    <span class="btn-icon">🛍️</span> Saily
-                </a>
-                <a href="cydia://url/https://cydia.saurik.com/api/share#?source=https://duchaivcyv-design.github.io/" class="btn">
-                    <span class="btn-icon">📦</span> Cydia
-                </a>
-            </div>
+                <div class="section-title">Cài đặt nhanh</div>
+                <div class="btn-grid">
+                    <a href="sileo://source/https://duchaivcyv-design.github.io/" class="btn">
+                        <span class="btn-icon">🧊</span> Sileo
+                    </a>
+                    <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn">
+                        <span class="btn-icon">🦓</span> Zebra
+                    </a>
+                    <a href="saily://source/https://duchaivcyv-design.github.io/" class="btn">
+                        <span class="btn-icon">🛍️</span> Saily
+                    </a>
+                    <a href="cydia://url/https://cydia.saurik.com/api/share#?source=https://duchaivcyv-design.github.io/" class="btn">
+                        <span class="btn-icon">📦</span> Cydia
+                    </a>
+                </div>
 
-            <button onclick="copyRepoLink()" class="btn btn-copy" id="copyBtn">
-                <span class="btn-icon">📋</span> <span>Sao chép URL Repo</span>
-            </button>
+                <button onclick="copyRepoLink()" class="btn btn-copy" id="copyBtn">
+                    <span class="btn-icon">📋</span> <span>Sao chép URL Repo</span>
+                </button>
 
-            <div class="section-title">Danh sách Tweak</div>
-            <div class="package-list">
-                <div class="package-item"><span class="package-name">27CC Ios 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                <div class="package-item"><span class="package-name">DynaFake 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                <div class="package-item"><span class="package-name">Liquid Tab 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                <div class="package-item"><span class="package-name">26Morph 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                <div class="package-item"><span class="package-name">UnlockCode 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                <div class="package-item"><span class="package-name">OpenWave 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                <div class="package-item"><span class="package-name">2712 (trọn bộ)</span><span class="package-version">v6.0.2-5</span></div>
-            </div>
+                <div class="section-title">Danh sách Tweak</div>
+                <div class="package-list">
+                    <div class="package-item"><span class="package-name">27CC Ios 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                    <div class="package-item"><span class="package-name">DynaFake 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                    <div class="package-item"><span class="package-name">Liquid Tab 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                    <div class="package-item"><span class="package-name">26Morph 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                    <div class="package-item"><span class="package-name">UnlockCode 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                    <div class="package-item"><span class="package-name">OpenWave 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                    <div class="package-item"><span class="package-name">2712 (trọn bộ)</span><span class="package-version">v6.0.2-5</span></div>
+                </div>
 
-            <div class="guide-box">
-                <span style="font-size: 1.2rem;">💧</span>
-                <div>Hãy chạm và di chuyển ngón tay trên mặt kính để cảm nhận hiệu ứng nước lỏng.</div>
+                <div class="guide-box">
+                    <span style="font-size: 1.2rem;">💧</span>
+                    <div>Chạm và vuốt ngón tay trên mặt kính để cảm nhận hiệu ứng nước lỏng.</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Thư viện liquidGL và HTML2Canvas (bắt buộc) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/naughtyduk/liquidGL/scripts/liquidGL.js"></script>
+    <!-- Thư viện liquidGL -->
+    <script src="https://cdn.jsdelivr.net/gh/naughtyduk/liquidGL@3.0.0/scripts/liquidGL.js" defer></script>
     
     <script>
-        // Khởi tạo hiệu ứng kính lỏng
-        document.addEventListener("DOMContentLoaded", () => {
-            liquidGL({
-                target: ".liquidGL",
-                snapshot: "body",
-                resolution: 1.5, // Giảm nhẹ để mượt hơn trên mobile
-                refraction: 0.5,
-                bevelDepth: 0.05,
-                bevelWidth: 0.2,
-                frost: 4,
-                shadow: true,
-                specular: true,
-                // KÍCH HOẠT TÍNH NĂNG NƯỚC LỎNG (FLUID INTERACTION)
-                interaction: "fluid",
-                interactionStrength: 0.8,
-                interactionRadius: 1.5,
-                interactionViscosity: 0.6
-            });
+        // Khởi tạo liquidGL sau khi DOM và script đã tải xong
+        window.addEventListener('DOMContentLoaded', () => {
+            // Kiểm tra xem liquidGL đã được định nghĩa chưa
+            if (typeof liquidGL !== 'undefined') {
+                liquidGL({
+                    engine: "auto",
+                    target: ".liquidGL",
+                    snapshot: "body",
+                    resolution: 2.0,
+                    zIndex: 10,
+                    content: ".content",
+                    refraction: 0.15,
+                    aberration: 0.02,
+                    bevelDepth: 0.1,
+                    bevelWidth: 0.2,
+                    frost: 2,
+                    shadow: true,
+                    specular: true,
+                    reveal: "fade",
+                    tilt: false,
+                    // Kích hoạt hiệu ứng nước (fluid interaction)
+                    interaction: "fluid",
+                    interactionStrength: 0.8, // Độ mạnh của hiệu ứng nước (0-1)
+                    interactionRadius: 0.6,   // Bán kính ảnh hưởng của ngón tay
+                    interactionViscosity: 0.4, // Độ nhớt (càng thấp càng loãng, chảy nhanh)
+                    tint: "rgba(255, 255, 255, 0.05)"
+                });
+            } else {
+                console.warn("liquidGL chưa được tải. Vui lòng kiểm tra kết nối mạng.");
+            }
         });
 
         function copyRepoLink() {
