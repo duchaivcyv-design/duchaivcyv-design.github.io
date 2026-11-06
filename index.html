@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TaoJB Repo - Liquid Glass</title>
+    <title>TaoJB Repo - Liquid Glass Pro</title>
     <style>
         /* ==========================================================================
            1. CORE VARIABLES & RESET
            ========================================================================== */
         :root {
             --text-main: #ffffff;
-            --text-muted: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.6);
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* Màu chủ đạo của kính */
+            --glass-tint: rgba(15, 20, 25, 0.2); 
         }
 
         * {
@@ -30,8 +32,7 @@
 
         body {
             min-height: 100vh;
-            /* Nền tối làm nền tảng, nhưng WebGL sẽ phủ lên màu sáng */
-            background-color: #0a0a0f;
+            background-color: #000;
             color: var(--text-main);
             overflow-x: hidden;
             overflow-y: auto;
@@ -41,7 +42,7 @@
         }
 
         /* ==========================================================================
-           2. WEBGL CANVAS BACKGROUND
+           2. WEBGL BACKGROUND (CÂY XANH TĨNH & NỀN TỐI)
            ========================================================================== */
         #bg-canvas {
             position: fixed;
@@ -54,7 +55,7 @@
         }
 
         /* ==========================================================================
-           3. GLASS CONTAINER (LIQUID GLASS CSS)
+           3. UI WRAPPER
            ========================================================================== */
         .app-wrapper {
             position: relative;
@@ -63,43 +64,45 @@
             max-width: 440px;
             margin: 0 auto;
             padding: 20px;
-            padding-top: 40px;
+            padding-top: 50px;
             padding-bottom: 80px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            perspective: 1000px; /* Hỗ trợ hiệu ứng 3D */
+            perspective: 1200px; /* Tăng không gian 3D */
         }
 
-        /* Khung kính chính - Siêu dày, siêu trong suốt */
+        /* ==========================================================================
+           4. THE "HEAVY" LIQUID GLASS PANEL
+           ========================================================================== */
         .glass-panel {
             width: 100%;
             position: relative;
             border-radius: 45px;
-            padding: 30px 20px;
+            padding: 35px 20px;
             
-            /* Nền kính cực trong suốt */
-            background: rgba(255, 255, 255, 0.05); 
+            /* Nền kính cực kỳ trong suốt, chỉ phủ một lớp tint tối mỏng */
+            background: var(--glass-tint); 
             
-            /* Tăng cường Blur, Saturation và Brightness để "nặng" hơn */
-            backdrop-filter: blur(40px) saturate(250%) brightness(1.1) contrast(1.1);
-            -webkit-backdrop-filter: blur(40px) saturate(250%) brightness(1.1) contrast(1.1);
+            /* Blur siêu mạnh, độ bão hòa cao để tách biệt lớp kính */
+            backdrop-filter: blur(45px) saturate(200%) contrast(120%) brightness(0.9);
+            -webkit-backdrop-filter: blur(45px) saturate(200%) contrast(120%) brightness(0.9);
             
-            /* Viền sáng đa lớp tạo cảm giác kính dày và lồi */
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            /* VIỀN VÀ BÓNG ĐỔ ĐA LỚP (TẠO CẢM GIÁC KÍNH DÀY) */
+            border: 1px solid rgba(255, 255, 255, 0.12);
             box-shadow: 
-                0 35px 70px rgba(0, 0, 0, 0.4),           /* Bóng đổ sâu bên ngoài */
-                inset 0 1px 2px rgba(255, 255, 255, 0.6), /* Viền sáng trên cùng */
-                inset 0 -1px 2px rgba(255, 255, 255, 0.1),/* Viền tối dưới cùng */
-                inset 0 0 30px rgba(255, 255, 255, 0.05); /* Quầng sáng bên trong */
+                0 40px 80px rgba(0, 0, 0, 0.8),           /* Bóng đổ sâu ra ngoài */
+                inset 0 1px 2px rgba(255, 255, 255, 0.6), /* Viền sáng trên đỉnh */
+                inset 0 -1px 3px rgba(0, 0, 0, 0.5),      /* Viền tối dưới đáy */
+                inset 0 0 40px rgba(255, 255, 255, 0.05), /* Quầng sáng trong kính */
+                inset 0 0 0 2px rgba(255, 255, 255, 0.05);/* Lớp viền phụ bên trong */
             
-            /* Tối ưu hóa render cho phần cứng */
             will-change: transform, backdrop-filter;
-            transition: transform 0.1s ease-out;
+            transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1);
             transform-style: preserve-3d;
         }
 
-        /* Hiệu ứng ánh sáng lướt trên mặt kính khi vuốt tay */
+        /* Lớp ánh sáng phản chiếu lướt theo ngón tay */
         .glass-panel::before {
             content: '';
             position: absolute;
@@ -107,16 +110,16 @@
             border-radius: 45px;
             background: radial-gradient(
                 circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-                rgba(255, 255, 255, 0.2) 0%,
-                rgba(255, 255, 255, 0) 60%
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0) 70%
             );
             pointer-events: none;
             z-index: 1;
-            mix-blend-mode: overlay;
+            mix-blend-mode: screen;
         }
 
         /* ==========================================================================
-           4. TYPOGRAPHY
+           5. TYPOGRAPHY
            ========================================================================== */
         .header {
             text-align: center;
@@ -129,61 +132,66 @@
             font-size: 2.5rem;
             font-weight: 800;
             letter-spacing: -1px;
-            /* Gradient màu sáng rực rỡ */
-            background: linear-gradient(180deg, #ffffff 0%, #d0d0d0 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #999999 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
         }
 
         .subtitle {
             font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.8);
-            letter-spacing: 1.5px;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 2px;
             text-transform: uppercase;
             margin-top: 8px;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         /* ==========================================================================
-           5. iOS PILL TAB BAR (HIỆU ỨNG ẢNH 2)
+           6. iOS PILL TAB BAR (VIÊN THUỐC LỎNG)
            ========================================================================== */
         .ios-tab-bar {
             position: relative;
             display: flex;
-            background: rgba(0, 0, 0, 0.25); /* Nền tab mờ tối */
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 50px;
             padding: 6px;
             margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.6);
             z-index: 10;
         }
 
-        /* Cục trượt - Cốt lõi của hiệu ứng Liquid Glass */
+        /* Viên thuốc trượt */
         .tab-indicator {
             position: absolute;
             top: 6px;
             bottom: 6px;
             width: calc(33.333% - 4px);
-            /* Nền kính lỏng cho cục trượt */
-            background: rgba(255, 255, 255, 0.1);
+            
+            /* Viên thuốc trong suốt */
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 40px;
-            /* Viền sáng mạnh mẽ, dày */
-            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            
+            /* Viền sáng dày, nặng */
+            border: 1.5px solid rgba(255, 255, 255, 0.25);
             box-shadow: 
-                0 8px 20px rgba(0, 0, 0, 0.4),
-                inset 0 2px 5px rgba(255, 255, 255, 0.6), /* Highlight đỉnh */
-                inset 0 -2px 5px rgba(0, 0, 0, 0.2);    /* Bóng đáy */
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+                0 10px 20px rgba(0, 0, 0, 0.5),
+                inset 0 2px 4px rgba(255, 255, 255, 0.7), /* Highlight đỉnh */
+                inset 0 -2px 4px rgba(0, 0, 0, 0.3);    /* Bóng đáy */
+            
+            /* Hiệu ứng nhún khi trượt */
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             z-index: 1;
             will-change: transform;
         }
 
-        /* Hiệu ứng phình to khi giữ tab (Áp dụng cho nút tab) */
-        .tab-item:active {
-            transform: scale(1.1);
-            transition: transform 0.1s;
+        /* Hiệu ứng nhấn nổi lên */
+        .tab-indicator.pressing {
+            transform: scale(1.05) !important;
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .tab-item {
@@ -194,9 +202,9 @@
             text-align: center;
             font-size: 0.9rem;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.4);
             cursor: pointer;
-            transition: color 0.3s ease, transform 0.2s ease;
+            transition: color 0.3s ease;
             border: none;
             background: transparent;
             outline: none;
@@ -204,11 +212,11 @@
 
         .tab-item.active {
             color: #fff;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
 
         /* ==========================================================================
-           6. TAB CONTENT AREA
+           7. TAB CONTENT & COMPONENTS
            ========================================================================== */
         .content-area {
             position: relative;
@@ -218,7 +226,7 @@
 
         .tab-pane {
             display: none;
-            animation: slideUp 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation: slideUp 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
 
         .tab-pane.active {
@@ -230,14 +238,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ==========================================================================
-           7. COMPONENTS (BUTTONS & LISTS)
-           ========================================================================== */
         .section-title {
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.5);
             margin: 20px 0 12px 10px;
             font-weight: 700;
         }
@@ -249,7 +254,7 @@
             margin-bottom: 15px;
         }
 
-        /* Nút bấm phong cách Liquid Glass */
+        /* Nút bấm kính nặng */
         .btn {
             display: flex;
             flex-direction: column;
@@ -263,58 +268,31 @@
             font-size: 0.95rem;
             color: #fff;
             
-            /* Nền nút kính mờ */
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            /* Viền sáng 3D */
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 
-                0 8px 20px rgba(0,0,0,0.2),
-                inset 0 1px 2px rgba(255,255,255,0.4),
-                inset 0 -1px 2px rgba(0,0,0,0.1);
+                0 10px 20px rgba(0,0,0,0.3),
+                inset 0 1px 1px rgba(255,255,255,0.4),
+                inset 0 -1px 2px rgba(0,0,0,0.2);
             
-            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
             cursor: pointer;
             position: relative;
             overflow: hidden;
             will-change: transform;
         }
 
-        /* Hiệu ứng ảnh 2: Nút phình ra và sáng lên khi nhấn */
         .btn:active {
-            transform: scale(1.08) translateY(-2px);
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(0.94);
+            background: rgba(255, 255, 255, 0.12);
             box-shadow: 
-                0 15px 30px rgba(0,0,0,0.4),
-                inset 0 2px 5px rgba(255,255,255,0.7);
-        }
-
-        /* Hiệu ứng gợn nước (ripple) lan tỏa trên nút */
-        .btn::after {
-            content: '';
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 150px; height: 150px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            opacity: 0;
-            transition: transform 0.5s, opacity 0.5s;
-            pointer-events: none;
-        }
-        .btn:active::after {
-            transform: translate(-50%, -50%) scale(2.5);
-            opacity: 1;
-            transition: 0s;
+                0 5px 10px rgba(0,0,0,0.4),
+                inset 0 2px 5px rgba(255,255,255,0.6);
         }
 
         .btn-icon { 
             font-size: 1.8rem; 
-            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); 
-            transition: transform 0.3s;
-        }
-        .btn:active .btn-icon {
-            transform: scale(1.1); /* Icon cũng phình nhẹ */
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); 
         }
 
         .btn-copy {
@@ -324,18 +302,17 @@
             width: 100%;
             padding: 16px;
             margin-bottom: 10px;
-            /* Nền gradient xanh lá sáng */
-            background: linear-gradient(135deg, rgba(52, 199, 89, 0.3) 0%, rgba(52, 199, 89, 0.1) 100%);
-            border-color: rgba(52, 199, 89, 0.5);
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.2) 0%, rgba(52, 199, 89, 0.05) 100%);
+            border-color: rgba(52, 199, 89, 0.3);
             color: #fff;
         }
 
         .package-list {
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 22px;
             padding: 5px 18px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: inset 0 5px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 5px 20px rgba(0, 0, 0, 0.5);
         }
 
         .package-item {
@@ -343,21 +320,21 @@
             justify-content: space-between;
             align-items: center;
             padding: 16px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .package-item:last-child { border-bottom: none; }
 
         .package-name { font-weight: 500; font-size: 0.95rem; }
         .package-version {
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.8);
             font-size: 0.75rem;
             font-family: monospace;
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.08);
             padding: 4px 10px;
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: inset 0 1px 1px rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
         }
 
         .guide-box {
@@ -365,36 +342,30 @@
             flex-direction: column;
             gap: 15px;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 22px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.8);
             line-height: 1.5;
-            box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
         }
 
-        .guide-box h3 { color: #fff; margin-bottom: 5px; font-size: 1rem; display: flex; align-items: center; gap: 8px;}
-
-        .about-text {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-        }
+        .guide-box h3 { color: #fff; margin-bottom: 5px; font-size: 1rem; }
+        .about-text { font-size: 0.95rem; line-height: 1.6; color: rgba(255, 255, 255, 0.8); padding: 10px; }
         .about-text p { margin-bottom: 15px; }
-        .about-text strong { color: #fff; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .about-text strong { color: #fff; font-weight: 700; }
     </style>
 </head>
 <body>
 
-    <!-- WebGL Canvas: Vẽ hình nền sáng -->
+    <!-- WebGL Canvas: Vẽ nền tối và cây xanh tĩnh -->
     <canvas id="bg-canvas"></canvas>
 
     <!-- Lớp giao diện người dùng -->
     <div class="app-wrapper">
         
-        <!-- Khung kính chính -->
+        <!-- Khung kính chính (Kính Nặng) -->
         <div class="glass-panel" id="glassPanel">
             
             <!-- Header -->
@@ -404,8 +375,8 @@
             </div>
 
             <!-- Thanh Tab iOS -->
-            <div class="ios-tab-bar">
-                <!-- Cục trượt (Pill Indicator) -->
+            <div class="ios-tab-bar" id="tabBar">
+                <!-- Viên thuốc trượt -->
                 <div class="tab-indicator" id="tabIndicator"></div>
                 
                 <!-- Các nút tab -->
@@ -476,7 +447,6 @@
                     <div class="about-text">
                         <p>Welcome to <strong>TaoJB Repo</strong>, your premier destination for meticulously crafted iOS tweaks.</p>
                         <p>Founded by <strong>TaoJB</strong>, we push the boundaries of jailbroken devices. We specialize in fluid user interface enhancements, stunning visual effects, and deep system customizations.</p>
-                        <p>Our tweaks are designed with performance in mind, ensuring your device remains fast while delivering cutting-edge features like the Liquid Glass UI and advanced morphing animations.</p>
                     </div>
                 </div>
 
@@ -500,7 +470,7 @@
         const tabIndicator = document.getElementById('tabIndicator');
         const glassPanel = document.getElementById('glassPanel');
 
-        // Hàm chuyển Tab
+        // Hàm chuyển Tab (Có hiệu ứng viên thuốc nổi lên)
         window.switchTab = function(index) {
             tabButtons.forEach((btn, i) => {
                 btn.classList.toggle('active', i === index);
@@ -508,11 +478,18 @@
             tabPanes.forEach((pane, i) => {
                 pane.classList.toggle('active', i === index);
             });
+            
+            // Hiệu ứng viên thuốc phình lên khi chuyển
+            tabIndicator.classList.add('pressing');
+            setTimeout(() => {
+                tabIndicator.classList.remove('pressing');
+            }, 200);
+
             // Cục trượt di chuyển
             tabIndicator.style.transform = `translateX(${index * 100}%)`;
         };
 
-        // Hiệu ứng 3D Tilt & Ánh sáng theo ngón tay
+        // Hiệu ứng 3D Tilt & Ánh sáng theo ngón tay (Cực nhạy)
         function handlePointerMove(e) {
             const rect = glassPanel.getBoundingClientRect();
             let clientX, clientY;
@@ -528,26 +505,25 @@
             const x = clientX - rect.left;
             const y = clientY - rect.top;
             
-            // Tính toán phần trăm cho ánh sáng
             const xPercent = (x / rect.width) * 100;
             const yPercent = (y / rect.height) * 100;
             
             glassPanel.style.setProperty('--mouse-x', `${xPercent}%`);
             glassPanel.style.setProperty('--mouse-y', `${yPercent}%`);
 
-            // Nghiêng 3D (tăng lên 8 độ để "lỏng" hơn)
-            const rotateX = ((y / rect.height) - 0.5) * -8;
-            const rotateY = ((x / rect.width) - 0.5) * 8;
+            // Nghiêng 3D nhẹ thôi để không bị vỡ chữ
+            const rotateX = ((y / rect.height) - 0.5) * -6;
+            const rotateY = ((x / rect.width) - 0.5) * 6;
             
             glassPanel.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
         }
 
         function resetTilt() {
             glassPanel.style.transform = `rotateX(0deg) rotateY(0deg)`;
-            glassPanel.style.transition = 'transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)';
+            glassPanel.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
             glassPanel.style.setProperty('--mouse-x', '50%');
             glassPanel.style.setProperty('--mouse-y', '50%');
-            setTimeout(() => { glassPanel.style.transition = 'transform 0.1s ease-out'; }, 500);
+            setTimeout(() => { glassPanel.style.transition = 'transform 0.1s ease-out'; }, 600);
         }
 
         glassPanel.addEventListener('mousemove', handlePointerMove);
@@ -572,7 +548,7 @@
         };
 
         // ======================================================================
-        // PHẦN 2: WEBGL BACKGROUND ENGINE (NỀN SÁNG & RỰC RỠ)
+        // PHẦN 2: WEBGL BACKGROUND ENGINE (CÂY XANH TĨNH)
         // ======================================================================
         
         const canvas = document.getElementById('bg-canvas');
@@ -589,7 +565,7 @@
             }
         `;
 
-        // Shader Nền: Bokeh rực rỡ, Logo phát sáng mạnh, Giọt nước long lanh
+        // Shader Nền: Tối, Cây xanh đứng im, Đom đóm
         const FRAGMENT_SHADER = `
             precision highp float;
             varying vec2 v_uv;
@@ -599,99 +575,74 @@
             uniform float u_isPressed;
 
             float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-            
-            // Vẽ đốm sáng Bokeh (Tăng cường độ sáng)
-            vec3 bokeh(vec2 uv, vec2 c, float r, vec3 col) {
-                float d = distance(uv, c);
-                float blur = smoothstep(r, r * 0.3, d); // Mờ hơn
-                return col * blur;
+            float noise(vec2 p) {
+                vec2 i = floor(p); vec2 f = fract(p);
+                f = f * f * (3.0 - 2.0 * f);
+                return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
+                           mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
             }
 
-            // Logo Apple
-            float sdApple(vec2 p) {
-                p.y -= 0.05;
-                float d1 = length(p - vec2(-0.15, 0.0)) - 0.25;
-                float d2 = length(p - vec2(0.15, 0.0)) - 0.25;
-                float d = min(d1, d2);
-                d = max(d, -(p.y - 0.1));
-                vec2 leafP = p - vec2(0.0, 0.35);
-                float leaf = length(leafP) - 0.08;
-                leaf = max(leaf, -(leafP.x + 0.02));
-                return min(d, leaf);
-            }
+            // Hàm vẽ cây tĩnh
+            vec4 drawTree(vec2 uv, vec2 center) {
+                vec2 p = uv - center;
+                
+                // Thân cây
+                float trunk = length(p - vec2(0.0, -0.3)) - 0.04;
+                trunk = max(trunk, abs(p.x) - 0.03); // Kéo thẳng thân
+                
+                // Tán lá (Hình tròn to + nhiễu)
+                vec2 canopyP = p - vec2(0.0, 0.15);
+                float canopy = length(canopyP) - 0.25;
+                canopy += noise(canopyP * 15.0) * 0.08; // Làm méo viền lá
+                canopy += noise(canopyP * 30.0) * 0.03;
 
-            // Giọt nước (Độ phản chiếu cao)
-            vec4 droplet(vec2 uv, vec2 center, float radius) {
-                vec2 p = (uv - center) / radius;
-                p.y *= 1.0 + smoothstep(0.0, 1.0, p.y) * 0.15;
-                float d = length(p) - 1.0;
-                float mask = smoothstep(0.05, -0.05, d);
+                float treeShape = min(trunk, canopy);
                 
-                if (mask <= 0.0) return vec4(0.0);
+                // Màu cây (Xanh tối, lấp lánh)
+                vec3 treeColor = mix(vec3(0.01, 0.05, 0.02), vec3(0.05, 0.2, 0.1), noise(p * 10.0));
                 
-                vec2 norm = normalize(p);
-                vec3 normal = vec3(norm.x, norm.y, sqrt(max(0.0, 1.0 - dot(norm, norm))));
-                
-                // Ánh sáng bên trong giọt nước
-                vec3 dropColor = mix(vec3(0.1, 0.2, 0.3), vec3(0.8, 0.9, 1.0), uv.y);
-                
-                // Điểm sáng Specular cực mạnh
-                float spec = pow(max(0.0, dot(normal, normalize(vec3(-0.6, -0.6, 1.0)))), 16.0);
-                dropColor += vec3(1.0) * spec * 2.0;
-                
-                // Viền sáng xung quanh giọt
-                dropColor += vec3(1.0) * smoothstep(0.85, 1.0, length(p)) * 0.8;
+                // Phát sáng viền lá
+                float glow = smoothstep(0.05, 0.0, abs(canopy)) * 0.5;
+                treeColor += vec3(0.2, 0.8, 0.4) * glow;
 
-                return vec4(dropColor, mask * 0.85);
+                return vec4(treeColor, smoothstep(0.02, -0.02, treeShape));
             }
 
             void main() {
                 vec2 uv = v_uv;
                 vec2 aspect = vec2(u_resolution.x / u_resolution.y, 1.0);
                 vec2 p = (uv - 0.5) * aspect;
-                float t = u_time * 0.1;
 
-                // 1. Nền Gradient SÁNG (Xanh dương -> Tím -> Hồng)
-                vec3 color = mix(vec3(0.1, 0.2, 0.4), vec3(0.3, 0.1, 0.4), uv.y);
-                color = mix(color, vec3(0.5, 0.2, 0.3), uv.x);
+                // 1. Nền tối sâu thẳm (Đen xanh)
+                vec3 color = vec3(0.01, 0.02, 0.03);
 
-                // 2. Các đốm Bokeh sáng rực
-                color += bokeh(p, vec2(-0.4 + sin(t)*0.2, 0.6), 0.35, vec3(1.0, 0.8, 0.2)); // Vàng sáng
-                color += bokeh(p, vec2(0.6, 0.4 + cos(t)*0.2), 0.3, vec3(0.2, 0.6, 1.0));    // Xanh lam sáng
-                color += bokeh(p, vec2(-0.3, -0.5), 0.4, vec3(0.3, 0.9, 0.6));              // Xanh lá sáng
-                color += bokeh(p, vec2(0.7, -0.6), 0.25, vec3(1.0, 0.4, 0.7));             // Hồng sáng
-                color += bokeh(p, vec2(-0.7, -0.1), 0.2, vec3(0.6, 0.4, 1.0));             // Tím sáng
+                // 2. Thêm quầng sáng xanh mờ ảo phía sau
+                float aura = smoothstep(0.8, 0.0, length(p - vec2(0.0, 0.2)));
+                color += vec3(0.0, 0.1, 0.05) * aura;
 
-                // 3. Vẽ Logo Apple Neon (Phát sáng mạnh)
-                vec2 logoP = (uv - 0.5) * 1.2;
-                float appleDist = sdApple(logoP);
-                vec3 logoGradient = mix(mix(vec3(0.2, 1.0, 0.2), vec3(0.6, 0.2, 1.0), uv.y), vec3(1.0, 0.2, 0.5), uv.x);
-                
-                // Tăng cường độ phát sáng
-                float glow = smoothstep(0.15, 0.0, abs(appleDist)) * 1.5;
-                color += logoGradient * glow;
+                // 3. Vẽ cây đứng im ở giữa
+                vec4 tree = drawTree(uv, vec2(0.5, 0.5));
+                color = mix(color, tree.rgb, tree.a);
 
-                // 4. Vẽ các giọt nước (Trong suốt, nổi bật trên nền sáng)
-                for(int i = 0; i < 12; i++) {
+                // 4. Đom đóm (Fireflies) bay lơ lửng
+                for(int i = 0; i < 15; i++) {
                     float fi = float(i);
-                    vec2 dropCenter = vec2(
-                        sin(fi * 2.7 + t * 2.0) * 0.9,
-                        cos(fi * 1.9 + t * 1.5) * 0.9
+                    // Chuyển động rất chậm
+                    vec2 fp = vec2(
+                        sin(fi * 1.5 + u_time * 0.2) * 0.5,
+                        cos(fi * 2.5 + u_time * 0.15) * 0.5
                     );
-                    float dropRadius = 0.04 + hash(vec2(fi)) * 0.06;
-                    vec4 drop = droplet(uv, (dropCenter / aspect) + 0.5, dropRadius);
-                    
-                    color = mix(color, drop.rgb, drop.a);
+                    float dist = length(p - fp);
+                    float light = smoothstep(0.02, 0.0, dist);
+                    // Nhấp nháy
+                    light *= 0.5 + 0.5 * sin(u_time * 2.0 + fi);
+                    color += vec3(0.4, 1.0, 0.5) * light;
                 }
 
                 // 5. Sóng nước khi chạm
                 float mDist = distance(uv * aspect, u_mouse * aspect);
-                float ripple = sin(mDist * 60.0 - u_time * 12.0) * exp(-mDist * 8.0) * u_isPressed * 0.3;
-                color += vec3(0.5, 0.9, 1.0) * ripple;
-
-                // 6. Vignette nhẹ (Không làm tối quá mức)
-                float vig = smoothstep(1.8, 0.8, length(p));
-                color *= vig;
+                float ripple = sin(mDist * 50.0 - u_time * 10.0) * exp(-mDist * 10.0) * u_isPressed * 0.1;
+                color += vec3(0.2, 0.5, 0.8) * ripple;
 
                 gl_FragColor = vec4(color, 1.0);
             }
@@ -726,7 +677,7 @@
         let startTime = performance.now();
 
         function resize() {
-            const dpr = Math.min(window.devicePixelRatio || 1, 2); // Tối ưu DPR để giữ FPS
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
             width = window.innerWidth * dpr;
             height = window.innerHeight * dpr;
             canvas.width = width;
