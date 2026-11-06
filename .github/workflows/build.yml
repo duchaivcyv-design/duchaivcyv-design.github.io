@@ -39,7 +39,7 @@ jobs:
                           # Xóa các đuôi rác do lần build trước để lấy ID gốc
                           pkg_id = line.replace('Package:', '').strip()
                           pkg_id = pkg_id.replace('.roothide', '').replace('.rootless', '').replace('.rootful', '')
-                          f.write(f'Package: {pkg_id}\n') # Giữ nguyên ID gốc, Sileo tự phân vùng
+                          f.write(f'Package: {pkg_id}\n') # Giữ nguyên ID gốc
                       elif line.startswith('Depends:') and is_roothide:
                           f.write(line.replace('mobilesubstrate', 'roothide'))
                       else:
@@ -50,6 +50,8 @@ jobs:
               control_path = sys.argv[2]
               if mode == 'rootful':
                   patch_control(control_path, 'iphoneos-arm')
+              elif mode == 'rootless':
+                  patch_control(control_path, 'iphoneos-arm64')
               elif mode == 'roothide':
                   patch_control(control_path, 'iphoneos-arm64e', True)
           PYEOF
@@ -57,7 +59,7 @@ jobs:
           echo "=== 1. QUÉT VÀ XỬ LÝ FILE GỐC ==="
           for deb in debs/*.deb; do
             if [ -f "$deb" ]; then
-              # Bỏ qua các file rác do bot tạo ra từ lần trước
+              # Bỏ qua các file rác do bot tạo ra từ lần trước (để không tách đè lên nhau)
               if [[ "$deb" == *"_rootful_"* ]] || [[ "$deb" == *"_roothide_"* ]] || [[ "$deb" == *"_rootless_"* ]]; then
                 continue
               fi
@@ -93,14 +95,8 @@ jobs:
               # B. TẠO BẢN ROOTLESS (iphoneos-arm64)
               # ==========================================
               dpkg-deb -R "$deb" temp_rootless
-              # Chỉ sửa Arch, giữ nguyên ID
-              python3 -c "
-with open('temp_rootless/DEBIAN/control', 'r') as f: lines = f.readlines()
-with open('temp_rootless/DEBIAN/control', 'w') as f:
-    for line in lines:
-        if line.startswith('Architecture:'): f.write('Architecture: iphoneos-arm64\n')
-        else: f.write(line)
-"
+              python3 patch.py rootless temp_rootless/DEBIAN/control
+              
               # Đảm bảo đường dẫn Rootless chuẩn
               find temp_rootless -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
               
