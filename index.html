@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TaoJB Repo - Liquid Glass</title>
+    <title>TaoJB Repo - Liquid Glass Siêu Sáng</title>
     <style>
-        /* ==========================================================================
-           1. RESET & CHỐNG ZOOM/COPY
-           ========================================================================== */
+        /* 1. RESET & CHỐNG ZOOM */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -22,168 +20,136 @@
         html, body {
             width: 100%;
             min-height: 100vh;
-            /* Cho phép cuộn tự nhiên toàn màn hình */
             overflow-x: hidden;
-            overflow-y: auto; 
-            background-color: #050a08;
+            overflow-y: auto; /* Cho phép cuộn tự nhiên */
+            background-color: #000;
             color: #fff;
-            /* Chặn zoom double-tap */
-            touch-action: pan-y; 
+            touch-action: pan-y; /* Chặn zoom, chỉ cho vuốt dọc */
         }
 
         body {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 40px 15px; /* Cách lề trên dưới */
+            padding: 20px;
         }
 
-        /* ==========================================================================
-           2. HÌNH NỀN WEBGL (CÂY XANH & HIỆU ỨNG CHẠM)
-           ========================================================================== */
+        /* 2. HÌNH NỀN WEBGL */
         #bg-canvas {
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            z-index: -1; /* Nằm dưới cùng */
+            z-index: 0; /* Nằm dưới cùng */
             pointer-events: none;
         }
 
-        /* ==========================================================================
-           3. KHUNG KÍNH LỎNG (LIQUID GLASS) TRONG SUỐT
-           ========================================================================== */
+        /* 3. KHUNG KÍNH LIQUID GLASS */
         .glass-panel {
             width: 100%;
             max-width: 400px;
             position: relative;
+            z-index: 10; /* Nằm trên nền */
             border-radius: 45px;
             
-            /* Nền siêu trong suốt, chỉ phủ lớp mờ tối nhẹ để dễ đọc chữ */
-            background: rgba(10, 15, 10, 0.3); 
+            /* Nền siêu trong suốt (chỉ 5% màu trắng) */
+            background: rgba(255, 255, 255, 0.05); 
             
-            /* Bộ lọc làm mờ (Blur) và bão hòa màu */
-            backdrop-filter: blur(35px) saturate(200%) brightness(1.1);
-            -webkit-backdrop-filter: blur(35px) saturate(200%) brightness(1.1);
+            /* Làm mờ hình nền phía sau */
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
             
-            /* VIỀN KÍNH ĐA LỚP TẠO CẢM GIÁC DÀY VÀ LỒI LÕM */
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            /* Viền kính đa lớp */
+            border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 
-                /* Bóng đổ ra ngoài */
-                0 30px 60px rgba(0, 0, 0, 0.6),
-                
-                /* Viền sáng ngoài cùng */
-                0 0 0 1px rgba(255, 255, 255, 0.2),
-                
-                /* Ánh sáng đỉnh kính (Highlight) */
-                inset 0 2px 4px rgba(255, 255, 255, 0.8),
-                
-                /* Bóng tối đáy kính */
-                inset 0 -2px 4px rgba(0, 0, 0, 0.6),
-                
-                /* Quầng sáng xanh môi trường bên trong */
-                inset 0 0 30px rgba(50, 255, 100, 0.1);
+                0 25px 50px rgba(0, 0, 0, 0.5), /* Bóng đổ ra ngoài */
+                inset 0 1px 2px rgba(255, 255, 255, 0.7), /* Sáng đỉnh */
+                inset 0 -1px 2px rgba(0, 0, 0, 0.3), /* Tối đáy */
+                inset 0 0 20px rgba(255, 255, 255, 0.05);
             
             padding: 30px 20px;
-            z-index: 10;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Lớp ánh sáng phản chiếu (Glass Reflection) */
-        .glass-panel::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: 45px;
-            /* Ánh sáng chéo từ góc trên trái */
-            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 40%);
-            pointer-events: none; /* Không chặn click */
-            z-index: 1;
-        }
-
-        /* Nội dung nằm trên lớp kính */
-        .content {
-            position: relative;
-            z-index: 5; /* Đảm bảo nội dung luôn nằm trên */
-        }
-
-        /* ==========================================================================
-           4. HEADER
-           ========================================================================== */
+        /* 4. HEADER */
         .header { text-align: center; margin-bottom: 25px; }
         h1 {
-            font-size: 2.4rem;
+            font-size: 2.5rem;
             font-weight: 900;
             letter-spacing: -1px;
-            background: linear-gradient(180deg, #ffffff 0%, #a3c9a8 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #a0f0ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         .subtitle {
-            font-size: 0.75rem;
-            color: rgba(200, 255, 200, 0.7);
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.8);
             letter-spacing: 3px;
             text-transform: uppercase;
             margin-top: 5px;
             font-weight: 700;
         }
 
-        /* ==========================================================================
-           5. THANH TAB (VIÊN THUỐC) - ĐÃ SỬA LỖI CLICK
-           ========================================================================== */
-        .ios-tab-bar {
-            position: relative;
+        /* 5. THANH TAB - ĐÃ SỬA LỖI CLICK */
+        .tab-bar {
             display: flex;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 50px;
             padding: 5px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.6);
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 20; /* Đảm bảo nó nằm trên cùng để nhận click */
         }
 
-        .tab-item {
+        .tab-btn {
             flex: 1;
-            position: relative;
-            padding: 10px 0;
+            padding: 12px 0;
             text-align: center;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 700;
-            color: rgba(255, 255, 255, 0.4);
-            cursor: pointer;
-            border: none;
+            color: rgba(255, 255, 255, 0.5);
             background: transparent;
-            outline: none;
-            transition: all 0.3s ease;
+            border: none;
             border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             /* Đảm bảo nhận click */
-            z-index: 10; 
+            position: relative;
+            z-index: 30;
             -webkit-appearance: none;
         }
 
-        /* Hiệu ứng viên thuốc cho nút Active */
-        .tab-item.active {
+        .tab-btn.active {
             color: #fff;
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.2);
             box-shadow: 
-                0 4px 10px rgba(0, 0, 0, 0.5),
-                inset 0 1px 2px rgba(255, 255, 255, 0.8),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.5);
-            text-shadow: 0 1px 5px rgba(0,0,0,0.5);
+                0 4px 10px rgba(0, 0, 0, 0.3),
+                inset 0 1px 2px rgba(255, 255, 255, 0.8);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
 
-        /* ==========================================================================
-           6. NỘI DUNG CÁC TAB
-           ========================================================================== */
-        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
-        .tab-pane.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        /* 6. NỘI DUNG CÁC TAB */
+        .tab-content {
+            display: none; /* Ẩn mặc định */
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content.active {
+            display: block; /* Hiện khi active */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         .section-title {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            color: rgba(150, 255, 180, 0.8);
-            margin: 20px 0 10px 10px;
+            color: #00f2fe; /* Màu xanh sáng */
+            margin: 15px 0 10px 10px;
             font-weight: 800;
         }
 
@@ -202,206 +168,175 @@
             font-weight: 700;
             font-size: 0.9rem;
             color: #fff;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 
-                0 6px 12px rgba(0,0,0,0.3),
-                inset 0 1px 2px rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.5);
             transition: all 0.2s ease;
             cursor: pointer;
         }
 
         .btn:active {
             transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        .btn-icon { font-size: 1.6rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+        .btn-icon { font-size: 1.6rem; }
 
         .btn-copy {
             display: flex;
             flex-direction: row;
             width: 100%;
             padding: 14px;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, rgba(52, 199, 89, 0.3) 0%, rgba(52, 199, 89, 0.1) 100%);
-            border-color: rgba(52, 199, 89, 0.5);
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.4) 0%, rgba(52, 199, 89, 0.1) 100%);
+            border-color: rgba(52, 199, 89, 0.6);
         }
 
-        /* Hộp hướng dẫn */
-        .guide-box {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding: 18px;
+        /* Hộp hướng dẫn & Danh sách */
+        .guide-box, .package-list {
             background: rgba(0, 0, 0, 0.2);
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255, 255, 255, 0.9);
             line-height: 1.5;
         }
+
         .guide-box h3 { color: #fff; margin-bottom: 5px; font-size: 1rem; }
 
-        /* Danh sách Tweak */
-        .package-list {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 20px;
-            padding: 5px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
         .package-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         .package-item:last-child { border-bottom: none; }
-        .package-name { font-weight: 600; font-size: 0.9rem; }
+        .package-name { font-weight: 600; }
         .package-version {
-            color: #fff;
-            font-size: 0.7rem;
-            font-family: monospace;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 4px 8px;
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 3px 8px;
             border-radius: 10px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Hình nền WebGL -->
+    <!-- Hình nền sáng xanh -->
     <canvas id="bg-canvas"></canvas>
 
-    <!-- Khung kính -->
+    <!-- Khung kính trong suốt -->
     <div class="glass-panel">
-        <div class="content">
-            
-            <!-- Header -->
-            <div class="header">
-                <h1>TaoJB Repo</h1>
-                <p class="subtitle">Liquid Glass</p>
-            </div>
+        
+        <div class="header">
+            <h1>TaoJB Repo</h1>
+            <p class="subtitle">Liquid Glass</p>
+        </div>
 
-            <!-- Thanh Tab -->
-            <div class="ios-tab-bar">
-                <button class="tab-item active" onclick="switchTab(0)">Trang Chủ</button>
-                <button class="tab-item" onclick="switchTab(1)">Repo</button>
-                <button class="tab-item" onclick="switchTab(2)">Giới Thiệu</button>
-            </div>
+        <!-- Thanh Tab -->
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab(0)">Trang Chủ</button>
+            <button class="tab-btn" onclick="switchTab(1)">Repo</button>
+            <button class="tab-btn" onclick="switchTab(2)">Giới Thiệu</button>
+        </div>
 
-            <!-- Nội dung -->
-            <div class="tab-content-area">
-                
-                <!-- Tab 1: Trang Chủ -->
-                <div class="tab-pane active" id="pane-0">
-                    <div class="section-title">Hướng dẫn cài đặt</div>
-                    <div class="guide-box">
-                        <div>
-                            <h3>1. Thêm Nguồn</h3>
-                            <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">Mở Sileo/Zebra > Sources > Edit > Add. Dán URL repo và nhấn Add Source.</p>
-                        </div>
-                        <div>
-                            <h3>2. Tìm kiếm Tweak</h3>
-                            <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">Các tweak sẽ xuất hiện trong tab Repo.</p>
-                        </div>
-                    </div>
+        <!-- Nội dung -->
+        <!-- Tab 1 -->
+        <div class="tab-content active" id="tab-0">
+            <div class="section-title">Hướng dẫn cài đặt</div>
+            <div class="guide-box">
+                <div>
+                    <h3>1. Thêm Nguồn</h3>
+                    <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">Mở Sileo/Zebra > Sources > Edit > Add. Dán URL repo và nhấn Add Source.</p>
                 </div>
-
-                <!-- Tab 2: Repo -->
-                <div class="tab-pane" id="pane-1">
-                    <div class="section-title">Cài đặt nhanh</div>
-                    <div class="btn-grid">
-                        <a href="sileo://source/https://duchaivcyv-design.github.io/" class="btn">
-                            <span class="btn-icon">🧊</span> Sileo
-                        </a>
-                        <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn">
-                            <span class="btn-icon">🦓</span> Zebra
-                        </a>
-                    </div>
-
-                    <button onclick="copyRepoLink()" class="btn btn-copy" id="copyBtn">
-                        <span class="btn-icon">📋</span> <span>Sao chép URL Repo</span>
-                    </button>
-
-                    <div class="section-title">Danh sách Tweak</div>
-                    <div class="package-list">
-                        <div class="package-item"><span class="package-name">27CC Ios 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                        <div class="package-item"><span class="package-name">DynaFake 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                    </div>
+                <div style="margin-top: 10px;">
+                    <h3>2. Tìm kiếm Tweak</h3>
+                    <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">Các tweak sẽ xuất hiện trong tab Repo.</p>
                 </div>
-
-                <!-- Tab 3: Giới thiệu -->
-                <div class="tab-pane" id="pane-2">
-                    <div class="section-title">About TaoJB</div>
-                    <div class="guide-box">
-                        <p>Welcome to <strong>TaoJB Repo</strong>, your premier destination for meticulously crafted iOS tweaks.</p>
-                    </div>
-                </div>
-
             </div>
         </div>
+
+        <!-- Tab 2 -->
+        <div class="tab-content" id="tab-1">
+            <div class="section-title">Cài đặt nhanh</div>
+            <div class="btn-grid">
+                <a href="sileo://source/https://duchaivcyv-design.github.io/" class="btn">
+                    <span class="btn-icon">🧊</span> Sileo
+                </a>
+                <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn">
+                    <span class="btn-icon">🦓</span> Zebra
+                </a>
+            </div>
+
+            <button onclick="copyLink()" class="btn btn-copy" id="copyBtn">
+                <span class="btn-icon">📋</span> <span>Sao chép URL Repo</span>
+            </button>
+
+            <div class="section-title">Danh sách Tweak</div>
+            <div class="package-list">
+                <div class="package-item"><span class="package-name">27CC Ios 14-18.0</span><span class="package-version">v6.0.2</span></div>
+                <div class="package-item"><span class="package-name">DynaFake 14-18.0</span><span class="package-version">v6.0.2</span></div>
+            </div>
+        </div>
+
+        <!-- Tab 3 -->
+        <div class="tab-content" id="tab-2">
+            <div class="section-title">About TaoJB</div>
+            <div class="guide-box">
+                <p>Welcome to <strong>TaoJB Repo</strong>. We provide high-quality visual tweaks for iOS.</p>
+            </div>
+        </div>
+
     </div>
 
-    <!-- ==========================================================================
-         JAVASCRIPT: TAB LOGIC & WEBGL
-         ========================================================================== -->
     <script>
-    // 1. CHẶN HÀNH VI COPY/ZOOM
+    // 1. CHẶN COPY/ZOOM
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('selectstart', e => e.preventDefault());
 
-    // 2. TAB LOGIC (SIÊU ĐƠN GIẢN VÀ CHÍNH XÁC)
-    const tabBtns = document.querySelectorAll('.tab-item');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-
+    // 2. LOGIC CHUYỂN TAB (ĐÃ SỬA LỖI)
     window.switchTab = function(index) {
-        // Xóa active cũ
-        tabBtns.forEach(btn => btn.classList.remove('active'));
-        tabPanes.forEach(pane => pane.classList.remove('active'));
+        // Lấy tất cả các nút và nội dung
+        const btns = document.querySelectorAll('.tab-btn');
+        const contents = document.querySelectorAll('.tab-content');
 
-        // Kích hoạt tab mới
-        tabBtns[index].classList.add('active');
-        document.getElementById(`pane-${index}`).classList.add('active');
+        // Xóa active ở tất cả
+        btns.forEach(btn => btn.classList.remove('active'));
+        contents.forEach(content => content.classList.remove('active'));
+
+        // Thêm active cho cái được chọn
+        btns[index].classList.add('active');
+        document.getElementById('tab-' + index).classList.add('active');
     };
 
-    // 3. COPY URL
-    window.copyRepoLink = function() {
+    // 3. HÀM COPY LINK
+    window.copyLink = function() {
         const url = "https://duchaivcyv-design.github.io/";
         navigator.clipboard.writeText(url).then(() => {
             const btn = document.getElementById('copyBtn');
             const original = btn.innerHTML;
             btn.innerHTML = '<span class="btn-icon">✅</span> <span>Đã sao chép!</span>';
-            btn.style.background = 'rgba(52, 199, 89, 0.5)';
-            setTimeout(() => {
-                btn.innerHTML = original;
-                btn.style.background = '';
-            }, 2000);
-        }).catch(err => alert("URL: " + url));
+            setTimeout(() => btn.innerHTML = original, 2000);
+        }).catch(() => alert("URL: " + url));
     };
 
-    // 4. WEBGL BACKGROUND (CÂY XANH SÁNG & TƯƠNG TÁC CHẠM)
+    // 4. WEBGL BACKGROUND (NỀN SÁNG XANH & CÂY NEON)
     const canvas = document.getElementById('bg-canvas');
-    const gl = canvas.getContext('webgl', { premultipliedAlpha: false, antialias: false, alpha: false });
+    const gl = canvas.getContext('webgl');
     if (!gl) return;
 
-    const VERT = `
-        attribute vec2 a_pos;
-        varying vec2 v_uv;
-        void main() {
-            v_uv = a_pos * 0.5 + 0.5;
-            gl_Position = vec4(a_pos, 0.0, 1.0);
-        }
-    `;
-
-    const FRAG = `
+    const vertSrc = `attribute vec2 p; varying vec2 uv; void main() { uv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }`;
+    
+    // Shader tạo nền xanh sáng và cây
+    const fragSrc = `
         precision highp float;
-        varying vec2 v_uv;
-        uniform float u_time;
-        uniform vec2 u_res;
-        uniform vec2 u_mouse;
-        uniform float u_press;
+        varying vec2 uv;
+        uniform float t;
+        uniform vec2 res;
+        uniform vec2 mouse;
+        uniform float press;
 
         float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
         float noise(vec2 p) {
@@ -412,48 +347,39 @@
         }
 
         void main() {
-            vec2 uv = v_uv;
-            vec2 p = (uv - 0.5) * vec2(u_res.x / u_res.y, 1.0);
-            float t = u_time * 0.2;
-
-            // Nền tối xanh lá sâu thẳm
-            vec3 color = mix(vec3(0.01, 0.05, 0.02), vec3(0.03, 0.15, 0.08), uv.y);
+            vec2 p = (uv - 0.5) * vec2(res.x / res.y, 1.0);
             
-            // Ánh sáng trung tâm phát ra từ cây
-            float centerGlow = smoothstep(0.8, 0.0, length(p - vec2(0.0, 0.1)));
-            color += vec3(0.05, 0.2, 0.1) * centerGlow;
+            // NỀN XANH SÁNG (Cyan/Blue)
+            vec3 color = mix(vec3(0.0, 0.8, 1.0), vec3(0.1, 0.3, 0.8), uv.y);
+            
+            // Ánh sáng trung tâm
+            float glow = smoothstep(0.8, 0.0, length(p));
+            color += vec3(0.5, 1.0, 1.0) * glow * 0.4;
 
-            // Vẽ tán lá cây (Sử dụng nhiễu tạo hình tròn lởm chởm)
-            vec2 cp = p - vec2(0.0, 0.15);
-            float canopy = length(cp) - 0.35;
-            canopy += noise(cp * 10.0) * 0.05;
-            canopy += noise(cp * 20.0) * 0.02;
+            // VẼ CÂY (Màu xanh lá Neon)
+            vec2 cp = p - vec2(0.0, 0.1);
+            float canopy = length(cp) - 0.35 + noise(cp * 10.0) * 0.05 + noise(cp * 20.0) * 0.02;
             
             if(canopy < 0.0) {
-                vec3 leafColor = mix(vec3(0.1, 0.5, 0.2), vec3(0.3, 0.9, 0.4), noise(cp * 15.0));
-                float light = smoothstep(-0.2, 0.3, cp.y);
-                leafColor += vec3(0.2, 0.5, 0.3) * light;
-                color = mix(color, leafColor, smoothstep(0.02, -0.02, canopy));
+                vec3 leaf = mix(vec3(0.0, 1.0, 0.5), vec3(0.5, 1.0, 0.0), noise(cp * 15.0));
+                color = mix(color, leaf, smoothstep(0.02, -0.02, canopy));
             }
 
-            // Vẽ thân cây
-            float trunk = length(max(abs(p - vec2(0.0, -0.3)) - vec2(0.03, 0.2), 0.0));
-            if(trunk < 0.0) {
-                color = mix(color, vec3(0.05, 0.1, 0.05), smoothstep(0.02, -0.02, trunk));
-            }
+            // Thân cây
+            float trunk = length(max(abs(p - vec2(0.0, -0.35)) - vec2(0.04, 0.2), 0.0));
+            if(trunk < 0.0) color = mix(color, vec3(0.1, 0.3, 0.1), smoothstep(0.02, -0.02, trunk));
 
-            // Đom đóm bay lơ lửng
-            for(int i=0; i<8; i++) {
+            // Đốm sáng bay (Fireflies)
+            for(int i=0; i<10; i++) {
                 float fi = float(i);
-                vec2 fp = vec2(sin(fi*2.1 + t)*0.5, cos(fi*1.8 + t)*0.5);
-                float d = length(p - fp);
-                color += vec3(0.4, 1.0, 0.5) * smoothstep(0.015, 0.0, d) * (0.5 + 0.5*sin(t*3.0 + fi));
+                vec2 fp = vec2(sin(fi*2.3 + t)*0.6, cos(fi*1.7 + t)*0.6);
+                color += vec3(1.0, 1.0, 0.5) * smoothstep(0.02, 0.0, length(p - fp)) * (0.5 + 0.5*sin(t*3.0 + fi));
             }
 
-            // Sóng nước khi chạm
-            float mDist = distance(uv * vec2(u_res.x / u_res.y, 1.0), u_mouse * vec2(u_res.x / u_res.y, 1.0));
-            float ripple = sin(mDist * 40.0 - u_time * 8.0) * exp(-mDist * 8.0) * u_press * 0.2;
-            color += vec3(0.2, 0.8, 0.4) * ripple;
+            // SÓNG NƯỚC KHI CHẠM
+            float mDist = distance(uv * vec2(res.x / res.y, 1.0), mouse * vec2(res.x / res.y, 1.0));
+            float ripple = sin(mDist * 40.0 - t * 10.0) * exp(-mDist * 8.0) * press * 0.3;
+            color += vec3(1.0, 1.0, 1.0) * ripple; // Sóng màu trắng sáng
 
             gl_FragColor = vec4(color, 1.0);
         }
@@ -467,33 +393,31 @@
     }
 
     const prog = gl.createProgram();
-    gl.attachShader(prog, createShader(gl.VERTEX_SHADER, VERT));
-    gl.attachShader(prog, createShader(gl.FRAGMENT_SHADER, FRAG));
+    gl.attachShader(prog, createShader(gl.VERTEX_SHADER, vertSrc));
+    gl.attachShader(prog, createShader(gl.FRAGMENT_SHADER, fragSrc));
     gl.linkProgram(prog);
 
     const buf = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
 
-    const posLoc = gl.getAttribLocation(prog, 'a_pos');
-    const timeLoc = gl.getUniformLocation(prog, 'u_time');
-    const resLoc = gl.getUniformLocation(prog, 'u_res');
-    const mouseLoc = gl.getUniformLocation(prog, 'u_mouse');
-    const pressLoc = gl.getUniformLocation(prog, 'u_press');
+    const pLoc = gl.getAttribLocation(prog, 'p');
+    const tLoc = gl.getUniformLocation(prog, 't');
+    const rLoc = gl.getUniformLocation(prog, 'res');
+    const mLoc = gl.getUniformLocation(prog, 'mouse');
+    const pressLoc = gl.getUniformLocation(prog, 'press');
 
-    let W, H, mouse = [0.5, 0.5], press = 0.0, start = performance.now();
+    let W, H, mouse = [0.5, 0.5], press = 0, start = performance.now();
 
     function resize() {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        W = window.innerWidth * dpr;
-        H = window.innerHeight * dpr;
-        canvas.width = W;
-        canvas.height = H;
+        W = window.innerWidth * dpr; H = window.innerHeight * dpr;
+        canvas.width = W; canvas.height = H;
     }
     window.addEventListener('resize', resize);
     resize();
 
-    // Lắng nghe sự kiện chạm để tạo sóng
+    // Lắng nghe chạm để tạo sóng
     window.addEventListener('pointermove', e => mouse = [e.clientX / window.innerWidth, 1.0 - (e.clientY / window.innerHeight)]);
     window.addEventListener('pointerdown', () => press = 1.0);
     window.addEventListener('pointerup', () => press = 0.0);
@@ -503,12 +427,12 @@
         gl.viewport(0, 0, W, H);
         gl.useProgram(prog);
         gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-        gl.enableVertexAttribArray(posLoc);
-        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(pLoc);
+        gl.vertexAttribPointer(pLoc, 2, gl.FLOAT, false, 0, 0);
 
-        gl.uniform1f(timeLoc, time);
-        gl.uniform2f(resLoc, W, H);
-        gl.uniform2f(mouseLoc, mouse[0], mouse[1]);
+        gl.uniform1f(tLoc, time);
+        gl.uniform2f(rLoc, W, H);
+        gl.uniform2f(mLoc, mouse[0], mouse[1]);
         gl.uniform1f(pressLoc, press);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
