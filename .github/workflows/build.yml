@@ -3,7 +3,7 @@ name: Build Sileo Repo (Clean & Auto-Split)
 on:
   push:
     paths:
-      - 'debs/**.deb'
+      - 'debs-source/**.deb'
   workflow_dispatch:
 
 jobs:
@@ -22,7 +22,9 @@ jobs:
 
       - name: Clean and Rebuild Environments
         run: |
-          mkdir -p processed_debs
+          # Xóa thư mục debs cũ để làm sạch repo trước khi build
+          rm -rf debs
+          mkdir -p debs
           
           # Tạo script Python để xử lý file control cực kỳ an toàn
           cat << 'PYEOF' > patch.py
@@ -36,10 +38,10 @@ jobs:
                       if line.startswith('Architecture:'):
                           f.write(f'Architecture: {target_arch}\n')
                       elif line.startswith('Package:'):
-                          # Xóa các đuôi rác do lần build trước để lấy ID gốc
+                          # Xóa các đuôi rác để lấy ID gốc
                           pkg_id = line.replace('Package:', '').strip()
                           pkg_id = pkg_id.replace('.roothide', '').replace('.rootless', '').replace('.rootful', '')
-                          f.write(f'Package: {pkg_id}\n') # Giữ nguyên ID gốc
+                          f.write(f'Package: {pkg_id}\n')
                       elif line.startswith('Depends:') and is_roothide:
                           f.write(line.replace('mobilesubstrate', 'roothide'))
                       else:
@@ -56,14 +58,9 @@ jobs:
                   patch_control(control_path, 'iphoneos-arm64e', True)
           PYEOF
 
-          echo "=== 1. QUÉT VÀ XỬ LÝ FILE GỐC ==="
-          for deb in debs/*.deb; do
+          echo "=== 1. QUÉT FILE GỐC TỪ debs-source ==="
+          for deb in debs-source/*.deb; do
             if [ -f "$deb" ]; then
-              # Bỏ qua các file rác do bot tạo ra từ lần trước (để không tách đè lên nhau)
-              if [[ "$deb" == *"_rootful_"* ]] || [[ "$deb" == *"_roothide_"* ]] || [[ "$deb" == *"_rootless_"* ]]; then
-                continue
-              fi
-              
               echo "--> Đang xử lý file gốc: $deb"
               PKG_NAME=$(dpkg-deb -f "$deb" Package)
               PKG_VER=$(dpkg-deb -f "$deb" Version)
@@ -74,10 +71,9 @@ jobs:
               dpkg-deb -R "$deb" temp_rootful
               python3 patch.py rootful temp_rootful/DEBIAN/control
               
-              # Đảo ngược đường dẫn: Từ /var/jb/Library/ -> /Library/
+              # Đảo ngược đường dẫn: Từ /var/jb/ -> /
               find temp_rootful -type f -name "*.plist" -exec sed -i 's|/var/jb/|/|g' {} +
               
-              # Sửa đường dẫn trong file binary
               find temp_rootful -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho.txt
               while read -r bin; do
                 chmod +x "$bin"
@@ -88,7 +84,7 @@ jobs:
                 done
               done < macho.txt; rm macho.txt
 
-              dpkg-deb -b temp_rootful "processed_debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
+              dpkg-deb -b temp_rootful "debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
               rm -rf temp_rootful
 
               # ==========================================
@@ -97,10 +93,9 @@ jobs:
               dpkg-deb -R "$deb" temp_rootless
               python3 patch.py rootless temp_rootless/DEBIAN/control
               
-              # Đảm bảo đường dẫn Rootless chuẩn
               find temp_rootless -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
               
-              dpkg-deb -b temp_rootless "processed_debs/${PKG_NAME}_${PKG_VER}_rootless_iphoneos-arm64.deb" > /dev/null
+              dpkg-deb -b temp_rootless "debs/${PKG_NAME}_${PKG_VER}_rootless_iphoneos-arm64.deb" > /dev/null
               rm -rf temp_rootless
 
               # ==========================================
@@ -109,7 +104,6 @@ jobs:
               dpkg-deb -R "$deb" temp_roothide
               python3 patch.py roothide temp_roothide/DEBIAN/control
               
-              # Giữ nguyên đường dẫn /var/jb/ cho RootHide
               find temp_roothide -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
               
               find temp_roothide -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho.txt
@@ -121,25 +115,24 @@ jobs:
                 done
               done < macho.txt; rm macho.txt
 
-              dpkg-deb -b temp_roothide "processed_debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
+              dpkg-deb -b temp_roothide "debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
               rm -rf temp_roothide
               
               echo "=== Đã xử lý xong 3 bản cho: $PKG_NAME ==="
             fi
           done
           
-          # XÓA SẠCH THƯ MỤC CŨ VÀ CHỈ ĐƯA 3 FILE CHUẨN VÀO
-          rm -rf debs
-          mkdir -p debs
-          mv processed_debs/*.deb debs/ 2>/dev/null || true
-          rm -rf processed_debs patch.py
+          rm -f patch.py
 
       - name: Generate Packages
         run: |
-          dpkg-scanpackages -m ./debs /dev/null > Packages
+          # Thêm || true để không báo lỗi đỏ nếu thư mục trống (dễ nhìn log hơn)
+          dpkg-scanpackages -m ./debs /dev/null > Packages || true
+          
           echo "=== KIỂM TRA FILE PACKAGES ==="
-          grep "^Package:\|^Architecture:" Packages
-          bzip2 -kf Packages
+          grep "^Package:\|^Architecture:" Packages || echo "CẢNH BÁO: Không có file .deb nào trong thư mục debs!"
+          
+          bzip2 -kf Packages || true
           
       - name: Generate Release
         run: |
