@@ -20,11 +20,15 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev bzip2 fakeroot python3 llvm ldid file
+          sudo apt-get install -y dpkg-dev bzip2 fakeroot python3 llvm file wget unzip
+
+      - name: Install ldid
+        uses: MOZGIII/install-ldid-action@v1
+        with:
+          tag: v2.1.5-procursus2
           
       - name: Process Debs
         run: |
-          # Tạo script python patch
           cat << 'PYEOF' > patch.py
           import sys
           def patch_control(path, target_arch):
@@ -58,25 +62,18 @@ jobs:
                 PKG_NAME=$(dpkg-deb -f "$deb" Package)
                 PKG_VER=$(dpkg-deb -f "$deb" Version)
                 
-                # ==========================================
-                # TÁCH BẢN ROOTFUL (arm)
-                # ==========================================
+                # BẢN ROOTFUL
                 dpkg-deb -R "$deb" temp_dir
                 python3 patch.py rootful temp_dir/DEBIAN/control
                 find temp_dir -type f -name "*.plist" -exec sed -i 's|/var/jb/|/|g' {} +
                 dpkg-deb -b temp_dir "debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
                 rm -rf temp_dir
                 
-                # ==========================================
-                # TÁCH BẢN ROOTHIDE (arm64e) - FIX ELLEKIT
-                # ==========================================
+                # BẢN ROOTHIDE (CÓ KÝ LẠI)
                 dpkg-deb -R "$deb" temp_dir
                 python3 patch.py roothide temp_dir/DEBIAN/control
-                
-                # Sửa đường dẫn trong file text
                 find temp_dir -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
                 
-                # Sửa đường dẫn trong file binary và KÝ LẠI (Re-sign)
                 find temp_dir -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho.txt
                 while read -r bin; do
                   chmod +x "$bin"
@@ -84,14 +81,13 @@ jobs:
                   for p in $paths; do
                     [[ "$p" == /Library/* || "$p" == /usr/lib/* ]] && llvm-install-name-tool -change "$p" "/var/jb$p" "$bin" 2>/dev/null || true
                   done
-                  # KÝ LẠI FILE BINARY ĐỂ KHÔNG BỊ LỖI CORRUPTED
                   ldid -S "$bin" 
                 done < macho.txt; rm macho.txt
 
                 dpkg-deb -b temp_dir "debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
                 rm -rf temp_dir
                 
-                echo "=== Đã tách xong 2 vùng cho: $PKG_NAME (Đã fix ElleKit) ==="
+                echo "=== Đã tách xong 2 vùng cho: $PKG_NAME ==="
               fi
             fi
           done
