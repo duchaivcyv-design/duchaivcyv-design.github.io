@@ -3,27 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TaoJB Repo - Fluid Liquid Glass</title>
+    <title>TaoJB Repo - Ultimate Liquid Glass</title>
     <style>
-        /* ==========================================
-           BIẾN CSS TOÀN CỤC
-           ========================================== */
-        :root {
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.5);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --glass-shadow: rgba(0, 0, 0, 0.4);
-            --accent-blue: #007aff;
-            --accent-green: #34c759;
-            --accent-purple: #af52de;
-            --accent-orange: #ff9500;
-            --accent-red: #ff3b30;
-        }
-
-        /* ==========================================
-           RESET & BASE
-           ========================================== */
+        /* ==========================================================================
+           CSS RESET & BASE
+           ========================================================================== */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -39,83 +23,57 @@
 
         body {
             min-height: 100vh;
-            background-color: #050510;
-            color: var(--text-primary);
+            background-color: #000;
+            color: #fff;
             overflow-x: hidden;
-            overflow-y: auto; /* Cho phép cuộn dọc */
+            overflow-y: auto;
             position: relative;
         }
 
-        /* ==========================================
-           LỚP NỀN CHẤT LỎNG (WEBGL CANVAS)
-           ========================================== */
-        #fluid-canvas {
+        /* ==========================================================================
+           WEBGL CANVAS (BACKGROUND & GLASS)
+           ========================================================================== */
+        #glcanvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
             z-index: 0;
-            pointer-events: none; /* Cho phép chạm xuyên qua để tạo sóng nước */
-        }
-
-        /* Lớp phủ tối để làm nổi bật nội dung */
-        .bg-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
-            z-index: 1;
             pointer-events: none;
         }
 
-        /* ==========================================
-           WRAPPER & CONTAINER
-           ========================================== */
-        .page-wrapper {
+        /* Lớp UI (HTML) nằm trên canvas WebGL */
+        .ui-wrapper {
             position: relative;
             z-index: 10;
             width: 100%;
             max-width: 480px;
             margin: 0 auto;
             padding: 20px;
-            padding-top: 40px;
-            padding-bottom: 60px;
+            padding-top: 60px;
+            padding-bottom: 80px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            pointer-events: none; /* Cho phép chạm xuyên qua để tương tác với canvas */
         }
 
-        /* ==========================================
-           GLASS CONTAINER (liquidGL Target)
-           ========================================== */
-        .glass-container {
+        /* Vùng nội dung bên trong kính (cần nhận tương tác) */
+        .glass-content {
             width: 100%;
             position: relative;
+            z-index: 12;
+            pointer-events: auto;
+            /* Bo góc nội dung để khớp với kính */
             border-radius: 40px;
             padding: 30px 20px;
-            /* Nền tối mờ cơ bản, liquidGL sẽ xử lý phần khúc xạ */
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            box-shadow:
-                0 30px 60px var(--glass-shadow),
-                inset 0 1px 1px rgba(255, 255, 255, 0.4),
-                inset 0 -1px 2px rgba(255, 255, 255, 0.1);
-            /* Đảm bảo nội dung bên trong hiển thị trên hiệu ứng kính */
-            z-index: 10;
+            /* Không có nền, để shader kính hiển thị bên dưới */
         }
 
-        /* Nội dung bên trong kính (được liquidGL bỏ qua) */
-        .glass-content {
-            position: relative;
-            z-index: 12;
-        }
-
-        /* ==========================================
-           TYPOGRAPHY
-           ========================================== */
+        /* ==========================================================================
+           TYPOGRAPHY & ELEMENTS
+           ========================================================================== */
         h1 {
             font-size: 2.2rem;
             font-weight: 800;
@@ -125,13 +83,13 @@
             background: linear-gradient(180deg, #ffffff 0%, #b0b0b0 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .subtitle {
             text-align: center;
             font-size: 0.9rem;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.7);
             margin-bottom: 25px;
             line-height: 1.4;
         }
@@ -140,14 +98,12 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            color: var(--text-muted);
+            color: rgba(255, 255, 255, 0.5);
             margin: 20px 0 10px 10px;
             font-weight: 700;
         }
 
-        /* ==========================================
-           NÚT BẤM (Quick Install Grid)
-           ========================================== */
+        /* Nút bấm */
         .btn-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -169,9 +125,7 @@
             color: #fff;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow:
-                inset 0 1px 1px rgba(255, 255, 255, 0.4),
-                0 8px 16px rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 8px 16px rgba(0,0,0,0.2);
             transition: transform 0.2s ease, background 0.2s ease;
             cursor: pointer;
             -webkit-appearance: none;
@@ -189,7 +143,6 @@
             filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
         }
 
-        /* Nút Copy */
         .btn-copy {
             display: flex;
             flex-direction: row;
@@ -201,9 +154,7 @@
             border-color: rgba(52, 199, 89, 0.4);
         }
 
-        /* ==========================================
-           DANH SÁCH TWEAK
-           ========================================== */
+        /* Danh sách tweak */
         .package-list {
             background: rgba(0, 0, 0, 0.25);
             border-radius: 24px;
@@ -239,9 +190,6 @@
             box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
         }
 
-        /* ==========================================
-           HƯỚNG DẪN
-           ========================================== */
         .guide-box {
             display: flex;
             gap: 12px;
@@ -252,214 +200,573 @@
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             font-size: 0.85rem;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.7);
             line-height: 1.4;
-        }
-
-        /* ==========================================
-           HIỆU ỨNG 3D TILT (Tùy chọn)
-           ========================================== */
-        .glass-container {
-            transition: transform 0.1s ease-out, box-shadow 0.3s ease;
-        }
-
-        /* ==========================================
-           MEDIA QUERIES
-           ========================================== */
-        @media (max-width: 360px) {
-            h1 {
-                font-size: 1.8rem;
-            }
-            .btn {
-                padding: 12px 8px;
-                font-size: 0.85rem;
-            }
-            .btn-icon {
-                font-size: 1.3rem;
-            }
         }
     </style>
 </head>
 <body>
 
-    <!-- ==========================================
-         CANVAS NỀN CHẤT LỎNG
-         ========================================== -->
-    <canvas id="fluid-canvas"></canvas>
-    <div class="bg-overlay"></div>
+    <!-- WebGL Canvas: Vẽ nền và kính lỏng -->
+    <canvas id="glcanvas"></canvas>
 
-    <!-- ==========================================
-         PAGE WRAPPER
-         ========================================== -->
-    <div class="page-wrapper">
-        <!-- Glass Container (Target cho liquidGL) -->
-        <div class="glass-container liquidGL">
-            <div class="glass-content">
-                <h1>TaoJB Repo</h1>
-                <p class="subtitle">Fluid Liquid Glass · Touch to Ripple</p>
+    <!-- Lớp UI -->
+    <div class="ui-wrapper">
+        <div class="glass-content" id="glassContent">
+            <h1>TaoJB Repo</h1>
+            <p class="subtitle">Fluid Liquid Glass · Touch to Ripple</p>
 
-                <!-- Quick Install -->
-                <div class="section-title">Cài đặt nhanh</div>
-                <div class="btn-grid">
-                    <a href="sileo://source/https://duchaivcyv-design.github.io/" class="btn">
-                        <span class="btn-icon">🧊</span> Sileo
-                    </a>
-                    <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn">
-                        <span class="btn-icon">🦓</span> Zebra
-                    </a>
-                    <a href="saily://source/https://duchaivcyv-design.github.io/" class="btn">
-                        <span class="btn-icon">🛍️</span> Saily
-                    </a>
-                    <a href="cydia://url/https://cydia.saurik.com/api/share#?source=https://duchaivcyv-design.github.io/" class="btn">
-                        <span class="btn-icon">📦</span> Cydia
-                    </a>
-                </div>
+            <div class="section-title">Cài đặt nhanh</div>
+            <div class="btn-grid">
+                <a href="sileo://source/https://duchaivcyv-design.github.io/" class="btn">
+                    <span class="btn-icon">🧊</span> Sileo
+                </a>
+                <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn">
+                    <span class="btn-icon">🦓</span> Zebra
+                </a>
+                <a href="saily://source/https://duchaivcyv-design.github.io/" class="btn">
+                    <span class="btn-icon">🛍️</span> Saily
+                </a>
+                <a href="cydia://url/https://cydia.saurik.com/api/share#?source=https://duchaivcyv-design.github.io/" class="btn">
+                    <span class="btn-icon">📦</span> Cydia
+                </a>
+            </div>
 
-                <!-- Copy URL -->
-                <button onclick="copyRepoLink()" class="btn btn-copy" id="copyBtn">
-                    <span class="btn-icon">📋</span> <span>Sao chép URL Repo</span>
-                </button>
+            <button onclick="copyRepoLink()" class="btn btn-copy" id="copyBtn">
+                <span class="btn-icon">📋</span> <span>Sao chép URL Repo</span>
+            </button>
 
-                <!-- Danh sách Tweak -->
-                <div class="section-title">Danh sách Tweak</div>
-                <div class="package-list">
-                    <div class="package-item">
-                        <span class="package-name">27CC Ios 14-18.0</span>
-                        <span class="package-version">v6.0.2-5</span>
-                    </div>
-                    <div class="package-item">
-                        <span class="package-name">DynaFake 14-18.0</span>
-                        <span class="package-version">v6.0.2-5</span>
-                    </div>
-                    <div class="package-item">
-                        <span class="package-name">Liquid Tab 14-18.0</span>
-                        <span class="package-version">v6.0.2-5</span>
-                    </div>
-                    <div class="package-item">
-                        <span class="package-name">26Morph 14-18.0</span>
-                        <span class="package-version">v6.0.2-5</span>
-                    </div>
-                    <div class="package-item">
-                        <span class="package-name">UnlockCode 14-18.0</span>
-                        <span class="package-version">v6.0.2-5</span>
-                    </div>
-                    <div class="package-item">
-                        <span class="package-name">OpenWave 14-18.0</span>
-                        <span class="package-version">v6.0.2-5</span>
-                    </div>
-                    <div class="package-item">
-                        <span class="package-name">2712 (trọn bộ)</span>
-                        <span class="package-version">v6.0.2-5</span>
-                    </div>
-                </div>
+            <div class="section-title">Danh sách Tweak</div>
+            <div class="package-list">
+                <div class="package-item"><span class="package-name">27CC Ios 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                <div class="package-item"><span class="package-name">DynaFake 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                <div class="package-item"><span class="package-name">Liquid Tab 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                <div class="package-item"><span class="package-name">26Morph 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                <div class="package-item"><span class="package-name">UnlockCode 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                <div class="package-item"><span class="package-name">OpenWave 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
+                <div class="package-item"><span class="package-name">2712 (trọn bộ)</span><span class="package-version">v6.0.2-5</span></div>
+            </div>
 
-                <!-- Guide -->
-                <div class="guide-box">
-                    <span style="font-size: 1.2rem;">💧</span>
-                    <div>Chạm và vuốt ngón tay trên màn hình để tạo ra những gợn sóng nước thực sự trên nền.</div>
-                </div>
+            <div class="guide-box">
+                <span style="font-size: 1.2rem;">💧</span>
+                <div>Chạm và vuốt ngón tay trên màn hình để tạo ra những gợn sóng nước thực sự trên nền.</div>
             </div>
         </div>
     </div>
 
-    <!-- ==========================================
-         SCRIPTS
-         ========================================== -->
-
-    <!-- 1. WebGL Fluid Simulation -->
-    <script src="https://cdn.jsdelivr.net/npm/webgl-fluid@0.4"></script>
-
-    <!-- 2. liquidGL -->
-    <script src="https://cdn.jsdelivr.net/gh/naughtyduk/liquidGL@3.0.0/scripts/liquidGL.js" defer></script>
-
-    <!-- 3. Logic khởi tạo -->
+    <!-- ==========================================================================
+         JAVASCRIPT: WEBGL ENGINE
+         ========================================================================== -->
     <script>
-        // ==========================================
-        // KHỞI TẠO HIỆU ỨNG NỀN NƯỚC (WebGL Fluid)
-        // ==========================================
-        document.addEventListener("DOMContentLoaded", () => {
-            const canvas = document.getElementById('fluid-canvas');
-            if (canvas && typeof WebGLFluid !== 'undefined') {
-                WebGLFluid(canvas, {
-                    TRIGGER: 'hover', // Kích hoạt khi di chuột (hoặc chạm trên mobile)
-                    IMMEDIATE: true,  // Tạo hiệu ứng ngay khi tải trang
-                    AUTO: false,      // Tắt tự động tạo splat
-                    INTERVAL: 3000,   // Khoảng thời gian giữa các splat tự động (nếu bật AUTO)
-                    SIM_RESOLUTION: 128,
-                    DYE_RESOLUTION: 1024,
-                    CAPTURE_RESOLUTION: 512,
-                    DENSITY_DISSIPATION: 1,
-                    VELOCITY_DISSIPATION: 0.3,
-                    PRESSURE: 0.8,
-                    PRESSURE_ITERATIONS: 20,
-                    CURL: 30,
-                    SPLAT_RADIUS: 0.35,
-                    SPLAT_FORCE: 6000,
-                    SPLAT_COUNT: Number.parseInt(Math.random() * 20) + 5,
-                    SPLAT_COLOR: undefined,
-                    SHADING: true,
-                    COLORFUL: true,
-                    COLOR_UPDATE_SPEED: 10,
-                    PAUSED: false,
-                    BACK_COLOR: { r: 5, g: 5, b: 16 }, // Màu nền tối
-                    TRANSPARENT: false,
-                    BLOOM: true,
-                    BLOOM_ITERATIONS: 8,
-                    BLOOM_RESOLUTION: 256,
-                    BLOOM_INTENSITY: 0.8,
-                    BLOOM_THRESHOLD: 0.6,
-                    BLOOM_SOFT_KNEE: 0.7,
-                    SUNRAYS: true,
-                    SUNRAYS_RESOLUTION: 196,
-                    SUNRAYS_WEIGHT: 1.0,
-                });
-            } else {
-                console.warn("webgl-fluid chưa được tải hoặc không được hỗ trợ.");
-            }
-        });
+    (function() {
+        "use strict";
 
-        // ==========================================
-        // KHỞI TẠO HIỆU ỨNG KÍNH LỎNG (liquidGL)
-        // ==========================================
-        window.addEventListener('DOMContentLoaded', () => {
-            if (typeof liquidGL !== 'undefined') {
-                try {
-                    liquidGL({
-                        engine: "auto",
-                        target: ".liquidGL",
-                        snapshot: "body",
-                        resolution: 2.0,
-                        zIndex: 10,
-                        content: ".glass-content",
-                        refraction: 0.15,
-                        aberration: 0.02,
-                        bevelDepth: 0.1,
-                        bevelWidth: 0.2,
-                        frost: 2,
-                        shadow: true,
-                        specular: true,
-                        reveal: "fade",
-                        tilt: true, // Bật hiệu ứng nghiêng 3D theo con trỏ
-                        tiltEasing: 0.1,
-                        // Hiệu ứng "chất lỏng nhớt" khi tương tác
-                        interaction: "fluid",
-                        interactionStrength: 0.8,
-                        interactionRadius: 0.6,
-                        interactionViscosity: 0.4,
-                        tint: "rgba(255, 255, 255, 0.05)"
-                    });
-                } catch (e) {
-                    console.error("Lỗi khởi tạo liquidGL:", e);
+        // ======================================================================
+        // 1. SHADER SOURCES (GLSL)
+        // ======================================================================
+
+        // --- Vertex Shader chung ---
+        const VERTEX_SHADER_SOURCE = `
+            attribute vec2 a_position;
+            varying vec2 v_uv;
+            void main() {
+                v_uv = a_position * 0.5 + 0.5;
+                gl_Position = vec4(a_position, 0.0, 1.0);
+            }
+        `;
+
+        // --- Fragment Shader: Background (Bokeh + Logo + Droplets) ---
+        const FRAGMENT_SHADER_BG = `
+            precision highp float;
+            varying vec2 v_uv;
+            uniform float u_time;
+            uniform vec2 u_resolution;
+
+            // Hàm tạo nhiễu ngẫu nhiên
+            float hash(vec2 p) {
+                return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+            }
+
+            float noise(vec2 p) {
+                vec2 i = floor(p);
+                vec2 f = fract(p);
+                f = f * f * (3.0 - 2.0 * f);
+                return mix(
+                    mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
+                    mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x),
+                    f.y
+                );
+            }
+
+            // Vẽ bokeh (đốm sáng mờ)
+            vec3 drawBokeh(vec2 uv, vec2 center, float radius, vec3 color) {
+                float d = distance(uv, center);
+                float intensity = smoothstep(radius, 0.0, d);
+                // Thêm viền sáng (rim) cho bokeh
+                float rim = smoothstep(radius * 0.8, radius, d) - smoothstep(radius * 0.9, radius * 1.0, d);
+                return color * intensity + color * rim * 0.5;
+            }
+
+            // Vẽ logo Apple (SDF đơn giản)
+            float sdApple(vec2 p) {
+                p.y -= 0.05;
+                float d1 = length(p - vec2(-0.15, 0.0)) - 0.25;
+                float d2 = length(p - vec2(0.15, 0.0)) - 0.25;
+                float d = min(d1, d2);
+                // Cắt phần dưới
+                d = max(d, -(p.y - 0.1));
+                // Phần lá
+                vec2 leafP = p - vec2(0.0, 0.35);
+                float leaf = length(leafP) - 0.08;
+                leaf = max(leaf, -(leafP.x + 0.02));
+                d = min(d, leaf);
+                return d;
+            }
+
+            // Vẽ giọt nước
+            float drawDroplet(vec2 uv, vec2 center, float radius) {
+                vec2 p = (uv - center) / radius;
+                // Biến dạng giọt nước (hơi dẹt ở dưới)
+                p.y *= 1.0 + smoothstep(0.0, 1.0, p.y) * 0.2;
+                float d = length(p) - 1.0;
+                return smoothstep(0.1, -0.1, d);
+            }
+
+            void main() {
+                vec2 uv = v_uv;
+                vec2 aspect = vec2(u_resolution.x / u_resolution.y, 1.0);
+                vec2 p = (uv - 0.5) * aspect;
+                float t = u_time * 0.15;
+
+                // 1. Nền tối
+                vec3 color = vec3(0.02, 0.03, 0.06);
+
+                // 2. Các đốm sáng bokeh (màu vàng, xanh, tím)
+                color += drawBokeh(p, vec2(-0.3, 0.4), 0.15, vec3(0.8, 0.6, 0.1));
+                color += drawBokeh(p, vec2(0.4, 0.2), 0.12, vec3(0.1, 0.5, 0.8));
+                color += drawBokeh(p, vec2(-0.2, -0.3), 0.18, vec3(0.6, 0.2, 0.7));
+                color += drawBokeh(p, vec2(0.5, -0.4), 0.1, vec3(0.1, 0.8, 0.4));
+                color += drawBokeh(p, vec2(-0.5, -0.1), 0.08, vec3(0.9, 0.9, 0.2));
+
+                // Thêm bokeh nhỏ lấp lánh
+                for (int i = 0; i < 10; i++) {
+                    float fi = float(i);
+                    vec2 bc = vec2(
+                        sin(fi * 1.3 + t * 0.5) * 0.8,
+                        cos(fi * 2.1 + t * 0.3) * 0.8
+                    );
+                    color += drawBokeh(p, bc, 0.03 + fi * 0.005, vec3(1.0, 0.8, 0.5));
                 }
-            } else {
-                console.warn("liquidGL chưa được tải.");
+
+                // 3. Logo Apple phát sáng
+                vec2 logoP = (uv - 0.5) * 1.5;
+                float appleDist = sdApple(logoP);
+                float glow = smoothstep(0.1, 0.0, abs(appleDist));
+                // Màu gradient cho logo
+                vec3 logoColor = mix(vec3(0.2, 0.8, 0.2), vec3(0.8, 0.2, 0.8), uv.x);
+                color += logoColor * glow * 0.8;
+                // Viền sáng bên ngoài logo
+                float outerGlow = smoothstep(0.3, 0.1, abs(appleDist)) * 0.2;
+                color += vec3(0.5, 0.8, 1.0) * outerGlow;
+
+                // 4. Giọt nước (vẽ đè lên)
+                for (int i = 0; i < 8; i++) {
+                    float fi = float(i);
+                    vec2 dropCenter = vec2(
+                        sin(fi * 2.7) * 0.6 + t * 0.1,
+                        cos(fi * 1.9) * 0.7 + t * 0.05
+                    );
+                    float dropR = 0.05 + hash(vec2(fi)) * 0.04;
+                    float drop = drawDroplet(p, dropCenter, dropR);
+                    // Phản xạ bên trong giọt nước
+                    vec3 dropColor = mix(vec3(0.1, 0.2, 0.3), vec3(0.8, 0.9, 1.0), uv.y);
+                    color = mix(color, dropColor, drop * 0.6);
+                    // Viền sáng cho giọt
+                    color += vec3(1.0) * drop * 0.2;
+                }
+
+                // 5. Nhiễu nhẹ
+                color += noise(uv * 10.0 + t) * 0.02;
+
+                // 6. Vignette
+                float vig = smoothstep(1.2, 0.3, length(p));
+                color *= vig;
+
+                gl_FragColor = vec4(color, 1.0);
             }
+        `;
+
+        // --- Fragment Shader: Liquid Glass (Kính lỏng đa lớp) ---
+        const FRAGMENT_SHADER_GLASS = `
+            precision highp float;
+            varying vec2 v_uv;
+            uniform sampler2D u_bgTexture;
+            uniform float u_time;
+            uniform vec2 u_resolution;
+            uniform vec2 u_glassCenter;
+            uniform vec2 u_glassSize;
+            uniform float u_glassRadius;
+            uniform vec2 u_mouse;
+
+            // Hàm SDF cho hình chữ nhật bo góc
+            float sdRoundedRect(vec2 p, vec2 b, float r) {
+                vec2 q = abs(p) - b + r;
+                return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r;
+            }
+
+            // Tính toán pháp tuyến bề mặt cho hiệu ứng lồi lõm (bevel)
+            vec3 calculateNormal(vec2 p, vec2 size, float radius, float thickness) {
+                // Khoảng cách từ tâm đến cạnh
+                vec2 d = abs(p) - size + radius;
+                float dist = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - radius;
+                
+                // Nếu nằm trong vùng bevel (gần cạnh)
+                float bevelZone = smoothstep(0.0, thickness, -dist);
+                
+                // Đạo hàm của SDF để tìm hướng pháp tuyến
+                vec2 grad = normalize(p - clamp(p, -size + radius, size - radius));
+                float slope = bevelZone * 1.5;
+                
+                return normalize(vec3(grad * slope, 1.0));
+            }
+
+            void main() {
+                vec2 uv = v_uv;
+                vec2 pixel = uv * u_resolution;
+                
+                // Tọa độ tương đối so với tâm kính
+                vec2 p = pixel - u_glassCenter;
+                vec2 halfSize = u_glassSize * 0.5;
+
+                // 1. Kiểm tra xem pixel có nằm trong kính không
+                float dist = sdRoundedRect(p, halfSize, u_glassRadius);
+                
+                if (dist > 0.0) {
+                    // Ngoài kính: hiển thị nền gốc
+                    gl_FragColor = texture2D(u_bgTexture, uv);
+                    return;
+                }
+
+                // 2. Hiệu ứng lồi lõm (Bevel) - Tính pháp tuyến
+                vec3 normal = calculateNormal(p, halfSize, u_glassRadius, 20.0);
+
+                // 3. Khúc xạ ánh sáng (Refraction)
+                // Vector khúc xạ dựa trên pháp tuyến
+                vec2 refractOffset = normal.xy * 0.08;
+                vec2 refractedUV = uv + refractOffset;
+                
+                // 4. Tán sắc màu (Chromatic Aberration)
+                // Tách kênh đỏ và xanh lục lam
+                vec2 caOffset = normal.xy * 0.015;
+                float r = texture2D(u_bgTexture, refractedUV + caOffset).r;
+                float g = texture2D(u_bgTexture, refractedUV).g;
+                float b = texture2D(u_bgTexture, refractedUV - caOffset).b;
+                vec3 glassColor = vec3(r, g, b);
+
+                // 5. Làm mờ (Blur) - Mô phỏng kính mờ
+                vec3 blurColor = vec3(0.0);
+                float blurSize = 2.0;
+                for (int i = 0; i < 9; i++) {
+                    float fi = float(i);
+                    float angle = fi * 0.698 + u_time * 0.5;
+                    vec2 offset = vec2(cos(angle), sin(angle)) * blurSize / u_resolution;
+                    blurColor += texture2D(u_bgTexture, uv + offset).rgb;
+                }
+                blurColor /= 9.0;
+                
+                // Kết hợp khúc xạ và làm mờ
+                glassColor = mix(glassColor, blurColor, 0.3);
+
+                // 6. Phản xạ gương (Specular Reflection)
+                // Ánh sáng từ trên cao chiếu xuống
+                vec3 lightDir = normalize(vec3(-0.5, -0.8, 1.0));
+                vec3 viewDir = vec3(0.0, 0.0, 1.0);
+                vec3 halfDir = normalize(lightDir + viewDir);
+                
+                float spec = pow(max(dot(normal, halfDir), 0.0), 64.0);
+                vec3 specular = vec3(spec) * 1.5;
+                
+                // Phản xạ viền (Edge Reflection)
+                float edgeDist = abs(dist);
+                float edgeGlow = smoothstep(3.0, 0.0, edgeDist);
+                vec3 edgeSpecular = vec3(edgeGlow) * 0.8;
+
+                // 7. Ánh sáng môi trường (Ambient)
+                vec3 ambient = vec3(0.1, 0.1, 0.15);
+
+                // 8. Đổ bóng (Shadow)
+                float shadowOffset = 10.0;
+                float shadowDist = sdRoundedRect(p + vec2(0.0, shadowOffset), halfSize, u_glassRadius);
+                float shadow = smoothstep(0.0, 20.0, shadowDist) * 0.5;
+
+                // 9. Tổng hợp màu sắc
+                vec3 finalColor = glassColor;
+                finalColor += ambient;
+                finalColor += specular;
+                finalColor += edgeSpecular;
+                finalColor *= (1.0 - shadow);
+
+                // Thêm tint nhẹ cho kính
+                finalColor = mix(finalColor, vec3(0.8, 0.9, 1.0), 0.05);
+
+                // Viền sáng (Border Highlight)
+                float border = smoothstep(2.0, 0.0, edgeDist);
+                finalColor += vec3(1.0) * border * 0.3;
+
+                // Hiệu ứng nước khi chạm (Ripple)
+                float rippleDist = distance(uv, u_mouse);
+                float ripple = sin(rippleDist * 40.0 - u_time * 10.0) * exp(-rippleDist * 5.0) * 0.1;
+                finalColor += vec3(0.5, 0.8, 1.0) * ripple;
+
+                gl_FragColor = vec4(finalColor, 1.0);
+            }
+        `;
+
+        // ======================================================================
+        // 2. WEBGL ENGINE
+        // ======================================================================
+        
+        const canvas = document.getElementById('glcanvas');
+        const gl = canvas.getContext('webgl', { premultipliedAlpha: false, antialias: true, alpha: false });
+
+        if (!gl) {
+            console.error('WebGL không được hỗ trợ.');
+            alert('Trình duyệt của bạn không hỗ trợ WebGL.');
+            return;
+        }
+
+        // --- Biên dịch Shader ---
+        function compileShader(type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Lỗi biên dịch shader:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            return shader;
+        }
+
+        // --- Tạo chương trình ---
+        function createProgram(vertexSource, fragmentSource) {
+            const vertexShader = compileShader(gl.VERTEX_SHADER, vertexSource);
+            const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentSource);
+            if (!vertexShader || !fragmentShader) return null;
+
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error('Lỗi liên kết chương trình:', gl.getProgramInfoLog(program));
+                return null;
+            }
+            return program;
+        }
+
+        // --- Tạo Texture ---
+        function createTexture(width, height) {
+            const texture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            return texture;
+        }
+
+        // --- Tạo Framebuffer ---
+        function createFramebuffer(texture) {
+            const fb = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            return fb;
+        }
+
+        // --- Khởi tạo tài nguyên ---
+        const bgProgram = createProgram(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_BG);
+        const glassProgram = createProgram(VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_GLASS);
+
+        if (!bgProgram || !glassProgram) {
+            console.error('Không thể khởi tạo chương trình shader.');
+            return;
+        }
+
+        // --- Tạo Buffer hình chữ nhật ---
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            -1, -1,  1, -1, -1,  1,
+            -1,  1,  1, -1,  1,  1
+        ]), gl.STATIC_DRAW);
+
+        // --- Biến toàn cục ---
+        let bgTexture, bgFramebuffer;
+        let glassTexture, glassFramebuffer;
+        let width, height;
+        let mouse = [0, 0];
+        let isMouseDown = false;
+        let startTime = performance.now();
+
+        // --- Lấy vị trí uniform ---
+        const bgUniforms = {
+            time: gl.getUniformLocation(bgProgram, 'u_time'),
+            resolution: gl.getUniformLocation(bgProgram, 'u_resolution')
+        };
+
+        const glassUniforms = {
+            bgTexture: gl.getUniformLocation(glassProgram, 'u_bgTexture'),
+            time: gl.getUniformLocation(glassProgram, 'u_time'),
+            resolution: gl.getUniformLocation(glassProgram, 'u_resolution'),
+            glassCenter: gl.getUniformLocation(glassProgram, 'u_glassCenter'),
+            glassSize: gl.getUniformLocation(glassProgram, 'u_glassSize'),
+            glassRadius: gl.getUniformLocation(glassProgram, 'u_glassRadius'),
+            mouse: gl.getUniformLocation(glassProgram, 'u_mouse')
+        };
+
+        // --- Lấy vị trí attribute ---
+        const bgPositionLoc = gl.getAttribLocation(bgProgram, 'a_position');
+        const glassPositionLoc = gl.getAttribLocation(glassProgram, 'a_position');
+
+        // --- Hàm thay đổi kích thước ---
+        function resize() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            width = Math.floor(window.innerWidth * dpr);
+            height = Math.floor(window.innerHeight * dpr);
+            canvas.width = width;
+            canvas.height = height;
+
+            // Tạo lại texture và framebuffer cho background
+            if (bgTexture) gl.deleteTexture(bgTexture);
+            if (bgFramebuffer) gl.deleteFramebuffer(bgFramebuffer);
+            bgTexture = createTexture(width, height);
+            bgFramebuffer = createFramebuffer(bgTexture);
+
+            // Tạo lại texture và framebuffer cho glass
+            if (glassTexture) gl.deleteTexture(glassTexture);
+            if (glassFramebuffer) gl.deleteFramebuffer(glassFramebuffer);
+            glassTexture = createTexture(width, height);
+            glassFramebuffer = createFramebuffer(glassTexture);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        // --- Lấy thông tin kính từ DOM ---
+        function getGlassRect() {
+            const rect = document.getElementById('glassContent').getBoundingClientRect();
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            return {
+                center: [(rect.left + rect.width / 2) * dpr, (rect.top + rect.height / 2) * dpr],
+                size: [rect.width * dpr, rect.height * dpr],
+                radius: 40 * dpr // Bo góc 40px
+            };
+        }
+
+        // --- Vẽ Background ---
+        function renderBackground(time) {
+            gl.bindFramebuffer(gl.FRAMEBUFFER, bgFramebuffer);
+            gl.viewport(0, 0, width, height);
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            gl.useProgram(bgProgram);
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.enableVertexAttribArray(bgPositionLoc);
+            gl.vertexAttribPointer(bgPositionLoc, 2, gl.FLOAT, false, 0, 0);
+
+            gl.uniform1f(bgUniforms.time, time);
+            gl.uniform2f(bgUniforms.resolution, width, height);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        }
+
+        // --- Vẽ Glass ---
+        function renderGlass(time) {
+            gl.viewport(0, 0, width, height);
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            gl.useProgram(glassProgram);
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.enableVertexAttribArray(glassPositionLoc);
+            gl.vertexAttribPointer(glassPositionLoc, 2, gl.FLOAT, false, 0, 0);
+
+            // Bind background texture
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, bgTexture);
+            gl.uniform1i(glassUniforms.bgTexture, 0);
+
+            // Lấy thông tin kính
+            const glassRect = getGlassRect();
+
+            gl.uniform1f(glassUniforms.time, time);
+            gl.uniform2f(glassUniforms.resolution, width, height);
+            gl.uniform2f(glassUniforms.glassCenter, glassRect.center[0], glassRect.center[1]);
+            gl.uniform2f(glassUniforms.glassSize, glassRect.size[0], glassRect.size[1]);
+            gl.uniform1f(glassUniforms.glassRadius, glassRect.radius);
+            gl.uniform2f(glassUniforms.mouse, mouse[0], mouse[1]);
+
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+        }
+
+        // --- Vòng lặp Render ---
+        function render() {
+            const time = (performance.now() - startTime) / 1000;
+
+            // 1. Vẽ background vào texture
+            renderBackground(time);
+
+            // 2. Vẽ glass (sử dụng background texture)
+            renderGlass(time);
+
+            requestAnimationFrame(render);
+        }
+
+        // --- Xử lý sự kiện chuột/chạm ---
+        canvas.addEventListener('mousemove', (e) => {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            mouse = [e.clientX * dpr, e.clientY * dpr];
         });
 
-        // ==========================================
-        // CHỨC NĂNG COPY URL
-        // ==========================================
-        function copyRepoLink() {
+        canvas.addEventListener('mousedown', () => {
+            isMouseDown = true;
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isMouseDown = false;
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            mouse = [touch.clientX * dpr, touch.clientY * dpr];
+        }, { passive: false });
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            mouse = [touch.clientX * dpr, touch.clientY * dpr];
+            isMouseDown = true;
+        });
+
+        canvas.addEventListener('touchend', () => {
+            isMouseDown = false;
+        });
+
+        // Bắt đầu render
+        requestAnimationFrame(render);
+
+        // ======================================================================
+        // 3. CHỨC NĂNG COPY URL
+        // ======================================================================
+        window.copyRepoLink = function() {
             const url = "https://duchaivcyv-design.github.io/";
             navigator.clipboard.writeText(url).then(() => {
                 const btn = document.getElementById('copyBtn');
@@ -473,7 +780,9 @@
             }).catch(err => {
                 alert("URL Repo: " + url);
             });
-        }
+        };
+
+    })();
     </script>
 </body>
 </html>
