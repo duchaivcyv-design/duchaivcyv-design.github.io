@@ -1,0 +1,48 @@
+Package: com.gpt.alert
+Version: 9.9.9-5+debug
+Architecture: iphoneos-arm
+Maintainer: me
+Installed-Size: 168
+Depends: mobilesubstrate
+Filename: ./debs/com.gpt.alert_9.9.9-5+debug_rootful_iphoneos-arm.deb
+Size: 3696
+MD5sum: d48c2c9fe4f7237ce8db4fa91451d542
+SHA1: 203dddfd73b2dc8600694a531e4ed2bd2fafb40d
+SHA256: b4312d9d82f7d988ec385d40d97812e13cc80fc47d18061850405650c98d53ff
+Section: Tweaks
+Description: remove upgrade dialog
+Author: idk
+Name: no gpt alert
+
+Package: com.gpt.alert
+Version: 9.9.9-5+debug
+Architecture: iphoneos-arm64e
+Maintainer: me
+Installed-Size: 168
+Depends: roothide
+Filename: ./debs/com.gpt.alert_9.9.9-5+debug_roothide_iphoneos-arm64e.deb
+Size: 3694
+MD5sum: a343ea27b290624bd5bb1bd6a3c8da81
+SHA1: e5c40881362b4137a3fe6bc75d27b9a601d92b39
+SHA256: ef872de9ca3c6ddb931f849e9b2a9f8e2a42624e781fb70d607bde56598fcb4b
+Section: Tweaks
+Description: remove upgrade dialog
+Author: idk
+Name: no gpt alert
+
+Package: com.gpt.alert
+Version: 9.9.9-5+debug
+Architecture: iphoneos-arm64
+Maintainer: me
+Installed-Size: 168
+Depends: mobilesubstrate
+Filename: ./debs/com.gpt.alert_9.9.9-5+debug_rootless_iphoneos-arm64.deb
+Size: 3698
+MD5sum: 68f7ef87dad99612747598017f229c70
+SHA1: 1ea041ba42d3e989e89bad978cd77224f200c4e9
+SHA256: d18487685e98265be2abf175241d0f985f4a016352ec6058fbdadf9e20fd2d81
+Section: Tweaks
+Description: remove upgrade dialog
+Author: idk
+Name: no gpt alert
+
