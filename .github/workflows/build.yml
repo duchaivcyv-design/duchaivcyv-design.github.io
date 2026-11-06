@@ -24,45 +24,60 @@ jobs:
         run: |
           mkdir -p final_debs
           
+          # Tạo script Python để xử lý file control an toàn 100%
+          cat << 'PYEOF' > patch.py
+          import sys
+
+          def patch_control(path, arch, new_pkg=None, is_roothide=False):
+              with open(path, 'r') as f:
+                  lines = f.readlines()
+              with open(path, 'w') as f:
+                  for line in lines:
+                      if line.startswith('Architecture:'):
+                          f.write(f'Architecture: {arch}\n')
+                      elif line.startswith('Package:') and new_pkg:
+                          f.write(f'Package: {new_pkg}\n')
+                      elif line.startswith('Depends:') and is_roothide:
+                          f.write(line.replace('mobilesubstrate', 'roothide'))
+                      else:
+                          f.write(line)
+
+          if __name__ == '__main__':
+              mode = sys.argv[1]
+              control_path = sys.argv[2]
+              if mode == 'rootful':
+                  patch_control(control_path, 'iphoneos-arm')
+              elif mode == 'rootless':
+                  patch_control(control_path, 'iphoneos-arm64')
+              elif mode == 'roothide':
+                  pkg_name = sys.argv[3]
+                  patch_control(control_path, 'iphoneos-arm64e', f'{pkg_name}.roothide', True)
+          PYEOF
+
           for deb in debs/*.deb; do
             if [ -f "$deb" ]; then
-              echo "========================================"
-              echo "Đang xử lý file gốc: $deb"
-              
+              echo "Đang xử lý: $deb"
               PKG_NAME=$(dpkg-deb -f "$deb" Package)
               PKG_VER=$(dpkg-deb -f "$deb" Version)
               
               # ==========================================
               # 1. TẠO BẢN ROOTFUL (iphoneos-arm)
               # ==========================================
-              echo "--> Đang tạo bản Rootful..."
               dpkg-deb -R "$deb" temp_rootful
-              # Dùng python để sửa Architecture chuẩn xác 100%
-              python3 -c "
-import re
-with open('temp_rootful/DEBIAN/control', 'r') as f: lines = f.readlines()
-with open('temp_rootful/DEBIAN/control', 'w') as f:
-    for line in lines:
-        if line.startswith('Architecture:'): f.write('Architecture: iphoneos-arm\n')
-        else: f.write(line)
-"
-              dpkg-deb -b temp_rootful "final_debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
+              python3 patch.py rootful temp_rootful/DEBIAN/control
+              dpkg-deb -b temp_rootful "final_debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb"
               rm -rf temp_rootful
 
               # ==========================================
               # 2. TẠO BẢN ROOTLESS (iphoneos-arm64)
               # ==========================================
-              echo "--> Đang tạo bản Rootless..."
               dpkg-deb -R "$deb" temp_rootless
-              python3 -c "
-with open('temp_rootless/DEBIAN/control', 'r') as f: lines = f.readlines()
-with open('temp_rootless/DEBIAN/control', 'w') as f:
-    for line in lines:
-        if line.startswith('Architecture:'): f.write('Architecture: iphoneos-arm64\n')
-        else: f.write(line)
-"
-              # Patch path
+              python3 patch.py rootless temp_rootless/DEBIAN/control
+              
+              # Patch path file text (.plist)
               find temp_rootless -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
+              
+              # Patch path file binary (.dylib)
               find temp_rootless -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho.txt
               while read -r bin; do
                 chmod +x "$bin"
@@ -72,26 +87,17 @@ with open('temp_rootless/DEBIAN/control', 'w') as f:
                 done
               done < macho.txt; rm macho.txt
 
-              dpkg-deb -b temp_rootless "final_debs/${PKG_NAME}_${PKG_VER}_rootless_iphoneos-arm64.deb" > /dev/null
+              dpkg-deb -b temp_rootless "final_debs/${PKG_NAME}_${PKG_VER}_rootless_iphoneos-arm64.deb"
               rm -rf temp_rootless
 
               # ==========================================
               # 3. TẠO BẢN ROOTHIDE (iphoneos-arm64e)
               # ==========================================
-              echo "--> Đang tạo bản RootHide..."
               dpkg-deb -R "$deb" temp_roothide
-              python3 -c "
-with open('temp_roothide/DEBIAN/control', 'r') as f: lines = f.readlines()
-with open('temp_roothide/DEBIAN/control', 'w') as f:
-    for line in lines:
-        if line.startswith('Architecture:'): f.write('Architecture: iphoneos-arm64e\n')
-        elif line.startswith('Package:'): f.write(f'Package: ${PKG_NAME}.roothide\n')
-        elif line.startswith('Depends:'): 
-            deps = line.replace('Depends:', '').replace('mobilesubstrate', 'roothide').strip()
-            f.write(f'Depends: {deps}\n')
-        else: f.write(line)
-"
+              python3 patch.py roothide temp_roothide/DEBIAN/control "$PKG_NAME"
+              
               find temp_roothide -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
+              
               find temp_roothide -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho.txt
               while read -r bin; do
                 chmod +x "$bin"
@@ -101,7 +107,7 @@ with open('temp_roothide/DEBIAN/control', 'w') as f:
                 done
               done < macho.txt; rm macho.txt
 
-              dpkg-deb -b temp_roothide "final_debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
+              dpkg-deb -b temp_roothide "final_debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb"
               rm -rf temp_roothide
               
             fi
@@ -111,6 +117,9 @@ with open('temp_roothide/DEBIAN/control', 'w') as f:
           mkdir -p debs
           mv final_debs/*.deb debs/
           rm -rf final_debs
+          
+          # Xóa file script tạm
+          rm patch.py
 
       - name: Generate Packages
         run: |
