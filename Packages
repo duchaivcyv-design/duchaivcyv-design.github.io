@@ -26,10 +26,10 @@ Depends: mobilesubstrate, firmware (>= 11.0)
 Conflicts: com.bazik.codexgenie27, com.bazik.genie27
 Replaces: com.bazik.codexgenie27
 Filename: ./debs/com.bazik1337.ios2627anims_1.4.7_rootful_iphoneos-arm.deb
-Size: 36892
-MD5sum: 49b7524685d242772b3b8d0bc0d604b6
-SHA1: 177a6a7160ed76d42f83b7d929b3bb43f75290fd
-SHA256: b82332d02dcafcd999127c849c30c2b43c820c327fb7cbe3f5ca08a54e9ceb08
+Size: 36844
+MD5sum: 95ef712041398588f418948e47ef0650
+SHA1: 4894a4cf5817cb4eea8df5c34af0284f72557eca
+SHA256: 07f79a2136a847ea66f54e2be0f1ef005fd2870555157c2fd0e9116c676038f4
 Section: Tweaks
 Homepage: https://t.me/ba31k_tweaks
 Description: iOS 27 app open and close animations. Authors: bazik1337 (Telegram @bazik1337). Channel: https://t.me/ba31k_tweaks
@@ -41,14 +41,14 @@ Version: 1.4.7
 Architecture: iphoneos-arm64e
 Maintainer: bazik1337
 Installed-Size: 240
-Depends: roothide, firmware (>= 11.0)
+Depends: mobilesubstrate, firmware (>= 11.0)
 Conflicts: com.bazik.codexgenie27, com.bazik.genie27
 Replaces: com.bazik.codexgenie27
 Filename: ./debs/com.bazik1337.ios2627anims_1.4.7_roothide_iphoneos-arm64e.deb
-Size: 36888
-MD5sum: 5b265caa42850182a1ebfb71414e260f
-SHA1: 64bb078addc1a22cce23586b1642e03e8cc0bc80
-SHA256: 5c55364b92129df8d90b74ea4e276ab243fc1391b68689f88083460c1ff4cffd
+Size: 37980
+MD5sum: 03ba129773979e7e94235ec2939b11db
+SHA1: 59649fd0fe856329fbf06b159f1cd2da246a14d6
+SHA256: 6cd366f671b1959534cc3d5d608d5411bf22620e4f99bb26446a2926395f2b27
 Section: Tweaks
 Homepage: https://t.me/ba31k_tweaks
 Description: iOS 27 app open and close animations. Authors: bazik1337 (Telegram @bazik1337). Channel: https://t.me/ba31k_tweaks
@@ -78,10 +78,10 @@ Maintainer: me
 Installed-Size: 168
 Depends: mobilesubstrate
 Filename: ./debs/com.gpt.alert_9.9.9-5+debug_rootful_iphoneos-arm.deb
-Size: 3680
-MD5sum: dcdf32b5344a4b2095774846a19e820c
-SHA1: 7d6f70ce191752863b1f30b919d425efab336929
-SHA256: 81de263e3f4803d5a727477d801209b1b3ff1c5925aeea2b4687b99bedcff329
+Size: 3698
+MD5sum: 11f2768ef41d3669aad71c5669e44c93
+SHA1: f5670e1917856a941f51b7611d1bed178b00c993
+SHA256: 8e75453ac56038d9b03410859bbcc911deebef613c28f80ebd7e54a5010343a6
 Section: Tweaks
 Description: remove upgrade dialog
 Author: idk
@@ -92,12 +92,12 @@ Version: 9.9.9-5+debug
 Architecture: iphoneos-arm64e
 Maintainer: me
 Installed-Size: 168
-Depends: roothide
+Depends: mobilesubstrate
 Filename: ./debs/com.gpt.alert_9.9.9-5+debug_roothide_iphoneos-arm64e.deb
-Size: 3678
-MD5sum: b0db35ccb02a152e8ad0c9876b33b8e9
-SHA1: a53790810cbb0a48418eb3961455cd94ed717fc6
-SHA256: 10844c18499b6dfcc79cc115f7d86fb086aa75e8833eb2a89ec90f518a503ae7
+Size: 3984
+MD5sum: 228a4eb5abd9bcd56680cff7b0838cdc
+SHA1: 4a35a55045004ea7be1ffad8a67dd0fd202c8ff1
+SHA256: 0c8af2cc4099e25be07c946f0f9fce1b88bca48d39ab02540986f0d0e66cfe8d
 Section: Tweaks
 Description: remove upgrade dialog
 Author: idk
@@ -108,12 +108,12 @@ Version: 0.0.1
 Architecture: iphoneos-arm64e
 Maintainer: jb
 Installed-Size: 412
-Depends: ellekit | roothide (>= 0.9.5000), preferenceloader, firmware (>= 16.0)
+Depends: ellekit | mobilesubstrate (>= 0.9.5000), preferenceloader, firmware (>= 16.0)
 Filename: ./debs/com.jb.aodreal_0.0.1_roothide_iphoneos-arm64e.deb
-Size: 27158
-MD5sum: c45c63fadb7a9d706a2973e18a07429b
-SHA1: 700fb80eb9490040b917426d211952d22a8ee102
-SHA256: 8924670c891d7bed741d4701b82b8462bdcdf714ab9440ed127b558d8e5c4782
+Size: 28318
+MD5sum: e1502301a2e162117022f3c03008bb80
+SHA1: faea04e122b0199f4fa5322d87469721ae665511
+SHA256: 42a7cc3527dcde1eb7402637ea7ca5a0658d428470e54bb47945de289868d8ba
 Section: Tweaks
 Description: Unlock native AOD engine with forced 2-20Hz hardware refresh rate for iPhone 8 - XS Max
 Author: jb
@@ -126,10 +126,10 @@ Maintainer: jb
 Installed-Size: 412
 Depends: ellekit | mobilesubstrate (>= 0.9.5000), preferenceloader, firmware (>= 16.0)
 Filename: ./debs/com.jb.aodreal_0.0.1_rootful_iphoneos-arm.deb
-Size: 27160
-MD5sum: 87453263f192b314e38c953ef5c70a0b
-SHA1: 747ef1ba9fa36812b98cb5c72914233e9317ec5b
-SHA256: 7fa936c00017c47446bba2d7b9033a6a508d31c14f32ce3bd7a14b5ed10c3a04
+Size: 27164
+MD5sum: a025d31755f9b5f449f3d1fdb3b95525
+SHA1: 1f91cc4627fad611610da64349de62f661f0a0d3
+SHA256: a7062e8ecb1d0b599759748f58a253a21510c50cadf6bbc7d038a71f26cb7692
 Section: Tweaks
 Description: Unlock native AOD engine with forced 2-20Hz hardware refresh rate for iPhone 8 - XS Max
 Author: jb
@@ -158,10 +158,10 @@ Maintainer: JB
 Installed-Size: 116
 Depends: odcctools, ldid
 Filename: ./debs/com.jb.rootless-patcher_1.0.0_rootful_iphoneos-arm.deb
-Size: 26892
-MD5sum: e527523bba4c1789a6e916eb21fd821a
-SHA1: dff28e48c921c15a50c7c9ae255e971a05319f8b
-SHA256: b67c9abad95e76f63e3ec42f30c67a1f96e0df38c5152d0b7c53ec60ec9b237d
+Size: 26900
+MD5sum: 38a6ad9f6075033eec8ee5e9b8fd78cc
+SHA1: 70a48c4001c8f85d16a99555eae62a14cd9ecae1
+SHA256: 6adae68f20533589acdccbfcb61db912b746d5763721388b8a1c73617c9159d3
 Section: System
 Description: Tweak chuyển đổi rootful sang rootless
 Tag: role::hacker
@@ -175,10 +175,10 @@ Maintainer: JB
 Installed-Size: 116
 Depends: odcctools, ldid
 Filename: ./debs/com.jb.rootless-patcher_1.0.0_roothide_iphoneos-arm64e.deb
-Size: 26894
-MD5sum: fcc6f4f51b7a1253fa8322ce8c9aa7a5
-SHA1: 3cee99be006b96925c52402691ad6569a11ce4e3
-SHA256: 51fd432f77351297e1c87b93c47c66e6e0933180131fabc185211aae9ef29ec4
+Size: 27144
+MD5sum: 0014cd2f4d381439e68c0104d2c62a52
+SHA1: ca383256dd3019295a00f45832cebee7b672f182
+SHA256: 9896aed4a8abca31b6c908d727fe2d476828e4aa8c71aefe40773560923924c9
 Section: System
 Description: Tweak chuyển đổi rootful sang rootless
 Tag: role::hacker
@@ -208,10 +208,10 @@ Architecture: iphoneos-arm
 Maintainer: Korboy <korboybeats@gmail.com>
 Depends: firmware (>= 11.0), firmware(>=12.2) | org.swift.libswift (>=5.0), coreutils (>= 8.30-1), dpkg (>= 1.19.4-1), apt (>= 1.8.2), libzstd1
 Filename: ./debs/com.korboy.sileo_2.5.7_rootful_iphoneos-arm.deb
-Size: 3386332
-MD5sum: 5d4b41448a5bc48e4d31d682e08a47d4
-SHA1: aa4d660c85d049597f5257f947003346bf4814a1
-SHA256: 7d0929d295566189af03ac589e9d91717f0a85a481975c51262d0df8f29e54f9
+Size: 3386350
+MD5sum: 710b0d36cf9be8f34b0bf2cfc3cc666a
+SHA1: 4634f8f7208fa825ff19eda7143b8bdb10685dcc
+SHA256: f699f636c0df9476566103e8bcd420e8178d248ddf3900ea4e35caa030d4459d
 Section: Packaging
 Description: A modern APT package manager frontend.
 Author: Korboy <korboybeats@gmail.com>, Amy While, waruhachi
@@ -246,10 +246,10 @@ Architecture: iphoneos-arm64e
 Maintainer: Korboy <korboybeats@gmail.com>
 Depends: firmware (>= 11.0), firmware(>=12.2) | org.swift.libswift (>=5.0), coreutils (>= 8.30-1), dpkg (>= 1.19.4-1), apt (>= 1.8.2), libzstd1
 Filename: ./debs/com.korboy.sileo_2.5.7_roothide_iphoneos-arm64e.deb
-Size: 3386356
-MD5sum: c4ac30740a051e85dc5166abf5f22e3e
-SHA1: 14c46780828fbb4748f17d255e0404ece87d1647
-SHA256: 1391ea340be6532443c2404c787081e774b01b29ada1e9db893d073c4c421917
+Size: 3420510
+MD5sum: 8e8b41df60828a4b22005e398f202e36
+SHA1: fae668b0a01fe7f75c93ec48ba160c518bbdcbcb
+SHA256: 6002977d11150efa9b946a5cfbccc1b88cf764082c9ad83a1bee854b7c40c12c
 Section: Packaging
 Description: A modern APT package manager frontend.
 Author: Korboy <korboybeats@gmail.com>, Amy While, waruhachi
@@ -263,13 +263,13 @@ Package: com.wave12.box26
 Version: 6.0.2-5
 Architecture: iphoneos-arm64e
 Maintainer: PucPucPuc, JB
-Depends: roothide, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.box26_6.0.2-5_roothide_iphoneos-arm64e.deb
-Size: 190552
-MD5sum: 0750b6520871d9ee61197f585d298f11
-SHA1: c2b2ed147a0a4803b0671a2b5834738ae395910d
-SHA256: f4e591af4094f986af191b5850524cc92b9b3b9ff1268c61a5151f9c23c9b932
+Size: 193402
+MD5sum: ed95324e4cbdecac752ee717002ae80c
+SHA1: e06f39bc223078a56333c3d7e2f8bcaef72f4824
+SHA256: 66c620f9f1b9be89fb14382e7d4c24e7273329689a6020f9608a5639de63e418
 Section: Tweaks
 Description: Hộp thoại kiểu iOS 26
  Hộp thoại & bảng chọn: nút viên thuốc trong suốt, xếp chồng, chữ canh giữa · Hoạt động trong SpringBoard và mọi ứng dụng.
@@ -304,10 +304,10 @@ Maintainer: PucPucPuc, JB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.box26_6.0.2-5_rootful_iphoneos-arm.deb
-Size: 190556
-MD5sum: d0a3e41ffaf4211458ab29479596e59b
-SHA1: a50faa0c3adee6ed8a9cc508ceafd9dbafc5ede7
-SHA256: ac8f48a2251e15e330dd1c1359c7d9628d0e7227a483c71158c51695d2c321cb
+Size: 190558
+MD5sum: 7715f46768c8819b785e33a86ad1befc
+SHA1: fdef74e341e14ac802374308f88973eb39b2f268
+SHA256: a2cd8541c1bac9ab8e890d3f964cdd59593d940add85f2610154006f184e76d6
 Section: Tweaks
 Description: Hộp thoại kiểu iOS 26
  Hộp thoại & bảng chọn: nút viên thuốc trong suốt, xếp chồng, chữ canh giữa · Hoạt động trong SpringBoard và mọi ứng dụng.
@@ -339,13 +339,13 @@ Package: com.wave12.cc27
 Version: 6.0.2-5
 Architecture: iphoneos-arm64e
 Maintainer: PucPucPuc, JB
-Depends: roothide, preferenceloader, firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.cc27_6.0.2-5_roothide_iphoneos-arm64e.deb
-Size: 187326
-MD5sum: 88e047c5a7a47844e70e32e0e9803e3f
-SHA1: 3aa43c206f02dceb5bc99ec859aeb4e822c303ba
-SHA256: c224899e867aa362fa3f5cb8c7297187f91e037e59317e67db81ec269aa90c53
+Size: 190104
+MD5sum: 9fd813579a7e9978cd4b15a875e040e4
+SHA1: ebff0b896cd5c1f3303b9519e3b67b8836157541
+SHA256: 0b68a7d4f175d7f685d10b9344798bf04abcf12bc6f910454707589b6b2961dc
 Section: Tweaks
 Description: Trung tâm điều khiển kiểu kính
  Viền kính mảnh quanh các ô trong Trung tâm điều khiển · Bo tròn ô, chỉnh độ đặc nền ô.
@@ -362,9 +362,9 @@ Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.cc27_6.0.2-5_rootful_iphoneos-arm.deb
 Size: 187332
-MD5sum: d60616f0eabcc7f6f63a45251ea39c16
-SHA1: b6935f78c6651860543ea707000291c42309455c
-SHA256: 70b48f31f8b88dab890eea711ccc07e575deebf9d2bc33765194194415bf3c73
+MD5sum: 55ffdd36cc7d0617c50ad0c70298caf2
+SHA1: 604559eefe37a4c8baf0a2bbb56a392c6b68ddb2
+SHA256: 2c05763f701c11972a7285cd356848900dc5fa20dbf1d3476297e2383b120476
 Section: Tweaks
 Description: Trung tâm điều khiển kiểu kính
  Viền kính mảnh quanh các ô trong Trung tâm điều khiển · Bo tròn ô, chỉnh độ đặc nền ô.
@@ -396,13 +396,13 @@ Package: com.wave12.dynafake
 Version: 6.0.2-5
 Architecture: iphoneos-arm64e
 Maintainer: PucPucPuc, JB
-Depends: roothide, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.dynafake_6.0.2-5_roothide_iphoneos-arm64e.deb
-Size: 193892
-MD5sum: 304f575ab9274ac612387b6a9586ab21
-SHA1: 0e8357bd2c58e2deb7e46a7d0b723d126a5725db
-SHA256: c326e6b138c88271e7e41f83089a77e9be8d11610a4724511b187ef5beeea036
+Size: 196904
+MD5sum: 9bd4e383281f3983b6a69b50256c6678
+SHA1: 03797a072441569266cc1c872363b88d854de5c9
+SHA256: 42bc34fedcd74a74490aa9af6bcfcd36b32ae20d595c9bfaccc0a3483f96b118
 Section: Tweaks
 Description: Dynamic Island ảo
  Island ảo: hẹn giờ, bấm giờ, báo thức, nhạc, cuộc gọi, âm lượng, đèn pin, pin yếu, sạc · Hiệu ứng Face ID khi mở khóa + ổ khóa trên màn hình khóa.( Lưu ý ios 16-18.0 có thể sẽ không hiện dynamic vẽ lại )
@@ -418,10 +418,10 @@ Maintainer: PucPucPuc, JB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.dynafake_6.0.2-5_rootful_iphoneos-arm.deb
-Size: 193896
-MD5sum: abc889f9fe71a263d19e902fdc1e53a7
-SHA1: 1d6d30ad5d38b045466754cc0d96d1877fb04d5a
-SHA256: c6a72dd0031bb68c9b038a414716824431a37a007c7a024eafdbdc74670108a7
+Size: 193898
+MD5sum: 73d60803ac34c0b3b7af901f5a8c09bd
+SHA1: f2813953ed28310ccfcc074ed553f3b5be49dabb
+SHA256: 2f0e943996848767c7cb1fe9e1b6b50c5f75eb5120f74ce678ce427c3b01e943
 Section: Tweaks
 Description: Dynamic Island ảo
  Island ảo: hẹn giờ, bấm giờ, báo thức, nhạc, cuộc gọi, âm lượng, đèn pin, pin yếu, sạc · Hiệu ứng Face ID khi mở khóa + ổ khóa trên màn hình khóa.( Lưu ý ios 16-18.0 có thể sẽ không hiện dynamic vẽ lại )
@@ -437,10 +437,10 @@ Maintainer: PucPucPuc, JB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.home26_6.0.2-5_rootful_iphoneos-arm.deb
-Size: 14261270
-MD5sum: f4945a973b13eec13896abdc5489ed02
-SHA1: c0cf1b7cc7c457b19145e778bc644654dfdefe4c
-SHA256: 064733f0c97c25466351e015215a2321395383ca252d1b68dfef27a8c061f242
+Size: 14261232
+MD5sum: aaff352cb04e0cd8627fa2585c1acb8d
+SHA1: 74993c70fd17f672e76233da13e1cf481105ab47
+SHA256: 2952370c3ab5a7a09340b1454f481d2357a7d1c068106c514bb6a0a84790db4d
 Section: Tweaks
 Description: Icon màn hình chính kiểu iOS 26
  Kiểu icon: Mặc định, Tối, Trong suốt, Phủ màu · Giữ vào chỗ trống để mở bảng tùy chỉnh.
@@ -453,13 +453,13 @@ Package: com.wave12.home26
 Version: 6.0.2-5
 Architecture: iphoneos-arm64e
 Maintainer: PucPucPuc, JB
-Depends: roothide, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.home26_6.0.2-5_roothide_iphoneos-arm64e.deb
-Size: 14261266
-MD5sum: 2b87f32cc5c814390f25af18dad42d01
-SHA1: 2b418b77f1a2f90e63e7d2e53130ee29472711db
-SHA256: 81bb8e7c1b0c02c78f7c27b99834a790c9904a64ce4bc230323a5aa38f1b1fce
+Size: 14264126
+MD5sum: d8ed9f60517893764326958698494801
+SHA1: 24dbce1fdedcdd1c601d054959342f0dd92a1959
+SHA256: 7bf14a40210f706972b75f934464fead988b79a8c5260c2ef80a5ac23de88fcf
 Section: Tweaks
 Description: Icon màn hình chính kiểu iOS 26
  Kiểu icon: Mặc định, Tối, Trong suốt, Phủ màu · Giữ vào chỗ trống để mở bảng tùy chỉnh.
@@ -494,10 +494,10 @@ Maintainer: PucPucPuc, JB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.liquidtab_6.0.2-5_rootful_iphoneos-arm.deb
-Size: 210590
-MD5sum: f224e4d94ee0c91f480d98f796a94a5a
-SHA1: eaf0e0fad918f91b3d6d26055b95ffed85bdd3aa
-SHA256: 27ce028d56d2a3be0b4627a210eaf3dd996274bab4cd1f931c816e10ed8bdcd7
+Size: 210572
+MD5sum: 4ebd1bfa9b2bcae1d0c1814fe6f522b0
+SHA1: ec08dd564e221a91424610f46929eb9633f8d3f6
+SHA256: c0ae7f87c924cac4a5ba99647e0ae3109aed5d83eb8d3f7b587788e0ee67cd2a
 Section: Tweaks
 Description: Thanh tab kính nổi
  Thanh tab nổi bằng kính, viên thấu kính lỏng khi chạm giữ · Tự đổi sáng / tối theo nền.
@@ -510,13 +510,13 @@ Package: com.wave12.liquidtab
 Version: 6.0.2-5
 Architecture: iphoneos-arm64e
 Maintainer: PucPucPuc, JB
-Depends: roothide, preferenceloader, firmware (>= 11.0), firmware (<< 18.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.liquidtab_6.0.2-5_roothide_iphoneos-arm64e.deb
-Size: 210590
-MD5sum: d3a3decacbdf47b6b5f40755c2848e5d
-SHA1: e429794bf601b3a6c8231a546007a04c19d5348c
-SHA256: 79c560da96e1d70cc7e0f63260b25805e7e7734e86b84a5c628afa25a6aa24c1
+Size: 213860
+MD5sum: 59f4b0da1a29e99a0ab3458c98d16c94
+SHA1: b8f53ef5005bf2e40575f66139365c24b4a3de77
+SHA256: 1c651b14d157a6054a587b4bf597fe8d644f5495c039bc6f78960d5a6a0a01d5
 Section: Tweaks
 Description: Thanh tab kính nổi
  Thanh tab nổi bằng kính, viên thấu kính lỏng khi chạm giữ · Tự đổi sáng / tối theo nền.
@@ -570,10 +570,10 @@ Maintainer: PucPucPuc, JB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.morph26_6.0.2-5_rootful_iphoneos-arm.deb
-Size: 197076
-MD5sum: fac1caefc0278c9e0935f59c10fc08be
-SHA1: 8fb2f4dd6d87850145c6681badd25d96e9a899c1
-SHA256: bc363a804942c4941cae67e7c8c9511434aad1dbec2277fb5024a320f1d068ab
+Size: 197094
+MD5sum: 66308a5fecd460c45f6c0cab6c91ec69
+SHA1: 4f2d5b3c1968cdd6c1ef8843e074fd6b8ce8c52c
+SHA256: f1965880fd414f7d4e46e51137099ca53aeb5b0ad6c4210d99dcfaa8758c1706
 Section: Tweaks
 Description: Hiệu ứng mở / đóng ứng dụng kiểu iOS 26
  Ứng dụng phóng ra từ đúng icon vừa chạm, thu về icon khi thoát · Bo góc, nghiêng 3D, làm mờ màn hình chính.( Lưu ý có thể ios 16-18.0 sẽ bị lỗi không có hiệu ứng )
@@ -586,13 +586,13 @@ Package: com.wave12.morph26
 Version: 6.0.2-5
 Architecture: iphoneos-arm64e
 Maintainer: PucPucPuc, JB
-Depends: roothide, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.morph26_6.0.2-5_roothide_iphoneos-arm64e.deb
-Size: 197074
-MD5sum: 54522f56a26d35829febbba900d5bd16
-SHA1: 1a2ceffd808815efe6f3c3ebb4b2e703adb33dd2
-SHA256: 880a6644f727fa9e325e12359f72960a578482538cb77230a4113f7ac24a95cf
+Size: 200176
+MD5sum: f6a1d6099ab50af869acfc032fbaeb81
+SHA1: 9c3b09f9724d752ecc817beb6e501783aade6dba
+SHA256: b02ce8694867b07e11e9c9a9b8d13a5aa5944e807367e26542897da48a227659
 Section: Tweaks
 Description: Hiệu ứng mở / đóng ứng dụng kiểu iOS 26
  Ứng dụng phóng ra từ đúng icon vừa chạm, thu về icon khi thoát · Bo góc, nghiêng 3D, làm mờ màn hình chính.( Lưu ý có thể ios 16-18.0 sẽ bị lỗi không có hiệu ứng )
@@ -608,9 +608,9 @@ Maintainer: PucPucPuc, JB
 Depends: com.wave12.unlockcode, com.wave12.unlockwave, com.wave12.morph26, com.wave12.liquidtab, com.wave12.home26, com.wave12.cc27, com.wave12.box26, com.wave12.wall26, com.wave12.dynafake
 Filename: ./debs/com.wave12.suite_6.1.0-5_rootful_iphoneos-arm.deb
 Size: 668
-MD5sum: 00036f16388fdde749b5df2d47200cbc
-SHA1: 757de66717d804f8f7cd8e7c96bcb749ce9c24ea
-SHA256: 8d7fe561db330fdb0113bcf281650d52ab7761f9225c953d4b3c69225882f20f
+MD5sum: 4dd82f2eb0d8e4407a6fcdefc2339868
+SHA1: 96b721cebd30b870e056b65060244a01ca6ea0da
+SHA256: ac60029ed510325ba90c9048fd405e1f76077f63b8e34e2cecb59530f5a21dad
 Section: Tweaks
 Description: Cài đủ 9 tweak của 2712 một lần
 Author: PucPucPuc, JB
@@ -637,10 +637,10 @@ Architecture: iphoneos-arm64e
 Maintainer: PucPucPuc, JB
 Depends: com.wave12.unlockcode, com.wave12.unlockwave, com.wave12.morph26, com.wave12.liquidtab, com.wave12.home26, com.wave12.cc27, com.wave12.box26, com.wave12.wall26, com.wave12.dynafake
 Filename: ./debs/com.wave12.suite_6.1.0-5_roothide_iphoneos-arm64e.deb
-Size: 670
-MD5sum: a9b99b80a0a25b0e88bb53fd40bc5b48
-SHA1: 270e300004cda31087f171e93172328de916de2a
-SHA256: f7282979c0cce598e0d7f36d3bc65d48e96102bf5d0a394bbf502c2e1682f03f
+Size: 672
+MD5sum: e982eadc4d9276abe36c07b92e3c61d6
+SHA1: 4ba691b3fdb19edb57bbc0164d04f60e2ca136b0
+SHA256: 87176fbd1133822ccadf0a1bbf1b16a19d11dc4bc81d83842d22666d24703fe3
 Section: Tweaks
 Description: Cài đủ 9 tweak của 2712 một lần
 Author: PucPucPuc, JB
@@ -650,13 +650,13 @@ Package: com.wave12.unlockcode
 Version: 6.0.2-5
 Architecture: iphoneos-arm64e
 Maintainer: PucPucPuc, JB
-Depends: roothide, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.unlockcode_6.0.2-5_roothide_iphoneos-arm64e.deb
-Size: 190402
-MD5sum: f3583ffad12fb16440af5f935c1b9bc2
-SHA1: 6971bde4c72e883ace62535b3bc808a1e7b383b3
-SHA256: a0954411056e8d8e737ba4083246f99c52a5dcb53a510dd41bd559a2794af2ef
+Size: 193372
+MD5sum: 0d2f99a40aceebdcdda2640f855917a9
+SHA1: 9bcf9d4a59c83c9fc2da599469fd704d63ec2f54
+SHA256: 73d30cfefdf56b3f9906375cc53faa82815b54b68ec3b0f6b7d4af31fcbee6a3
 Section: Tweaks
 Description: Phím mật khẩu nảy kiểu iOS 26
  Phím mã khóa nảy theo làn sóng khi chạm · Viền kính quanh từng phím.
@@ -691,10 +691,10 @@ Maintainer: PucPucPuc, JB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.unlockcode_6.0.2-5_rootful_iphoneos-arm.deb
-Size: 190404
-MD5sum: ea3e34158537f190adbd11c7824d34fc
-SHA1: 84dd4138a6dec40f79ef95f928a5324da4e9607e
-SHA256: c7b53a9b52338f5dac9d5adef83f8b2eea550ee1ae471164e70c3bd97167571e
+Size: 190406
+MD5sum: cdabe9f0a1087661007af1339bd814f1
+SHA1: fb54abb9683cc53dbc98dd9f50a7f0c4a646f8e1
+SHA256: bc5217039799f0214ef3189ee3c842be90bf405955a3d7504d381c80016cd6d9
 Section: Tweaks
 Description: Phím mật khẩu nảy kiểu iOS 26
  Phím mã khóa nảy theo làn sóng khi chạm · Viền kính quanh từng phím.
@@ -707,13 +707,13 @@ Package: com.wave12.unlockwave
 Version: 6.0.2-5
 Architecture: iphoneos-arm64e
 Maintainer: PucPucPuc, JB
-Depends: roothide, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.unlockwave_6.0.2-5_roothide_iphoneos-arm64e.deb
-Size: 205706
-MD5sum: e96a946746ee0aa8b02e219d8409fab5
-SHA1: 0533105529651cc73a951fb37ede2b303c485884
-SHA256: e372ff3724b176d07d35463e85998251e47ba3038ebbf9137834f8019685718a
+Size: 208616
+MD5sum: 66b1269db64dc65312f4124a5042190b
+SHA1: da3fce487e69429e1ef8e2d69b6dfe6cfeb5a043
+SHA256: f16aeee87e797860e2c0bae00c005a0f7a3912682efc1fdad80cc2b8ab9875b9
 Section: Tweaks
 Description: Hiệu ứng mở khóa lan từ tâm
  Mở khóa: icon bay ra theo làn sóng từ tâm màn hình · Thoát app về Home cũng chạy làn sóng.
@@ -748,10 +748,10 @@ Maintainer: PucPucPuc, JB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.unlockwave_6.0.2-5_rootful_iphoneos-arm.deb
-Size: 205710
-MD5sum: 88cf6fd2e32e460f9c291321ae7bb019
-SHA1: e2f0cdc7d2545435c12f5074d22fc5cc74c1d11a
-SHA256: 7daf24c46cdb6571324d87c0dc6b82090db3df908142c70d8e3e7d2f6de8aecc
+Size: 205712
+MD5sum: 2512fdd03fa93ff9626ed0ba0ad95d07
+SHA1: b667719c1a3779e823043d3fe368c4621ec861c6
+SHA256: 6122607202bb3e3108804451ce3a3ce673d8d75b166337c8b32a17b5e2042aad
 Section: Tweaks
 Description: Hiệu ứng mở khóa lan từ tâm
  Mở khóa: icon bay ra theo làn sóng từ tâm màn hình · Thoát app về Home cũng chạy làn sóng.
@@ -783,13 +783,13 @@ Package: com.wave12.wall26
 Version: 1.0.2-5
 Architecture: iphoneos-arm64e
 Maintainer: PucPucPuc, JB, TaoJB
-Depends: roothide, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.wall26_1.0.2-5_roothide_iphoneos-arm64e.deb
-Size: 4431752
-MD5sum: db25df0f6bdefc95939d7e77144287a6
-SHA1: d82b54f9feb53b3b2c40290060bfb3073b8d3945
-SHA256: 7a2fe04463f328ceefcac3d0ac5bd02ac545862c0793737bfa13b4387cc855a7
+Size: 4435586
+MD5sum: 45fdb348ddf4886e75a5208d4c9e38fd
+SHA1: 46510a77c7009ac35d35b57603534e4de232b4b5
+SHA256: f8772e7932ba0eaf71e543666d20506735740fb88e2bc538ee49e0b7f6b747c0
 Section: Tweaks
 Description: Màn hình khóa kiểu iOS 16: chủ thể che đồng hồ
  Tự tách người, thú cưng, vật nổi bật khỏi hình nền khóa bằng AI chạy ngay trên máy · Đồng hồ chìm phía sau chủ thể, che cả ngày tháng.
@@ -805,10 +805,10 @@ Maintainer: PucPucPuc, JB, TaoJB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 14.0), firmware (<< 18.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.wall26_1.0.2-5_rootful_iphoneos-arm.deb
-Size: 4430730
-MD5sum: 6cbf238c709af33ece714e0831f23c5a
-SHA1: c2a8ae0ce4802b7d6edf9837857efd0cc685f2f5
-SHA256: 5af15bc7b588c88568835987fe9d3e228c838d331d9b6052a1e26210c6ae3be6
+Size: 4431666
+MD5sum: a801fb82a15e9a91ff7627601bd3e872
+SHA1: 7fc68a65207d28cefdbc7870dcb28cfb8c7d53be
+SHA256: a28a1b7f5c4110bfaf2bd71d318b8318d33b4cccaa40795e8fa207a520f54ad0
 Section: Tweaks
 Description: Màn hình khóa kiểu iOS 16: chủ thể che đồng hồ
  Tự tách người, thú cưng, vật nổi bật khỏi hình nền khóa bằng AI chạy ngay trên máy · Đồng hồ chìm phía sau chủ thể, che cả ngày tháng.
@@ -825,10 +825,10 @@ Depends: mobilesubstrate, firmware (>= 12.0), gawk, gzip, libclang-cpp16, llvm-1
 Replaces: emt.paisseon.xinamine
 Provides: emt.paisseon.xinamine (= 99)
 Filename: ./debs/xyz.cypwn.xinam1ne_2.6-8_rootful_iphoneos-arm.deb
-Size: 1961052
-MD5sum: d610e1215c654d1f02e4b2cb482421ad
-SHA1: d3516dfb1cb526cd2d3890e9c313bdc1f78c5259
-SHA256: e7cffa2f2e71835e78d82d460d36e873578e141ac7593002b174f27804319af9
+Size: 1961054
+MD5sum: 86e47474d822825da1b85383c85dfd4f
+SHA1: dfd353bb76a173a062b289249a96f4f81a81fe66
+SHA256: 96276341972f6f79f78d11ee65d243caa9ea1cdb1b77c2401670b41318f3b11a
 Section: Utilities
 Description: Xinamine Official All-in-One bundle. Convert rootful tweaks to rootless (and rootless to rootful) with ease using the Xinam1nePatcher in Filza or use the included Xinaf1re app.
 Author: Paisseon, Sudo, NoW4U2Kid, Kixrd
@@ -839,14 +839,14 @@ Package: xyz.cypwn.xinam1ne
 Version: 2.6-8
 Architecture: iphoneos-arm64e
 Maintainer: CyPwn
-Depends: roothide, firmware (>= 12.0), gawk, gzip, libclang-cpp16, llvm-16, llvm-16-runtime, file, odcctools, ldid, plutil, com.tigisoftware.filza64bit (>= 4.0) | com.tigisoftware.filza (>= 4.0), cy+cpu.arm64v8 | oldabi-xina | oldabi
+Depends: mobilesubstrate, firmware (>= 12.0), gawk, gzip, libclang-cpp16, llvm-16, llvm-16-runtime, file, odcctools, ldid, plutil, com.tigisoftware.filza64bit (>= 4.0) | com.tigisoftware.filza (>= 4.0), cy+cpu.arm64v8 | oldabi-xina | oldabi
 Replaces: emt.paisseon.xinamine
 Provides: emt.paisseon.xinamine (= 99)
 Filename: ./debs/xyz.cypwn.xinam1ne_2.6-8_roothide_iphoneos-arm64e.deb
-Size: 1961048
-MD5sum: 7d72390980b772679542ff879ad190cd
-SHA1: 1e70d7be1be7a4d7c59ddbbb3c9333c77f59019f
-SHA256: 72e0acb117399d563a7d3a77b6f2c33e6e81ded7a2d19691968383bef4cb561d
+Size: 1965732
+MD5sum: 21ad5e96839cc2c62fb3968357955fa8
+SHA1: 98e69d0d71ad5529c038efa08e30db4e933644b2
+SHA256: c138317732c973d7ab5045fe1ef96c3d2648be214735d74746c95ee375d6b31f
 Section: Utilities
 Description: Xinamine Official All-in-One bundle. Convert rootful tweaks to rootless (and rootless to rootful) with ease using the Xinam1nePatcher in Filza or use the included Xinaf1re app.
 Author: Paisseon, Sudo, NoW4U2Kid, Kixrd
