@@ -1,3 +1,19 @@
+Package: com.gpt.alert
+Version: 9.9.9-5+debug
+Architecture: iphoneos-arm64
+Maintainer: me
+Installed-Size: 168
+Depends: mobilesubstrate
+Filename: ./debs/com.gpt.alert_9.9.9-5+debug_iphoneos-arm64.deb
+Size: 6986
+MD5sum: 60c1aa1240f1c4721c6c4cec10e17687
+SHA1: 5c17b69dcfa5f913e953c21f0c6329499c060a4e
+SHA256: 003924d2bf0dfe3263bf07263747e7bfe5ba0da5edae2bd0be02bde556e353e0
+Section: Tweaks
+Description: remove upgrade dialog
+Author: idk
+Name: no gpt alert
+
 Package: com.wave12.cc27
 Version: 6.0.2-5
 Architecture: iphoneos-arm64
