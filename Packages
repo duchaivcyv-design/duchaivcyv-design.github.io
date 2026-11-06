@@ -1,0 +1,15 @@
+Package: com.wave12.suite
+Version: 6.0.2-5
+Architecture: iphoneos-arm64
+Maintainer: PucPucPuc, TaoJB, jb
+Depends: com.wave12.unlockcode, com.wave12.unlockwave, com.wave12.morph26, com.wave12.liquidtab, com.wave12.home26, com.wave12.cc27, com.wave12.box26, com.wave12.dynafake
+Filename: ./debs/com.wave12.suite_6.0.2-5_iphoneos-arm64.deb
+Size: 848
+MD5sum: 58cab28670f2e509f0fffe59857aa4a2
+SHA1: 572dbbe3d2eebde99c44457d67beeaa68f7fb5be
+SHA256: 1ec196128b6f888e0333399a990c6f53171c508dc74b854ec104dffed3c92a66
+Section: Tweaks
+Description: Cài đủ 8 tweak của 2712 một lần
+Author: PucPucPuc, TaoJB, jb
+Name: 2712 (trọn bộ) ios 14-18
+
