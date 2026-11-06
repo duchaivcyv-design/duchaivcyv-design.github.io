@@ -16,46 +16,6 @@ Name: no gpt alert
 
 Package: com.taojb.boostiphone6s
 Version: 1.3.0-2-test
-Architecture: iphoneos-arm64e
-Maintainer: TaoJB, NoJB,NoNo
-Installed-Size: 1248
-Depends: mobilesubstrate, firmware (>= 14.0), firmware (<= 26.0.1), preferenceloader
-Filename: ./debs/com.taojb.boostiphone6s_1.3.0-2-test_iphoneos-arm64e.deb
-Size: 286780
-MD5sum: db97e33db1f2367bcf2c349e03386b0d
-SHA1: bd4c951aba2a5a09a4cf0f08c31957668452120d
-SHA256: e17d7d249da30c112bc7a06d83d84793d3cebd8fed005e43bb27951fbb929de1
-Section: Tweaks
-Priority: optional
-Homepage: https://github.com/duchaivcyv-design/Smooth
-Description: Dynamic variable refresh rate, zero stutter, and seamless animation pacing without overheating.(Tự động điều chỉnh tần số quét, triệt tiêu khựng giật, tối ưu hoạt ảnh và giữ máy mát mẻ) Hỗ trợ ios 14-26.0.1 iphone 6s-15prm
-Tag: role::hacker, purpose::extension, cydia::requires=respring
-Author: TaoJB, NoJB, NoNo
-Icon: https://github.com/duchaivcyv-design/Smooth/blob/44fe7df07d032007f33a7172df3383a6e2b2e336/BoostiPhone6s/Resources/icon.png
-Name: SmoothIOS Pro
-
-Package: com.taojb.boostiphone6s
-Version: 1.3.0-2-test
-Architecture: iphoneos-arm64
-Maintainer: TaoJB, NoJB,NoNo
-Installed-Size: 1248
-Depends: mobilesubstrate, firmware (>= 14.0), firmware (<= 26.0.1), preferenceloader
-Filename: ./debs/com.taojb.boostiphone6s_1.3.0-2-test_iphoneos-arm64.deb
-Size: 286144
-MD5sum: 9b03888c8a945b39c16dd1ff2a0b5505
-SHA1: 2db89fc989845176112ab5e7ce78f2a5a37280ff
-SHA256: d4901712ed8fcf3407b2df01095369e1a0c913ca989cd05157b8d1c745d4205f
-Section: Tweaks
-Priority: optional
-Homepage: https://github.com/duchaivcyv-design/Smooth
-Description: Dynamic variable refresh rate, zero stutter, and seamless animation pacing without overheating.(Tự động điều chỉnh tần số quét, triệt tiêu khựng giật, tối ưu hoạt ảnh và giữ máy mát mẻ) Hỗ trợ ios 14-26.0.1 iphone 6s-15prm
-Tag: role::hacker, purpose::extension, cydia::requires=respring
-Author: TaoJB, NoJB, NoNo
-Icon: https://github.com/duchaivcyv-design/Smooth/blob/44fe7df07d032007f33a7172df3383a6e2b2e336/BoostiPhone6s/Resources/icon.png
-Name: SmoothIOS Pro
-
-Package: com.taojb.boostiphone6s
-Version: 1.3.0-2-test
 Architecture: iphoneos-arm64
 Maintainer: TaoJB, NoJB,NoNo
 Installed-Size: 1248
