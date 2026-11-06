@@ -83,30 +83,36 @@ jobs:
                           f.write(f'Package: {pkg_id}\n')
                       elif line.startswith('Depends:'):
                           deps = line.replace('Depends:', '').strip()
-                          deps = deps.replace('mobilesubstrate,', '').replace('mobilesubstrate', '')
-                          deps = deps.replace('preferenceloader,', '').replace('preferenceloader', '')
-                          deps = deps.replace(',,', ',').strip(', ')
+                          # Xóa các dependency cũ dễ gây xung đột
+                          deps = deps.replace('mobilesubstrate', '').replace('preferenceloader', '')
+                          # Tách thành mảng, xóa khoảng trắng và dấu phẩy thừa
+                          dep_list = [d.strip() for d in deps.split(',') if d.strip()]
                           
+                          # Thêm dependency chuẩn vào đầu
                           if env_mode == 'rootful':
-                              new_dep = 'mobilesubstrate, preferenceloader'
+                              new_deps = ['mobilesubstrate', 'preferenceloader'] + dep_list
                           elif env_mode == 'roothide':
-                              new_dep = 'roothide, ellekit, preferenceloader'
+                              new_deps = ['roothide', 'ellekit', 'preferenceloader'] + dep_list
                               
-                          if deps:
-                              new_dep += ', ' + deps
-                          f.write(f'Depends: {new_dep}\n')
+                          # Loại bỏ trùng lặp (nếu có)
+                          final_deps = []
+                          for d in new_deps:
+                              if d not in final_deps:
+                                  final_deps.append(d)
+                                  
+                          # Nối lại thành chuỗi chuẩn
+                          f.write(f'Depends: {", ".join(final_deps)}\n')
                       else: 
                           f.write(line)
           PYEOF
 
           echo "=== 1. CHỈ XOÁ 2 VÙNG CŨ (ROOTFUL VÀ ROOTHIDE) ==="
-          # Tuyệt đối KHÔNG xóa file gốc rootless (arm64)
           rm -f debs/*_rootful_iphoneos-arm.deb
           rm -f debs/*_roothide_iphoneos-arm64e.deb
 
           echo "=== 2. QUÉT FILE GỐC VÀ TÁCH RA 2 VÙNG ==="
-          for deb in debs/*.deb; do
-            [ -f "$deb" ] || continue
+          # Xử lý tên file có chứa dấu cách (nếu có)
+          find debs -type f -name "*.deb" | while read -r deb; do
             
             # Chỉ xử lý file gốc (không chứa các hậu tố do bot tạo ra)
             if [[ "$deb" != *"_rootful_"* ]] && [[ "$deb" != *"_roothide_"* ]]; then
@@ -115,6 +121,9 @@ jobs:
                 PKG_NAME=$(dpkg-deb -f "$deb" Package)
                 PKG_VER=$(dpkg-deb -f "$deb" Version)
                 
+                # Làm sạch tên file (xóa khoảng trắng và ngoặc)
+                CLEAN_NAME=$(echo "$PKG_NAME" | tr -d ' ()')
+                
                 # --- A. TẠO BẢN ROOTFUL (arm) ---
                 dpkg-deb -R "$deb" temp_dir
                 python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm', 'rootful')"
@@ -122,7 +131,7 @@ jobs:
                 find temp_dir -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 | while read bin; do
                     python3 -c "import patch; patch.patch_binary('$bin', False)"
                 done
-                dpkg-deb -b temp_dir "debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
+                dpkg-deb -b temp_dir "debs/${CLEAN_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
                 rm -rf temp_dir
                 
                 # --- B. TẠO BẢN ROOTHIDE (arm64e) ---
@@ -132,10 +141,10 @@ jobs:
                 find temp_dir -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 | while read bin; do
                     python3 -c "import patch; patch.patch_binary('$bin', True)"
                 done
-                dpkg-deb -b temp_dir "debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
+                dpkg-deb -b temp_dir "debs/${CLEAN_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
                 rm -rf temp_dir
                 
-                echo "=== Đã tách xong 2 vùng cho: $PKG_NAME (Giữ nguyên file gốc Rootless) ==="
+                echo "=== Đã tách xong 2 vùng cho: $CLEAN_NAME (Giữ nguyên file gốc Rootless) ==="
               fi
             fi
           done
@@ -165,6 +174,6 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add Packages Packages.bz2 Release debs/
-          git commit -m "Keep rootless original, auto-split arm & arm64e [skip ci]" || exit 0
+          git commit -m "Keep rootless original, fix dependency parsing [skip ci]" || exit 0
           git pull origin main --rebase
           git push origin main
