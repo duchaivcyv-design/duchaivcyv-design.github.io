@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Cần thiết để pull rebase hoạt động tốt
       
       - name: Install Dependencies (dpkg)
         run: |
@@ -57,6 +59,7 @@ jobs:
           echo "=== 1. QUÉT VÀ XỬ LÝ FILE GỐC ==="
           for deb in debs/*.deb; do
             if [ -f "$deb" ]; then
+              # Bỏ qua file do bot tạo ra để tránh lặp vô hạn
               if [[ "$deb" == *"_rootful_"* ]] || [[ "$deb" == *"_roothide_"* ]] || [[ "$deb" == *"_rootless_"* ]]; then
                 continue
               fi
@@ -79,7 +82,7 @@ jobs:
               dpkg-deb -b temp_rootless "processed_debs/${PKG_NAME}_${PKG_VER}_rootless_iphoneos-arm64.deb" > /dev/null
               rm -rf temp_rootless
 
-              # C. BẢN ROOTHIDE (iphoneos-arm64e) - Không can thiệp file nhị phân
+              # C. BẢN ROOTHIDE (iphoneos-arm64e) - KHÔNG patch binary để bảo vệ ElleKit
               dpkg-deb -R "$deb" temp_roothide
               python3 patch.py roothide temp_roothide/DEBIAN/control
               find temp_roothide -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
@@ -90,8 +93,8 @@ jobs:
             fi
           done
           
-          rm -rf debs
-          mkdir -p debs
+          # Xóa file gốc (vì đã được chuyển thành bản _rootless_)
+          rm -f debs/*.deb
           mv processed_debs/*.deb debs/ 2>/dev/null || true
           rm -rf processed_debs patch.py
 
@@ -118,5 +121,9 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add Packages Packages.bz2 Release debs/
-          git commit -m "Safe build without binary patching" || exit 0
-          git push
+          # [skip ci] giúp bot không tự kích hoạt lại chính nó
+          git commit -m "Safe build without binary patching [skip ci]" || exit 0
+          
+          # ĐỒNG BỘ VỚI REMOTE TRƯỚC KHI PUSH ĐỂ TRÁNH LỖI REJECTED
+          git pull origin main --rebase
+          git push origin main
