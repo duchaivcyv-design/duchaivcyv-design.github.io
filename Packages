@@ -1,3 +1,18 @@
+Package: com.Jb.sileo
+Version: 2.5.7
+Architecture: iphoneos-arm64
+Maintainer: TaoJB, JB <korboybeats@gmail.com>
+Depends: firmware (>= 11.0), firmware(>=12.2) | org.swift.libswift (>=5.0), coreutils (>= 8.30-1), dpkg (>= 1.19.4-1), apt (>= 1.8.2), libzstd1
+Filename: ./debs/com.Jb.sileo_2.5.7_iphoneos-arm64.deb
+Size: 3120828
+MD5sum: 6102be044ae5959f7fbfde76fed6e744
+SHA1: 562f19128be1f7591ba38ff591ad5c94c971f56b
+SHA256: 75478b58fbe6daeea2c379eebc600139efd95e04aa8e0a1cb20baa74c178b818
+Section: Packaging
+Description: A modern APT package manager frontend.
+Author: TaoJB, JB
+Name: Sileo
+
 Package: com.gpt.alert
 Version: 9.9.9-5+debug
 Architecture: iphoneos-arm64
