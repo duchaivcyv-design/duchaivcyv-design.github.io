@@ -1,4 +1,4 @@
-name: Build Sileo Repo (True Patcher Replica)
+name: Build Sileo Repo (Keep Rootless Original)
 
 on:
   push:
@@ -29,7 +29,7 @@ jobs:
           chmod +x ldid_linux_x86_64
           sudo mv ldid_linux_x86_64 /usr/local/bin/ldid
 
-      - name: Process Debs Like A Pro
+      - name: Process Debs (Keep Rootless & Split 2 Envs)
         run: |
           cat << 'PYEOF' > patch.py
           import sys, os, subprocess
@@ -37,8 +37,6 @@ jobs:
 
           def patch_binary(bin_path, is_rootless):
               if not os.path.exists(bin_path): return
-              
-              # 1. Trích xuất quyền (Entitlements) gốc
               ent_file = bin_path + ".ent"
               has_ent = False
               try:
@@ -46,40 +44,34 @@ jobs:
                       res = subprocess.run(['ldid', '-e', bin_path], stdout=f, stderr=subprocess.DEVNULL)
                       if res.returncode == 0 and os.path.getsize(ent_file) > 0:
                           has_ent = True
-              except:
-                  pass
+              except: pass
 
-              # 2. Sửa đường dẫn bằng LIEF (An toàn tuyệt đối)
               try:
                   binary = lief.parse(bin_path)
                   if binary and binary.format == lief.Binary.FORMATS.MACHO:
                       changed = False
                       for cmd in binary.commands:
                           if cmd.command == lief.MachO.LoadCommand.TYPE.RPATH:
-                              if '/var/jb' not in cmd.path and is_rootless:
+                              if is_rootless and '/var/jb' not in cmd.path:
                                   cmd.path = '/var/jb' + cmd.path
                                   changed = True
                           elif cmd.command == lief.MachO.LoadCommand.TYPE.LOAD_DYLIB:
-                              if '/var/jb' not in cmd.name and is_rootless and cmd.name.startswith('/Library/'):
+                              if is_rootless and '/var/jb' not in cmd.name and cmd.name.startswith('/Library/'):
                                   cmd.name = '/var/jb' + cmd.name
                                   changed = True
                       if changed:
                           binary.write(bin_path)
-              except Exception as e:
-                  print(f"Lỗi LIEF: {e}")
-                  pass
+              except Exception: pass
 
-              # 3. Ký lại file (Re-sign) và nạp lại quyền gốc
               try:
                   if has_ent:
                       subprocess.run(['ldid', f'-S{ent_file}', bin_path], stderr=subprocess.DEVNULL)
                       os.remove(ent_file)
                   else:
                       subprocess.run(['ldid', '-S', bin_path], stderr=subprocess.DEVNULL)
-              except:
-                  pass
+              except: pass
 
-          def patch_control(path, target_arch, is_roothide=False):
+          def patch_control(path, target_arch, env_mode):
               with open(path, 'r') as f: lines = f.readlines()
               with open(path, 'w') as f:
                   for line in lines:
@@ -89,29 +81,43 @@ jobs:
                           pkg_id = line.replace('Package:', '').strip()
                           pkg_id = pkg_id.replace('.roothide', '').replace('.rootless', '').replace('.rootful', '')
                           f.write(f'Package: {pkg_id}\n')
-                      elif line.startswith('Depends:') and is_roothide:
-                          f.write(line.replace('mobilesubstrate', 'roothide'))
+                      elif line.startswith('Depends:'):
+                          deps = line.replace('Depends:', '').strip()
+                          deps = deps.replace('mobilesubstrate,', '').replace('mobilesubstrate', '')
+                          deps = deps.replace('preferenceloader,', '').replace('preferenceloader', '')
+                          deps = deps.replace(',,', ',').strip(', ')
+                          
+                          if env_mode == 'rootful':
+                              new_dep = 'mobilesubstrate, preferenceloader'
+                          elif env_mode == 'roothide':
+                              new_dep = 'roothide, ellekit, preferenceloader'
+                              
+                          if deps:
+                              new_dep += ', ' + deps
+                          f.write(f'Depends: {new_dep}\n')
                       else: 
                           f.write(line)
           PYEOF
 
-          echo "=== 1. XOÁ 2 VÙNG CŨ ==="
+          echo "=== 1. CHỈ XOÁ 2 VÙNG CŨ (ROOTFUL VÀ ROOTHIDE) ==="
+          # Tuyệt đối KHÔNG xóa file gốc rootless (arm64)
           rm -f debs/*_rootful_iphoneos-arm.deb
           rm -f debs/*_roothide_iphoneos-arm64e.deb
 
-          echo "=== 2. TÁCH VÀ PATCH BINARY CHUẨN PATChER ==="
+          echo "=== 2. QUÉT FILE GỐC VÀ TÁCH RA 2 VÙNG ==="
           for deb in debs/*.deb; do
             [ -f "$deb" ] || continue
             
+            # Chỉ xử lý file gốc (không chứa các hậu tố do bot tạo ra)
             if [[ "$deb" != *"_rootful_"* ]] && [[ "$deb" != *"_roothide_"* ]]; then
               if [[ "$deb" == *"arm64"* ]]; then
-                echo "--> Xử lý: $deb"
+                echo "--> Xử lý file gốc: $deb"
                 PKG_NAME=$(dpkg-deb -f "$deb" Package)
                 PKG_VER=$(dpkg-deb -f "$deb" Version)
                 
-                # BẢN ROOTFUL (Đảo ngược)
+                # --- A. TẠO BẢN ROOTFUL (arm) ---
                 dpkg-deb -R "$deb" temp_dir
-                python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm', False)"
+                python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm', 'rootful')"
                 find temp_dir -type f -name "*.plist" -exec sed -i 's|/var/jb/|/|g' {} +
                 find temp_dir -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 | while read bin; do
                     python3 -c "import patch; patch.patch_binary('$bin', False)"
@@ -119,9 +125,9 @@ jobs:
                 dpkg-deb -b temp_dir "debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
                 rm -rf temp_dir
                 
-                # BẢN ROOTHIDE (Chuẩn Patcher)
+                # --- B. TẠO BẢN ROOTHIDE (arm64e) ---
                 dpkg-deb -R "$deb" temp_dir
-                python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm64e', True)"
+                python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm64e', 'roothide')"
                 find temp_dir -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
                 find temp_dir -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 | while read bin; do
                     python3 -c "import patch; patch.patch_binary('$bin', True)"
@@ -129,7 +135,7 @@ jobs:
                 dpkg-deb -b temp_dir "debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
                 rm -rf temp_dir
                 
-                echo "=== Đã patch xong an toàn cho: $PKG_NAME ==="
+                echo "=== Đã tách xong 2 vùng cho: $PKG_NAME (Giữ nguyên file gốc Rootless) ==="
               fi
             fi
           done
@@ -151,7 +157,7 @@ jobs:
           Version: 1.0
           Architectures: iphoneos-arm iphoneos-arm64 iphoneos-arm64e
           Components: main
-          Description: Kho tweak ca nhan cua TaoJB (Pro Patched)
+          Description: Kho tweak ca nhan cua TaoJB (Keep Rootless)
           EOF
           
       - name: Commit and Push
@@ -159,6 +165,6 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add Packages Packages.bz2 Release debs/
-          git commit -m "True Patcher Replica (LIEF + Entitlements) [skip ci]" || exit 0
+          git commit -m "Keep rootless original, auto-split arm & arm64e [skip ci]" || exit 0
           git pull origin main --rebase
           git push origin main
