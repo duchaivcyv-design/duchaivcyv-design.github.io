@@ -1,4 +1,4 @@
-name: Build Sileo Repo (Keep Original Arm64 - Fix ElleKit)
+name: Build Sileo Repo (Safe Text-Only Patch)
 
 on:
   push:
@@ -20,32 +20,33 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev bzip2 fakeroot python3 llvm file wget unzip
-
-      - name: Install ldid
-        uses: MOZGIII/install-ldid-action@v1
-        with:
-          tag: v2.1.5-procursus2
+          sudo apt-get install -y dpkg-dev bzip2 fakeroot python3
           
-      - name: Process Debs
+      - name: Process Debs Safely
         run: |
           cat << 'PYEOF' > patch.py
           import sys
-          def patch_control(path, target_arch):
+          def patch_control(path, target_arch, is_roothide=False):
               with open(path, 'r') as f: lines = f.readlines()
               with open(path, 'w') as f:
                   for line in lines:
-                      if line.startswith('Architecture:'): f.write(f'Architecture: {target_arch}\n')
+                      if line.startswith('Architecture:'): 
+                          f.write(f'Architecture: {target_arch}\n')
                       elif line.startswith('Package:'):
                           pkg_id = line.replace('Package:', '').strip()
                           pkg_id = pkg_id.replace('.roothide', '').replace('.rootless', '').replace('.rootful', '')
                           f.write(f'Package: {pkg_id}\n')
-                      else: f.write(line)
+                      elif line.startswith('Depends:') and is_roothide:
+                          # Đổi mobilesubstrate thành roothide cho chuẩn môi trường
+                          f.write(line.replace('mobilesubstrate', 'roothide'))
+                      else: 
+                          f.write(line)
+                          
           if __name__ == '__main__':
               mode = sys.argv[1]
               control_path = sys.argv[2]
               if mode == 'rootful': patch_control(control_path, 'iphoneos-arm')
-              elif mode == 'roothide': patch_control(control_path, 'iphoneos-arm64e')
+              elif mode == 'roothide': patch_control(control_path, 'iphoneos-arm64e', True)
           PYEOF
 
           echo "=== 1. XOÁ 2 VÙNG CŨ (ROOTFUL VÀ ROOTHIDE) ==="
@@ -62,32 +63,21 @@ jobs:
                 PKG_NAME=$(dpkg-deb -f "$deb" Package)
                 PKG_VER=$(dpkg-deb -f "$deb" Version)
                 
-                # BẢN ROOTFUL
+                # BẢN ROOTFUL (Chỉ sửa text)
                 dpkg-deb -R "$deb" temp_dir
                 python3 patch.py rootful temp_dir/DEBIAN/control
                 find temp_dir -type f -name "*.plist" -exec sed -i 's|/var/jb/|/|g' {} +
                 dpkg-deb -b temp_dir "debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
                 rm -rf temp_dir
                 
-                # BẢN ROOTHIDE (CÓ KÝ LẠI)
+                # BẢN ROOTHIDE (Chỉ sửa text, KHÔNG ký lại binary)
                 dpkg-deb -R "$deb" temp_dir
                 python3 patch.py roothide temp_dir/DEBIAN/control
                 find temp_dir -type f -name "*.plist" -exec sed -i 's|/Library/|/var/jb/Library/|g' {} +
-                
-                find temp_dir -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 > macho.txt
-                while read -r bin; do
-                  chmod +x "$bin"
-                  paths=$(llvm-objdump -p "$bin" 2>/dev/null | grep -E "path|name" | grep -v "/System" | grep -v "/usr/lib/libSystem" | awk '{print $2}')
-                  for p in $paths; do
-                    [[ "$p" == /Library/* || "$p" == /usr/lib/* ]] && llvm-install-name-tool -change "$p" "/var/jb$p" "$bin" 2>/dev/null || true
-                  done
-                  ldid -S "$bin" 
-                done < macho.txt; rm macho.txt
-
                 dpkg-deb -b temp_dir "debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
                 rm -rf temp_dir
                 
-                echo "=== Đã tách xong 2 vùng cho: $PKG_NAME ==="
+                echo "=== Đã tách xong 2 vùng an toàn cho: $PKG_NAME ==="
               fi
             fi
           done
@@ -117,6 +107,6 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add Packages Packages.bz2 Release debs/
-          git commit -m "Fix ElleKit corrupted by re-signing binaries [skip ci]" || exit 0
+          git commit -m "Safe split (Text-only patch) [skip ci]" || exit 0
           git pull origin main --rebase
           git push origin main
