@@ -5,194 +5,460 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TaoJB Repo - Fluid Liquid Glass</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-        
+        /* ==========================================
+           BIẾN CSS TOÀN CỤC
+           ========================================== */
+        :root {
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-shadow: rgba(0, 0, 0, 0.4);
+            --accent-blue: #007aff;
+            --accent-green: #34c759;
+            --accent-purple: #af52de;
+            --accent-orange: #ff9500;
+            --accent-red: #ff3b30;
+        }
+
+        /* ==========================================
+           RESET & BASE
+           ========================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             background-color: #050510;
-            color: #fff;
-            overflow: hidden;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            overflow-y: auto; /* Cho phép cuộn dọc */
+            position: relative;
         }
 
-        /* Canvas WebGL vẽ nền nước động */
+        /* ==========================================
+           LỚP NỀN CHẤT LỎNG (WEBGL CANVAS)
+           ========================================== */
         #fluid-canvas {
             position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             z-index: 0;
-            pointer-events: none; /* Để sự kiện chạm xuyên qua lớp kính */
-        }
-
-        /* Lớp kính lỏng (Glassmorphism) */
-        .glass-wrapper {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            max-width: 420px;
-            padding: 20px;
             pointer-events: none; /* Cho phép chạm xuyên qua để tạo sóng nước */
         }
 
+        /* Lớp phủ tối để làm nổi bật nội dung */
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* ==========================================
+           WRAPPER & CONTAINER
+           ========================================== */
+        .page-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-top: 40px;
+            padding-bottom: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ==========================================
+           GLASS CONTAINER (liquidGL Target)
+           ========================================== */
         .glass-container {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(28px) saturate(200%) brightness(1.1);
-            -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.1);
+            width: 100%;
+            position: relative;
             border-radius: 40px;
             padding: 30px 20px;
+            /* Nền tối mờ cơ bản, liquidGL sẽ xử lý phần khúc xạ */
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            box-shadow:
+                0 30px 60px var(--glass-shadow),
+                inset 0 1px 1px rgba(255, 255, 255, 0.4),
+                inset 0 -1px 2px rgba(255, 255, 255, 0.1);
+            /* Đảm bảo nội dung bên trong hiển thị trên hiệu ứng kính */
+            z-index: 10;
+        }
+
+        /* Nội dung bên trong kính (được liquidGL bỏ qua) */
+        .glass-content {
             position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 
-                0 30px 60px rgba(0,0,0,0.5),
-                inset 0 1px 1px rgba(255,255,255,0.5),
-                inset 0 -1px 2px rgba(255,255,255,0.1);
-            /* Các nút bên trong cần nhận chạm */
+            z-index: 12;
         }
 
-        /* Cho phép các nút bấm nhận tương tác */
-        .btn, .btn-copy, .package-list, .guide-box {
-            pointer-events: auto;
-        }
-
+        /* ==========================================
+           TYPOGRAPHY
+           ========================================== */
         h1 {
-            font-size: 2.2rem; font-weight: 800; text-align: center; margin-bottom: 6px;
-            background: linear-gradient(180deg, #fff, #b0b0b0);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 2.2rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(180deg, #ffffff 0%, #b0b0b0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
-        .subtitle { text-align: center; font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 25px; }
+        .subtitle {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
 
-        .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.6); margin: 20px 0 10px 10px; font-weight: 700; }
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin: 20px 0 10px 10px;
+            font-weight: 700;
+        }
 
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        /* ==========================================
+           NÚT BẤM (Quick Install Grid)
+           ========================================== */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
 
         .btn {
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-            padding: 16px 10px; border-radius: 22px; text-decoration: none; font-weight: 600; font-size: 0.95rem; color: #fff;
-            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 8px 16px rgba(0,0,0,0.2);
-            transition: transform 0.2s, background 0.2s; cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 10px;
+            border-radius: 22px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow:
+                inset 0 1px 1px rgba(255, 255, 255, 0.4),
+                0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, background 0.2s ease;
+            cursor: pointer;
+            -webkit-appearance: none;
+            position: relative;
+            overflow: hidden;
         }
-        .btn:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.2); }
-        .btn-icon { font-size: 1.6rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
 
+        .btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-icon {
+            font-size: 1.6rem;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Nút Copy */
         .btn-copy {
-            display: flex; flex-direction: row; gap: 10px; width: 100%; padding: 16px; margin-bottom: 10px;
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            width: 100%;
+            padding: 16px;
+            margin-bottom: 10px;
             background: linear-gradient(135deg, rgba(52, 199, 89, 0.25) 0%, rgba(52, 199, 89, 0.05) 100%);
             border-color: rgba(52, 199, 89, 0.4);
         }
 
-        .package-list { background: rgba(0, 0, 0, 0.25); border-radius: 24px; padding: 5px 15px; border: 1px solid rgba(255, 255, 255, 0.08); }
-        .package-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .package-item:last-child { border-bottom: none; }
-        .package-name { font-weight: 500; font-size: 0.95rem; }
-        .package-version { color: rgba(255, 255, 255, 0.8); font-size: 0.75rem; background: rgba(255, 255, 255, 0.1); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); }
+        /* ==========================================
+           DANH SÁCH TWEAK
+           ========================================== */
+        .package-list {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 24px;
+            padding: 5px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
 
-        .guide-box { display: flex; gap: 12px; align-items: flex-start; padding: 15px; margin-top: 10px; background: rgba(255, 255, 255, 0.03); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.85rem; color: rgba(255, 255, 255, 0.7); line-height: 1.4; }
+        .package-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .package-item:last-child {
+            border-bottom: none;
+        }
+
+        .package-name {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .package-version {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
+        }
+
+        /* ==========================================
+           HƯỚNG DẪN
+           ========================================== */
+        .guide-box {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 15px;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* ==========================================
+           HIỆU ỨNG 3D TILT (Tùy chọn)
+           ========================================== */
+        .glass-container {
+            transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+        }
+
+        /* ==========================================
+           MEDIA QUERIES
+           ========================================== */
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            .btn {
+                padding: 12px 8px;
+                font-size: 0.85rem;
+            }
+            .btn-icon {
+                font-size: 1.3rem;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Canvas vẽ nền nước bằng WebGL -->
+    <!-- ==========================================
+         CANVAS NỀN CHẤT LỎNG
+         ========================================== -->
     <canvas id="fluid-canvas"></canvas>
+    <div class="bg-overlay"></div>
 
-    <div class="glass-wrapper">
-        <div class="glass-container">
-            <h1>TaoJB Repo</h1>
-            <p class="subtitle">Fluid Liquid Glass · Touch to Ripple</p>
+    <!-- ==========================================
+         PAGE WRAPPER
+         ========================================== -->
+    <div class="page-wrapper">
+        <!-- Glass Container (Target cho liquidGL) -->
+        <div class="glass-container liquidGL">
+            <div class="glass-content">
+                <h1>TaoJB Repo</h1>
+                <p class="subtitle">Fluid Liquid Glass · Touch to Ripple</p>
 
-            <div class="section-title">Cài đặt nhanh</div>
-            <div class="btn-grid">
-                <a href="sileo://source/https://duchaivcyv-design.github.io/" class="btn">
-                    <span class="btn-icon">🧊</span> Sileo
-                </a>
-                <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn">
-                    <span class="btn-icon">🦓</span> Zebra
-                </a>
-                <a href="saily://source/https://duchaivcyv-design.github.io/" class="btn">
-                    <span class="btn-icon">🛍️</span> Saily
-                </a>
-                <a href="cydia://url/https://cydia.saurik.com/api/share#?source=https://duchaivcyv-design.github.io/" class="btn">
-                    <span class="btn-icon">📦</span> Cydia
-                </a>
-            </div>
+                <!-- Quick Install -->
+                <div class="section-title">Cài đặt nhanh</div>
+                <div class="btn-grid">
+                    <a href="sileo://source/https://duchaivcyv-design.github.io/" class="btn">
+                        <span class="btn-icon">🧊</span> Sileo
+                    </a>
+                    <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn">
+                        <span class="btn-icon">🦓</span> Zebra
+                    </a>
+                    <a href="saily://source/https://duchaivcyv-design.github.io/" class="btn">
+                        <span class="btn-icon">🛍️</span> Saily
+                    </a>
+                    <a href="cydia://url/https://cydia.saurik.com/api/share#?source=https://duchaivcyv-design.github.io/" class="btn">
+                        <span class="btn-icon">📦</span> Cydia
+                    </a>
+                </div>
 
-            <button onclick="copyRepoLink()" class="btn btn-copy" id="copyBtn">
-                <span class="btn-icon">📋</span> <span>Sao chép URL Repo</span>
-            </button>
+                <!-- Copy URL -->
+                <button onclick="copyRepoLink()" class="btn btn-copy" id="copyBtn">
+                    <span class="btn-icon">📋</span> <span>Sao chép URL Repo</span>
+                </button>
 
-            <div class="section-title">Danh sách Tweak</div>
-            <div class="package-list">
-                <div class="package-item"><span class="package-name">27CC Ios 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                <div class="package-item"><span class="package-name">DynaFake 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                <div class="package-item"><span class="package-name">Liquid Tab 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                <div class="package-item"><span class="package-name">26Morph 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                <div class="package-item"><span class="package-name">UnlockCode 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                <div class="package-item"><span class="package-name">OpenWave 14-18.0</span><span class="package-version">v6.0.2-5</span></div>
-                <div class="package-item"><span class="package-name">2712 (trọn bộ)</span><span class="package-version">v6.0.2-5</span></div>
-            </div>
+                <!-- Danh sách Tweak -->
+                <div class="section-title">Danh sách Tweak</div>
+                <div class="package-list">
+                    <div class="package-item">
+                        <span class="package-name">27CC Ios 14-18.0</span>
+                        <span class="package-version">v6.0.2-5</span>
+                    </div>
+                    <div class="package-item">
+                        <span class="package-name">DynaFake 14-18.0</span>
+                        <span class="package-version">v6.0.2-5</span>
+                    </div>
+                    <div class="package-item">
+                        <span class="package-name">Liquid Tab 14-18.0</span>
+                        <span class="package-version">v6.0.2-5</span>
+                    </div>
+                    <div class="package-item">
+                        <span class="package-name">26Morph 14-18.0</span>
+                        <span class="package-version">v6.0.2-5</span>
+                    </div>
+                    <div class="package-item">
+                        <span class="package-name">UnlockCode 14-18.0</span>
+                        <span class="package-version">v6.0.2-5</span>
+                    </div>
+                    <div class="package-item">
+                        <span class="package-name">OpenWave 14-18.0</span>
+                        <span class="package-version">v6.0.2-5</span>
+                    </div>
+                    <div class="package-item">
+                        <span class="package-name">2712 (trọn bộ)</span>
+                        <span class="package-version">v6.0.2-5</span>
+                    </div>
+                </div>
 
-            <div class="guide-box">
-                <span style="font-size: 1.2rem;">💧</span>
-                <div>Chạm và vuốt lên mặt kính để tạo ra những gợn sóng nước thực sự trên nền.</div>
+                <!-- Guide -->
+                <div class="guide-box">
+                    <span style="font-size: 1.2rem;">💧</span>
+                    <div>Chạm và vuốt ngón tay trên màn hình để tạo ra những gợn sóng nước thực sự trên nền.</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Mã nguồn FluidEngine (WebGL Water Shader) -->
-    <script>
-    (function(global){ 'use strict';
-    var VERT_SRC = [ 'attribute vec2 a_position;', 'varying vec2 v_uv;', 'void main(){', ' v_uv = a_position * 0.5 + 0.5;', ' gl_Position = vec4(a_position, 0.0, 1.0);', '}' ].join('\n');
-    var BG_FRAG = [ 'precision highp float;', 'varying vec2 v_uv;', 'uniform float u_time;', 'uniform vec2 u_resolution;', '', 'float hash(vec2 p){', ' return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453);', '}', 'float noise(vec2 p){', ' vec2 i = floor(p);', ' vec2 f = fract(p);', ' f = f * f * (3.0 - 2.0 * f);', ' return mix(', ' mix(hash(i), hash(i + vec2(1.0,0.0)), f.x),', ' mix(hash(i + vec2(0.0,1.0)), hash(i + vec2(1.0,1.0)), f.x),', ' f.y', ' );', '}', '', 'void main(){', ' vec2 uv = v_uv;', ' float t = u_time * 0.12;', ' vec3 color = vec3(0.03, 0.05, 0.10);', '', ' vec2 b1 = vec2(0.25 + sin(t) * 0.12, 0.35 + cos(t * 1.3) * 0.12);', ' color += vec3(0.15, 0.08, 0.28) * smoothstep(0.55, 0.0, distance(uv, b1));', '', ' vec2 b2 = vec2(0.75 + cos(t * 0.7) * 0.12, 0.65 + sin(t * 1.1) * 0.12);', ' color += vec3(0.05, 0.15, 0.22) * smoothstep(0.55, 0.0, distance(uv, b2));', '', ' vec2 b3 = vec2(0.50 + sin(t * 0.9) * 0.15, 0.30 + cos(t * 0.6) * 0.15);', ' color += vec3(0.18, 0.05, 0.12) * smoothstep(0.45, 0.0, distance(uv, b3));', '', ' vec2 b4 = vec2(0.60 + sin(t * 1.2) * 0.10, 0.80 + cos(t * 0.8) * 0.10);', ' color += vec3(0.08, 0.18, 0.12) * smoothstep(0.50, 0.0, distance(uv, b4));', '', ' float n = noise(uv * 4.0 + t) * 0.03;', ' color += n;', '', ' float vig = smoothstep(1.3, 0.3, distance(uv, vec2(0.5)));', ' color *= vig;', '', ' gl_FragColor = vec4(color, 1.0);', '}' ].join('\n');
-    var WATER_FRAG = [ 'precision highp float;', 'varying vec2 v_uv;', 'uniform float u_time;', 'uniform float u_waveSpeed;', 'uniform float u_waveSpeedX;', 'uniform float u_waveSpeedY;', 'uniform float u_emboss;', 'uniform float u_intensity;', 'uniform float u_frequency;', 'uniform float u_refraction;', 'uniform float u_reflGain;', 'uniform float u_reflCutoff;', 'uniform float u_reflIntensity;', 'uniform float u_waterTint;', 'uniform vec2 u_resolution;', 'uniform sampler2D u_texture;', 'uniform int u_rippleCount;', 'uniform vec2 u_ripplePos[20];', 'uniform float u_rippleStart[20];', 'uniform float u_rippleStrength[20];', 'uniform vec2 u_mousePos;', 'uniform float u_mouseInside;', '', 'const float PI = 3.1415926535897932;', 'const int STEPS = 8;', 'const int ANGLE = 7;', 'const int MAX_RIPPLES = 20;', '', 'float water_height(vec2 coord, float t){', ' float dt = 2.0 * PI / float(ANGLE);', ' float h = 0.0;', ' for(int i = 0; i < STEPS; i++){', ' float th = dt * float(i);', ' vec2 a = coord;', ' a.x += cos(th) * t * u_waveSpeed + t * u_waveSpeedX;', ' a.y -= sin(th) * t * u_waveSpeed - t * u_waveSpeedY;', ' h += cos((a.x * cos(th) - a.y * sin(th)) * u_frequency) * u_intensity;', ' }', ' return cos(h);', '}', '', 'float ripple_height(vec2 px, float t){', ' float h = 0.0;', ' for(int i = 0; i < MAX_RIPPLES; i++){', ' if(i >= u_rippleCount) break;', ' float d = distance(px, u_ripplePos[i]);', ' float age = t - u_rippleStart[i];', ' if(age > 0.0 && age < 5.0){', ' float w = sin(d * 0.06 - age * 8.0) * exp(-d * 0.003) * exp(-age * 0.7);', ' h += w * u_rippleStrength[i];', ' }', ' }', ' return h;', '}', '', 'void main(){', ' vec2 uv = v_uv;', ' vec2 sz = max(u_resolution, vec2(1.0));', ' float t = u_time * 1.3;', ' vec2 px = uv * sz;', '', ' float wc = water_height(uv, t);', ' float rc = ripple_height(px, u_time);', ' float center = wc + rc * 0.6;', '', ' vec2 sd = 1.0 / sz;', '', ' float wdx = u_emboss * (wc - water_height(uv + vec2(sd.x, 0.0), t));', ' float wdy = u_emboss * (wc - water_height(uv + vec2(0.0, sd.y), t));', ' float rdx = u_emboss * (rc - ripple_height(px + vec2(1.0, 0.0), u_time)) * 0.6;', ' float rdy = u_emboss * (rc - ripple_height(px + vec2(0.0, 1.0), u_time)) * 0.6;', '', ' float dx = wdx + rdx;', ' float dy = wdy + rdy;', '', ' vec2 ruv = uv + vec2(dx, dy) * u_refraction;', ' ruv = clamp(ruv, vec2(0.0), vec2(1.0));', '', ' float alpha = max(0.0, 1.0 + dx * dy * u_reflGain);', ' float rx = dx - u_reflCutoff;', ' float ry = dy - u_reflCutoff;', ' if(rx > 0.0 && ry > 0.0){', ' alpha = pow(alpha, rx * ry * u_reflIntensity);', ' }', '', ' vec4 color = texture2D(u_texture, ruv);', '', ' if(u_mouseInside > 0.5){', ' float md = distance(px, u_mousePos);', ' float glow = exp(-md * 0.008) * 0.25;', ' color.rgb += vec3(0.15, 0.35, 0.55) * glow;', ' }', '', ' float rg = abs(rc);', ' color.rgb += vec3(0.1, 0.2, 0.3) * rg * 0.5;', '', ' vec2 lightDir = normalize(vec2(-0.35, -0.8));', ' float rl = clamp(dot(normalize(vec2(dx, dy) + 0.0001), lightDir), 0.0, 1.0);', ' vec3 tint = mix(vec3(u_waterTint), vec3(0.70, 0.88, 1.08), 0.25);', ' color.rgb = color.rgb * tint * clamp(alpha, 0.72, 1.55);', ' color.rgb += vec3(0.16, 0.24, 0.30) * rl * 0.22;', '', ' float vig = smoothstep(0.0, 0.25, uv.y) * smoothstep(1.0, 0.72, uv.y);', ' color.rgb *= mix(0.88, 1.04, vig);', '', ' gl_FragColor = vec4(color.rgb, color.a);', '}' ].join('\n');
-    
-    function createShader(gl, type, src){ var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){ console.error(gl.getShaderInfoLog(s)); return null; } return s; }
-    function createProgram(gl, vsSrc, fsSrc){ var vs = createShader(gl, gl.VERTEX_SHADER, vsSrc); var fs = createShader(gl, gl.FRAGMENT_SHADER, fsSrc); if(!vs || !fs) return null; var p = gl.createProgram(); gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p); if(!gl.getProgramParameter(p, gl.LINK_STATUS)){ console.error(gl.getProgramInfoLog(p)); return null; } return p; }
-    function createTexture(gl, w, h){ var tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); return tex; }
-    function createFBO(gl, tex){ var fb = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, fb); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0); gl.bindFramebuffer(gl.FRAMEBUFFER, null); return fb; }
-    
-    var MAX_RIPPLES = 20;
-    var DEFAULT_PARAMS = { waveSpeed: 0.2, waveSpeedX: 0.3, waveSpeedY: 0.3, emboss: 0.5, intensity: 2.4, frequency: 6.0, refraction: 2.0, reflGain: 700.0, reflCutoff: 0.012, reflIntensity: 200000.0, waterTint: 0.92 };
-    
-    function FluidEngine(canvas, opts){ opts = opts || {}; this.canvas = canvas; this.gl = canvas.getContext('webgl', {premultipliedAlpha:false, antialias:true, alpha:true}) || canvas.getContext('experimental-webgl', {premultipliedAlpha:false, antialias:true, alpha:true}); if(!this.gl){ console.error('WebGL not supported'); return; } var gl = this.gl; this.bgProgram = createProgram(gl, VERT_SRC, BG_FRAG); this.waterProgram = createProgram(gl, VERT_SRC, WATER_FRAG); this.buffer = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW); this.params = {}; for(var k in DEFAULT_PARAMS) this.params[k] = DEFAULT_PARAMS[k]; if(opts.params){ for(var k2 in opts.params){ if(this.params.hasOwnProperty(k2)) this.params[k2] = opts.params[k2]; } } this.ripples = []; this.effect = opts.effect || 'water'; this.mouseInside = false; this.mouseX = 0; this.mouseY = 0; this.lastMouseX = -1; this.lastMouseY = -1; this._destroyed = false; this._setupInteraction(); this.dpr = Math.min(window.devicePixelRatio || 1, 2); this._resize(); window.addEventListener('resize', this._resize.bind(this)); requestAnimationFrame(this._loop.bind(this)); }
-    FluidEngine.prototype._resize = function(){ var rect = this.canvas.getBoundingClientRect(); var w = Math.max(1, Math.floor(rect.width * this.dpr)); var h = Math.max(1, Math.floor(rect.height * this.dpr)); this.canvas.width = w; this.canvas.height = h; this.width = w; this.height = h; var gl = this.gl; if(this.bgTexture) gl.deleteTexture(this.bgTexture); if(this.bgFBO) gl.deleteFramebuffer(this.bgFBO); this.bgTexture = createTexture(gl, w, h); this.bgFBO = createFBO(gl, this.bgTexture); };
-    FluidEngine.prototype._setupInteraction = function(){ var self = this; function getPos(e){ var rect = self.canvas.getBoundingClientRect(); var x, y; if(e.touches && e.touches.length > 0){ x = e.touches[0].clientX - rect.left; y = e.touches[0].clientY - rect.top; } else { x = e.clientX - rect.left; y = e.clientY - rect.top; } return { x: x * self.dpr, y: y * self.dpr }; } this._mousemove = function(e){ var p = getPos(e); self.mouseX = p.x; self.mouseY = p.y; self.mouseInside = true; if(self.lastMouseX >= 0){ var dist = Math.hypot(p.x - self.lastMouseX, p.y - self.lastMouseY); if(dist > 4) self.addRipple(p.x, p.y, 0.8 + Math.min(dist / 30, 1.5)); } self.lastMouseX = p.x; self.lastMouseY = p.y; }; this._click = function(e){ var p = getPos(e); self.addRipple(p.x, p.y, 3.5); }; this._touchmove = function(e){ e.preventDefault(); var p = getPos(e); self.mouseX = p.x; self.mouseY = p.y; self.mouseInside = true; self.addRipple(p.x, p.y, 1.2); }; this._touchstart = function(e){ var p = getPos(e); self.mouseX = p.x; self.mouseY = p.y; self.mouseInside = true; self.addRipple(p.x, p.y, 2.5); }; this.canvas.addEventListener('mousemove', this._mousemove); this.canvas.addEventListener('click', this._click); this.canvas.addEventListener('touchmove', this._touchmove, {passive:false}); this.canvas.addEventListener('touchstart', this._touchstart); };
-    FluidEngine.prototype.addRipple = function(x, y, strength){ if(this.ripples.length >= MAX_RIPPLES) this.ripples.shift(); this.ripples.push({ x: x, y: y, start: performance.now() / 1000, strength: strength || 1.0 }); var now = performance.now() / 1000; this.ripples = this.ripples.filter(function(r){ return now - r.start < 5.0; }); };
-    FluidEngine.prototype._renderBackground = function(time){ var gl = this.gl, prog = this.bgProgram; gl.bindFramebuffer(gl.FRAMEBUFFER, this.bgFBO); gl.viewport(0, 0, this.width, this.height); gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT); gl.useProgram(prog); gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer); var posLoc = gl.getAttribLocation(prog, 'a_position'); gl.enableVertexAttribArray(posLoc); gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0); gl.uniform1f(gl.getUniformLocation(prog, 'u_time'), time); gl.uniform2f(gl.getUniformLocation(prog, 'u_resolution'), this.width, this.height); gl.drawArrays(gl.TRIANGLES, 0, 6); gl.bindFramebuffer(gl.FRAMEBUFFER, null); };
-    FluidEngine.prototype._renderWater = function(time){ var gl = this.gl, prog = this.waterProgram, p = this.params; gl.viewport(0, 0, this.width, this.height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.useProgram(prog); gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer); var posLoc = gl.getAttribLocation(prog, 'a_position'); gl.enableVertexAttribArray(posLoc); gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.bgTexture); gl.uniform1i(gl.getUniformLocation(prog, 'u_texture'), 0); gl.uniform1f(gl.getUniformLocation(prog, 'u_time'), time); gl.uniform2f(gl.getUniformLocation(prog, 'u_resolution'), this.width, this.height); gl.uniform1f(gl.getUniformLocation(prog, 'u_waveSpeed'), p.waveSpeed); gl.uniform1f(gl.getUniformLocation(prog, 'u_waveSpeedX'), p.waveSpeedX); gl.uniform1f(gl.getUniformLocation(prog, 'u_waveSpeedY'), p.waveSpeedY); gl.uniform1f(gl.getUniformLocation(prog, 'u_emboss'), p.emboss); gl.uniform1f(gl.getUniformLocation(prog, 'u_intensity'), p.intensity); gl.uniform1f(gl.getUniformLocation(prog, 'u_frequency'), p.frequency); gl.uniform1f(gl.getUniformLocation(prog, 'u_refraction'), p.refraction); gl.uniform1f(gl.getUniformLocation(prog, 'u_reflGain'), p.reflGain); gl.uniform1f(gl.getUniformLocation(prog, 'u_reflCutoff'), p.reflCutoff); gl.uniform1f(gl.getUniformLocation(prog, 'u_reflIntensity'), p.reflIntensity); gl.uniform1f(gl.getUniformLocation(prog, 'u_waterTint'), p.waterTint); gl.uniform2f(gl.getUniformLocation(prog, 'u_mousePos'), this.mouseX, this.mouseY); gl.uniform1f(gl.getUniformLocation(prog, 'u_mouseInside'), this.mouseInside ? 1.0 : 0.0); var rc = Math.min(this.ripples.length, MAX_RIPPLES); gl.uniform1i(gl.getUniformLocation(prog, 'u_rippleCount'), rc); for(var i = 0; i < rc; i++){ var r = this.ripples[i]; gl.uniform2f(gl.getUniformLocation(prog, 'u_ripplePos[' + i + ']'), r.x, r.y); gl.uniform1f(gl.getUniformLocation(prog, 'u_rippleStart[' + i + ']'), r.start); gl.uniform1f(gl.getUniformLocation(prog, 'u_rippleStrength[' + i + ']'), r.strength); } for(var j = rc; j < MAX_RIPPLES; j++){ gl.uniform2f(gl.getUniformLocation(prog, 'u_ripplePos[' + j + ']'), 0, 0); gl.uniform1f(gl.getUniformLocation(prog, 'u_rippleStart[' + j + ']'), -100); gl.uniform1f(gl.getUniformLocation(prog, 'u_rippleStrength[' + j + ']'), 0); } gl.drawArrays(gl.TRIANGLES, 0, 6); };
-    FluidEngine.prototype._loop = function(){ if(this._destroyed) return; var time = performance.now() / 1000; this._renderBackground(time); this._renderWater(time); requestAnimationFrame(this._loop.bind(this)); };
-    global.FluidEngine = FluidEngine;
-    })(typeof window !== 'undefined' ? window : this);
-    </script>
+    <!-- ==========================================
+         SCRIPTS
+         ========================================== -->
 
+    <!-- 1. WebGL Fluid Simulation -->
+    <script src="https://cdn.jsdelivr.net/npm/webgl-fluid@0.4"></script>
+
+    <!-- 2. liquidGL -->
+    <script src="https://cdn.jsdelivr.net/gh/naughtyduk/liquidGL@3.0.0/scripts/liquidGL.js" defer></script>
+
+    <!-- 3. Logic khởi tạo -->
     <script>
-        // Khởi tạo hiệu ứng nước
+        // ==========================================
+        // KHỞI TẠO HIỆU ỨNG NỀN NƯỚC (WebGL Fluid)
+        // ==========================================
         document.addEventListener("DOMContentLoaded", () => {
             const canvas = document.getElementById('fluid-canvas');
-            if (canvas && typeof FluidEngine !== 'undefined') {
-                const engine = new FluidEngine(canvas, {
-                    effect: 'water',
-                    params: {
-                        waveSpeed: 0.35,
-                        waveSpeedX: 0.4,
-                        waveSpeedY: 0.4,
-                        intensity: 3.5,
-                        frequency: 8.0,
-                        refraction: 2.5,
-                        emboss: 0.8,
-                        waterTint: 0.95
-                    }
+            if (canvas && typeof WebGLFluid !== 'undefined') {
+                WebGLFluid(canvas, {
+                    TRIGGER: 'hover', // Kích hoạt khi di chuột (hoặc chạm trên mobile)
+                    IMMEDIATE: true,  // Tạo hiệu ứng ngay khi tải trang
+                    AUTO: false,      // Tắt tự động tạo splat
+                    INTERVAL: 3000,   // Khoảng thời gian giữa các splat tự động (nếu bật AUTO)
+                    SIM_RESOLUTION: 128,
+                    DYE_RESOLUTION: 1024,
+                    CAPTURE_RESOLUTION: 512,
+                    DENSITY_DISSIPATION: 1,
+                    VELOCITY_DISSIPATION: 0.3,
+                    PRESSURE: 0.8,
+                    PRESSURE_ITERATIONS: 20,
+                    CURL: 30,
+                    SPLAT_RADIUS: 0.35,
+                    SPLAT_FORCE: 6000,
+                    SPLAT_COUNT: Number.parseInt(Math.random() * 20) + 5,
+                    SPLAT_COLOR: undefined,
+                    SHADING: true,
+                    COLORFUL: true,
+                    COLOR_UPDATE_SPEED: 10,
+                    PAUSED: false,
+                    BACK_COLOR: { r: 5, g: 5, b: 16 }, // Màu nền tối
+                    TRANSPARENT: false,
+                    BLOOM: true,
+                    BLOOM_ITERATIONS: 8,
+                    BLOOM_RESOLUTION: 256,
+                    BLOOM_INTENSITY: 0.8,
+                    BLOOM_THRESHOLD: 0.6,
+                    BLOOM_SOFT_KNEE: 0.7,
+                    SUNRAYS: true,
+                    SUNRAYS_RESOLUTION: 196,
+                    SUNRAYS_WEIGHT: 1.0,
                 });
-                
-                // Đảm bảo canvas nhận được sự kiện chạm dù lớp kính ở trên
-                // (Vì lớp kính có pointer-events: none, sự kiện sẽ tự động xuyên xuống canvas)
+            } else {
+                console.warn("webgl-fluid chưa được tải hoặc không được hỗ trợ.");
             }
         });
 
+        // ==========================================
+        // KHỞI TẠO HIỆU ỨNG KÍNH LỎNG (liquidGL)
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof liquidGL !== 'undefined') {
+                try {
+                    liquidGL({
+                        engine: "auto",
+                        target: ".liquidGL",
+                        snapshot: "body",
+                        resolution: 2.0,
+                        zIndex: 10,
+                        content: ".glass-content",
+                        refraction: 0.15,
+                        aberration: 0.02,
+                        bevelDepth: 0.1,
+                        bevelWidth: 0.2,
+                        frost: 2,
+                        shadow: true,
+                        specular: true,
+                        reveal: "fade",
+                        tilt: true, // Bật hiệu ứng nghiêng 3D theo con trỏ
+                        tiltEasing: 0.1,
+                        // Hiệu ứng "chất lỏng nhớt" khi tương tác
+                        interaction: "fluid",
+                        interactionStrength: 0.8,
+                        interactionRadius: 0.6,
+                        interactionViscosity: 0.4,
+                        tint: "rgba(255, 255, 255, 0.05)"
+                    });
+                } catch (e) {
+                    console.error("Lỗi khởi tạo liquidGL:", e);
+                }
+            } else {
+                console.warn("liquidGL chưa được tải.");
+            }
+        });
+
+        // ==========================================
+        // CHỨC NĂNG COPY URL
+        // ==========================================
         function copyRepoLink() {
             const url = "https://duchaivcyv-design.github.io/";
             navigator.clipboard.writeText(url).then(() => {
@@ -200,8 +466,13 @@
                 const originalHTML = btn.innerHTML;
                 btn.innerHTML = '<span class="btn-icon">✅</span> <span>Đã sao chép!</span>';
                 btn.style.background = 'rgba(52, 199, 89, 0.4)';
-                setTimeout(() => { btn.innerHTML = originalHTML; btn.style.background = ''; }, 2000);
-            }).catch(err => alert("URL Repo: " + url));
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                alert("URL Repo: " + url);
+            });
         }
     </script>
 </body>
