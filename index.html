@@ -2,14 +2,14 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TaoJB Repo</title>
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.25);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --bg-color: #050510;
             --text-color: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.15);
         }
 
         * {
@@ -17,56 +17,93 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
+        /* Nền tối với các quả cầu phát sáng chuyển động */
         body {
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            background-color: var(--bg-color);
             color: var(--text-color);
             padding: 20px;
             overflow-x: hidden;
+            position: relative;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* Các quả cầu phát sáng (Blobs) tạo màu cho kính */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.8;
+            animation: float 10s infinite ease-in-out alternate;
         }
 
-        /* Hiệu ứng Liquid Glass Container */
+        .blob-1 {
+            width: 300px;
+            height: 300px;
+            background: #007aff; /* Xanh Sileo */
+            top: -10%;
+            left: -10%;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            width: 250px;
+            height: 250px;
+            background: #ff9500; /* Cam Zebra */
+            bottom: -10%;
+            right: -10%;
+            animation-delay: -5s;
+        }
+
+        .blob-3 {
+            width: 200px;
+            height: 200px;
+            background: #af52de; /* Tím */
+            top: 40%;
+            left: 60%;
+            animation-delay: -2s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.2); }
+        }
+
+        /* Khung kính chính */
         .liquid-glass {
             background: var(--glass-bg);
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            backdrop-filter: blur(24px) saturate(200%);
+            -webkit-backdrop-filter: blur(24px) saturate(200%);
             border: 1px solid var(--glass-border);
-            border-radius: 28px;
-            box-shadow: var(--glass-shadow);
-            padding: 40px 30px;
+            border-radius: 36px;
+            padding: 40px 24px;
             width: 100%;
-            max-width: 440px;
-            text-align: center;
+            max-width: 400px;
             position: relative;
+            /* Đổ bóng và viền sáng kép tạo cảm giác kính dày */
+            box-shadow: 
+                0 24px 48px rgba(0, 0, 0, 0.4),
+                inset 0 1px 1px rgba(255, 255, 255, 0.4),
+                inset 0 -1px 1px rgba(255, 255, 255, 0.1);
+            z-index: 1;
             overflow: hidden;
-            /* SVG Filter cho hiệu ứng khúc xạ (nếu trình duyệt hỗ trợ) */
-            filter: url(#liquid-glass-filter);
         }
 
-        /* Lớp phủ bên trong để tạo cảm giác kính dày */
+        /* Lớp ánh sáng loang trên mặt kính */
         .liquid-glass::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0.1) 100%);
+            top: 0; left: 0; right: 0; height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
             pointer-events: none;
-            border-radius: 28px;
+            z-index: -1;
+            border-radius: 36px 36px 0 0;
         }
 
         h1 {
@@ -74,137 +111,164 @@
             font-weight: 800;
             margin-bottom: 8px;
             letter-spacing: -0.5px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            text-align: center;
         }
 
         .subtitle {
-            font-size: 1rem;
-            opacity: 0.8;
-            margin-bottom: 28px;
-            line-height: 1.5;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 32px;
+            text-align: center;
+            line-height: 1.4;
         }
 
         .btn-group {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 14px;
             margin-bottom: 24px;
         }
 
+        /* Nút bấm phong cách kính */
         .btn {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            padding: 14px 20px;
-            border-radius: 16px;
+            padding: 16px;
+            border-radius: 20px;
             text-decoration: none;
             font-weight: 600;
             font-size: 1rem;
             color: #fff;
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            -webkit-appearance: none;
         }
 
-        .btn:hover, .btn:active {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(1.02);
-            border-color: rgba(255, 255, 255, 0.4);
+        /* Hiệu ứng ánh sáng lướt qua nút khi chạm */
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: skewX(-20deg);
+            transition: 0.5s;
         }
-
-        .btn-sileo { background: rgba(0, 122, 255, 0.25); border-color: rgba(0, 122, 255, 0.4); }
-        .btn-sileo:hover { background: rgba(0, 122, 255, 0.4); }
         
-        .btn-zebra { background: rgba(255, 149, 0, 0.25); border-color: rgba(255, 149, 0, 0.4); }
-        .btn-zebra:hover { background: rgba(255, 149, 0, 0.4); }
+        .btn:active::after {
+            left: 150%;
+        }
 
-        .btn-copy { background: rgba(52, 199, 89, 0.25); border-color: rgba(52, 199, 89, 0.4); }
-        .btn-copy:hover { background: rgba(52, 199, 89, 0.4); }
+        .btn:active {
+            transform: scale(0.96);
+            background: rgba(255, 255, 255, 0.15);
+        }
 
+        /* Màu sắc riêng cho từng nút */
+        .btn-sileo { 
+            background: linear-gradient(135deg, rgba(0, 122, 255, 0.3) 0%, rgba(0, 122, 255, 0.1) 100%); 
+            border-color: rgba(0, 122, 255, 0.4); 
+        }
+        .btn-zebra { 
+            background: linear-gradient(135deg, rgba(255, 149, 0, 0.3) 0%, rgba(255, 149, 0, 0.1) 100%); 
+            border-color: rgba(255, 149, 0, 0.4); 
+        }
+        .btn-copy { 
+            background: linear-gradient(135deg, rgba(52, 199, 89, 0.3) 0%, rgba(52, 199, 89, 0.1) 100%); 
+            border-color: rgba(52, 199, 89, 0.4); 
+        }
+
+        /* Danh sách gói */
         .package-list {
-            text-align: left;
-            background: rgba(0, 0, 0, 0.15);
-            border-radius: 16px;
-            padding: 16px;
-            margin-top: 10px;
-            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
         }
 
         .package-item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
-        .package-item:last-child { border-bottom: none; }
-        .package-name { font-weight: 500; }
-        .package-version { opacity: 0.6; font-size: 0.8rem; }
-
-        /* SVG Filter Definition (chỉ hoạt động trên một số trình duyệt) */
-        .svg-filters { display: none; }
+        .package-item:last-child { 
+            border-bottom: none; 
+        }
+        
+        .package-name { 
+            font-weight: 500; 
+            font-size: 0.95rem;
+        }
+        .package-version { 
+            color: rgba(255, 255, 255, 0.5); 
+            font-size: 0.8rem; 
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- SVG Filter cho hiệu ứng Liquid Glass -->
-    <svg class="svg-filters">
-        <filter id="liquid-glass-filter">
-            <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="2" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-    </svg>
+    <!-- Các quả cầu màu phía sau kính -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
 
     <div class="liquid-glass">
         <h1>TaoJB Repo</h1>
         <p class="subtitle">Kho tweak cá nhân · Tương thích Sileo & Zebra</p>
 
         <div class="btn-group">
-            <!-- Nút thêm vào Sileo -->
             <a href="sileo://source/https://duchaivcyv-design.github.io/" class="btn btn-sileo">
                 🧊 Thêm vào Sileo
             </a>
-            <!-- Nút thêm vào Zebra -->
             <a href="zbra://sources/add/https://duchaivcyv-design.github.io/" class="btn btn-zebra">
                 🦓 Thêm vào Zebra
             </a>
-            <!-- Nút copy link repo -->
             <button onclick="copyRepoLink()" class="btn btn-copy" id="copyBtn">
                 📋 Sao chép URL Repo
             </button>
         </div>
 
-        <!-- Danh sách gói (có thể sửa tay cho đúng với repo của bạn) -->
         <div class="package-list">
             <div class="package-item">
                 <span class="package-name">27CC Ios 14-18.0</span>
-                <span class="package-version">6.0.2-5</span>
+                <span class="package-version">v6.0.2-5</span>
             </div>
             <div class="package-item">
                 <span class="package-name">DynaFake 14-18.0</span>
-                <span class="package-version">6.0.2-5</span>
+                <span class="package-version">v6.0.2-5</span>
             </div>
             <div class="package-item">
                 <span class="package-name">Liquid Tab Ios 14-18.0</span>
-                <span class="package-version">6.0.2-5</span>
+                <span class="package-version">v6.0.2-5</span>
             </div>
             <div class="package-item">
                 <span class="package-name">26Morph 14-18.0</span>
-                <span class="package-version">6.0.2-5</span>
+                <span class="package-version">v6.0.2-5</span>
             </div>
             <div class="package-item">
                 <span class="package-name">UnlockCode ios 14-18.0</span>
-                <span class="package-version">6.0.2-5</span>
+                <span class="package-version">v6.0.2-5</span>
             </div>
             <div class="package-item">
                 <span class="package-name">OpenWave Ios 14-18.0</span>
-                <span class="package-version">6.0.2-5</span>
+                <span class="package-version">v6.0.2-5</span>
             </div>
             <div class="package-item">
                 <span class="package-name">2712 (trọn bộ) ios 14-18</span>
-                <span class="package-version">6.0.2-5</span>
+                <span class="package-version">v6.0.2-5</span>
             </div>
         </div>
     </div>
@@ -216,11 +280,12 @@
                 const btn = document.getElementById('copyBtn');
                 const originalText = btn.innerHTML;
                 btn.innerHTML = '✅ Đã sao chép!';
+                btn.style.background = 'rgba(52, 199, 89, 0.6)';
                 setTimeout(() => {
                     btn.innerHTML = originalText;
+                    btn.style.background = '';
                 }, 2000);
             }).catch(err => {
-                // Fallback cho trình duyệt cũ
                 alert("URL Repo: " + url);
             });
         }
