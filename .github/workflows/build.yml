@@ -235,38 +235,37 @@ jobs:
                               pass
 
           def patch_control(path, target_arch, env_mode):
+              """PARSE CHUẨN DEBIAN: tach field + continuation -> dict -> viet lai theo thu tu chuan. KHONG the sai."""
               with open(path, 'r') as f:
                   raw = f.read()
-              # 1. Thay Architecture (toan bo field, ke ca continuation)
-              raw = re.sub(r'(?m)^Architecture:.*(\n[ \t].*)*', f'Architecture: {target_arch}\n', raw, count=1)
-              # 2. Thay Package (bo suffix .roothide/.rootless/.rootful)
-              def _pkg_sub(m):
-                  pid = m.group(1).strip()
-                  pid = re.sub(r'\.(roothide|rootless|rootful)$', '', pid)
-                  return f'Package: {pid}\n'
-              raw = re.sub(r'(?m)^Package:[ \t]*(.*?)(\n[ \t].*)*\n', _pkg_sub, raw, count=1)
-              # 3. Thay toan bo block Depends (field + continuation) — regex dotall cho den dong tiep theo khong bat dau bang space/tab
-              deps_str = ''
-              m = re.search(r'(?ms)^Depends:[ \t]*(.*?)(?=\n[A-Za-z-]+:|\Z)', raw)
-              if m:
-                  deps_str = m.group(1)
-                  # gop continuation (xuong dong + space) thanh 1 dong
-                  deps_str = re.sub(r'\n[ \t]+', ' ', deps_str)
-              # 4. Xu ly deps: xoa cac package khong mong muon (ke ca version constraint)
+              # 1. Parse tung field (ke ca continuation) — regex: field name + value den field tiep theo hoac cuoi
+              field_re = re.compile(r'(?ms)^([A-Za-z][A-Za-z0-9-]*):[ \t]*(.*?)(?=\n[A-Za-z][A-Za-z0-9-]*:|\Z)')
+              fields = {}
+              order = []
+              for m in field_re.finditer(raw):
+                  name = m.group(1)
+                  val = m.group(2).rstrip()
+                  if name != 'Description':
+                      val = re.sub(r'\n[ \t]+', ' ', val).strip()
+                  if name not in fields:
+                      order.append(name)
+                  fields[name] = val
+              # 2. Cap nhat cac field can thay
+              if 'Package' in fields:
+                  fields['Package'] = re.sub(r'\.(roothide|rootless|rootful)$', '', fields['Package'].strip())
+              fields['Architecture'] = target_arch
+              # 3. Xu ly Depends
+              deps_str = fields.get('Depends', '')
               for pat in [r'\bmobilesubstrate\b(\s*\([^)]*\))?', r'\bpreferenceloader\b(\s*\([^)]*\))?',
                           r'\broothide\b(\s*\([^)]*\))?', r'\bellekit\b(\s*\([^)]*\))?',
                           r'\bsubstrate\b(\s*\([^)]*\))?']:
                   deps_str = re.sub(pat, '', deps_str)
-              # 5. Tach tung dep, LOC HOP LE: phan tu phai co package name hop le (a-z0-9+.-)
               dep_list = []
               for d in re.split(r',', deps_str):
                   d = d.strip().strip(',').strip()
-                  if not d:
-                      continue
-                  # lay package name (phan truoc space hoac '(')
+                  if not d: continue
                   pkgname = re.split(r'[\s(]', d, 1)[0].strip()
-                  if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9+._-]*$', pkgname):
-                      continue  # LOAI phan tu rac -> khong gay missing package name
+                  if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9+._-]*$', pkgname): continue
                   dep_list.append(d)
               if env_mode == 'rootful':
                   new_deps = ['mobilesubstrate', 'preferenceloader'] + dep_list
@@ -277,24 +276,45 @@ jobs:
               final_deps = []
               seen = set()
               for d in new_deps:
-                  d = d.strip()
                   key = re.split(r'[\s(]', d, 1)[0].strip().lower()
-                  if d and key not in seen:
+                  if key and key not in seen:
                       seen.add(key)
-                      final_deps.append(d)
-              # 6. Ghi de block Depends (hoac bo neu rong)
+                      final_deps.append(d.strip())
               if final_deps:
-                  new_dep_line = 'Depends: %s\n' % ', '.join(final_deps)
-              else:
-                  new_dep_line = ''
-              if m:
-                  raw = raw[:m.start()] + new_dep_line + raw[m.end():]
-              else:
-                  # khong co Depends truoc do, them vao sau Package
-                  raw = re.sub(r'(?m)^(Package:.*\n)', r'\1' + new_dep_line, raw, count=1)
+                  fields['Depends'] = ', '.join(final_deps)
+              elif 'Depends' in fields:
+                  del fields['Depends']
+              # 4. Viet lai theo THU TU CHUAN dpkg (dam bao Version/Architecture/Package o dau)
+              STD_ORDER = ['Package', 'Name', 'Version', 'Architecture', 'Section', 'Priority',
+                           'Depends', 'Pre-Depends', 'Conflicts', 'Replaces', 'Provides',
+                           'Suggests', 'Recommends', 'Enhances', 'Description', 'Maintainer',
+                           'Author', 'Homepage', 'Tag', 'Icon', 'Installed-Size']
+              out = []
+              written = set()
+              for fn in STD_ORDER:
+                  if fn in fields and fn not in written:
+                      val = fields[fn]
+                      if fn == 'Description':
+                          # Description: dong dau + continuation (neu co newline thi giu, dong tiep theo bat dau bang space)
+                          lines = val.split('\n')
+                          out.append(f'Description: {lines[0]}\n')
+                          for ln in lines[1:]:
+                              if ln.strip():
+                                  out.append(' ' + ln.strip() + '\n')
+                              else:
+                                  out.append(' .\n')
+                      else:
+                          out.append(f'{fn}: {val}\n')
+                      written.add(fn)
+              # cac field con lai (theo thu tu xuat hien goc)
+              for fn in order:
+                  if fn not in written:
+                      val = fields[fn]
+                      out.append(f'{fn}: {val}\n')
+                      written.add(fn)
               with open(path, 'w') as f:
-                  f.write(raw)
-              # 7. DEBUG: in control da patch (de biet chinh xac neu van loi)
+                  f.writelines(out)
+              # 5. DEBUG
               try:
                   import sys as _sys
                   with open(path) as _f:
