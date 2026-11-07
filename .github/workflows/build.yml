@@ -1,4 +1,4 @@
-name: Build Sileo Repo (rootful/rootless/roothide)
+name: Build Sileo Repo (3 Env Perfect Patcher — rootful/rootless/roothide)
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pages: write
+      id-token: write
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -480,6 +482,27 @@ jobs:
           Components: main
           Description: Kho tweak ca nhan cua TaoJB — 3 moi truong rootful/rootless/roothide chuan 100%
           EOF
+
+      - name: Cancel in-progress Pages deployment (tránh lỗi "in progress deployment")
+        run: |
+          echo "=== Hủy các Pages deployment đang chạy (nếu có) ==="
+          DEPLOYS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"             "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/deployments" || echo "[]")
+          echo "$DEPLOYS" | python3 -c "
+          import sys, json
+          try:
+              data = json.load(sys.stdin)
+          except:
+              data = []
+          ids = [d.get('id') for d in data if isinstance(d, dict) and d.get('status') in ('in_progress','in_progress_queue')]
+          for i in ids:
+              print(i)
+          " | while read -r dep_id; do
+              [ -n "$dep_id" ] || continue
+              echo "Hủy deployment $dep_id..."
+              curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"                 "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/deployments/$dep_id/cancel" || true
+              sleep 2
+          done
+          echo "=== Đã hủy xong (nếu có) ==="
 
       - name: Commit and Push
         run: |
