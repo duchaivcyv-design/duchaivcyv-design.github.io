@@ -91,6 +91,48 @@ jobs:
                   return "@loader_path/.jbroot" + p[len("/var/jb"):]
               return p
 
+          def relocate_rootful(temp_dir):
+              """BAN ROOTFUL: di chuyen /var/jb/* len goc (rootful KHONG dung /var/jb). Khong tao /rootfs/ (file rootfs giu nguyen)."""
+              import shutil
+              jb = os.path.join(temp_dir, 'var', 'jb')
+              if os.path.isdir(jb):
+                  for item in os.listdir(jb):
+                      s = os.path.join(jb, item)
+                      d = os.path.join(temp_dir, item)
+                      if os.path.exists(d):
+                          if os.path.isdir(s):
+                              for sub in os.listdir(s):
+                                  os.makedirs(d, exist_ok=True)
+                                  try: os.rename(os.path.join(s, sub), os.path.join(d, sub))
+                                  except: pass
+                          else:
+                              try:
+                                  os.remove(d)
+                                  os.rename(s, d)
+                              except: pass
+                      else:
+                          try: os.rename(s, d)
+                          except: pass
+                  shutil.rmtree(jb, ignore_errors=True)
+                  var_dir = os.path.join(temp_dir, 'var')
+                  if os.path.isdir(var_dir) and not os.listdir(var_dir):
+                      try: os.rmdir(var_dir)
+                      except: pass
+
+          def _patch_binary_strings(bin_path, env_mode):
+              """Ky thuat chuan: thay /var/jb/ (8 bytes) -> //////// (8 bytes) trong strings binary. Khong doi kich thuoc, duong dan van hop le (nhieu / = 1 /)."""
+              if env_mode == 'rootless':
+                  return  # rootless giu nguyen /var/jb
+              try:
+                  with open(bin_path, 'rb') as f:
+                      data = f.read()
+                  new_data = data.replace(b'/var/jb/', b'////////')
+                  if new_data != data:
+                      with open(bin_path, 'wb') as f:
+                          f.write(new_data)
+              except Exception:
+                  pass
+
           def patch_binary(bin_path, env_mode):
               """env_mode: rootful | rootless | roothide — theo cơ chế chuẩn install_name_tool của RootHide Patcher + rootless-patcher"""
               if not os.path.exists(bin_path): return
@@ -186,6 +228,8 @@ jobs:
                       binary.write(bin_path)
               except Exception:
                   pass
+              # ---- Patch strings trong binary (ky thuat ////////) ----
+              _patch_binary_strings(bin_path, env_mode)
               # ---- Resign đúng theo môi trường ----
               try:
                   if env_mode == 'roothide' and is_exec:
@@ -277,6 +321,9 @@ jobs:
               d = tempfile.mkdtemp()
               try:
                   subprocess.run(['dpkg-deb', '-R', deb_path, d], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                  # kiem tra filesystem: rootful & roothide KHONG duoc con var/jb
+                  if env_mode != 'rootless' and os.path.isdir(os.path.join(d, 'var', 'jb')):
+                      print(f"[FAIL] {os.path.basename(deb_path)} VAN CON thu muc var/jb trong deb (chua relocate)")
                   bad = []
                   for root, dirs, files in os.walk(d):
                       for file in files:
@@ -483,8 +530,11 @@ jobs:
               if [ "$T_ENV" = "roothide" ]; then
                 echo "  [2/5] Di chuyển /var/jb lên gốc + /rootfs/ (roothide)..."
                 python3 -c "import patch; patch.relocate_roothide('temp_dir')"
+              elif [ "$T_ENV" = "rootful" ]; then
+                echo "  [2/5] Di chuyển /var/jb lên gốc (rootful — không dùng /var/jb)..."
+                python3 -c "import patch; patch.relocate_rootful('temp_dir')"
               else
-                echo "  [2/5] Bỏ qua relocate (không phải roothide)"
+                echo "  [2/5] Bỏ qua relocate (rootless giữ /var/jb)"
               fi
               echo "  [3/5] Patch control + plists + text files..."
               python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', '$T_ARCH', '$T_ENV')"
