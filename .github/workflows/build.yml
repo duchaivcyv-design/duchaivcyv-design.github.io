@@ -155,6 +155,15 @@ jobs:
                           name = cmd.name
                           if is_blacklisted(name):
                               continue
+                          bname = os.path.basename(name)
+                          # CHUYEN DOI CHUNG: rootful khong co libellekit -> doi sang libsubstrate (API tuong thich)
+                          if env_mode == 'rootful' and bname == 'libellekit.dylib':
+                              if name.startswith('@rpath/'):
+                                  cmd.name = '@rpath/libsubstrate.dylib'
+                              else:
+                                  cmd.name = '/usr/lib/libsubstrate.dylib'
+                              changed = True
+                              continue
                           if env_mode == 'rootful':
                               new = strip_varjb(name)
                               if new != name:
@@ -216,7 +225,8 @@ jobs:
                                        "@loader_path/.jbroot/Library/MobileSubstrate/DynamicLibraries"]
                   elif env_mode == 'rootful':
                       rpaths_to_add = ["/usr/lib", "/usr/local/lib", "/Library/Frameworks",
-                                       "/Library/PreferenceBundles", "/Library/MobileSubstrate/DynamicLibraries"]
+                                       "/Library/PreferenceBundles", "/Library/MobileSubstrate/DynamicLibraries",
+                                       "/Library/Frameworks/CydiaSubstrate.framework"]
                   existing = set()
                   for cmd in binary.commands:
                       if cmd.command == lief.MachO.LoadCommand.TYPE.RPATH:
@@ -345,13 +355,28 @@ jobs:
                   if bad:
                       print(f"[WARN] {os.path.basename(deb_path)} ({env_mode}) con /var/jb trong {len(bad)} load command(s): {bad[:2]}")
                   else:
-                      print(f"[PASS] {os.path.basename(deb_path)} ({env_mode}) — khong con /var/jb trong load commands, size={sz} bytes")
+                      # canh bao them: neu rootful ma con load libellekit -> se khong chay
+                      dylibs = set()
+                      try:
+                          b2 = lief.parse(deb_path)
+                          if b2 and b2.format == lief.Binary.FORMATS.MACHO:
+                              for c2 in b2.commands:
+                                  nm2 = getattr(c2, 'name', None)
+                                  if nm2: dylibs.add(os.path.basename(nm2))
+                      except: pass
+                      warn_dylibs = []
+                      if env_mode == 'rootful' and 'libellekit.dylib' in dylibs:
+                          warn_dylibs.append('libellekit.dylib (khong ton tai tren rootful)')
+                      if warn_dylibs:
+                          print(f"[WARN] {os.path.basename(deb_path)} ({env_mode}) co the khong chay: {', '.join(warn_dylibs)}")
+                      else:
+                          print(f"[PASS] {os.path.basename(deb_path)} ({env_mode}) — khong con /var/jb, size={sz} bytes, {len(dylibs)} dylibs")
               except Exception as e:
                   print(f"[FAIL] {deb_path} verify loi: {e}")
               finally:
                   shutil.rmtree(d, ignore_errors=True)
 
-          def patch_control(path, target_arch, env_mode):
+          def patch_control(path, target_arch, env_mode, icon_url=''):
               """PARSE CHUẨN DEBIAN: tach field + continuation -> dict -> viet lai theo thu tu chuan. KHONG the sai."""
               with open(path, 'r') as f:
                   raw = f.read()
@@ -409,6 +434,11 @@ jobs:
                   fields['Depends'] = ', '.join(final_deps)
               elif 'Depends' in fields:
                   del fields['Depends']
+              # Them Icon neu co URL (tu thu muc icon/ trong repo)
+              if icon_url:
+                  fields['Icon'] = icon_url.strip()
+                  if 'Icon' not in order:
+                      order.append('Icon')
               # 4. Viet lai theo THU TU CHUAN dpkg (dam bao Version/Architecture/Package o dau)
               STD_ORDER = ['Package', 'Name', 'Version', 'Architecture', 'Section', 'Priority',
                            'Depends', 'Pre-Depends', 'Conflicts', 'Replaces', 'Provides',
@@ -523,6 +553,13 @@ jobs:
               iphoneos-arm64e) ORIG_ENV=roothide; TARGETS="rootless:iphoneos-arm64 rootful:iphoneos-arm" ;;
               *)               ORIG_ENV=rootless; TARGETS="rootful:iphoneos-arm roothide:iphoneos-arm64e" ;;
             esac
+            ICON_FILE="icon/${PKG_NAME}.png"
+            if [ -f "$ICON_FILE" ]; then
+              ICON_URL="${PAGES_URL}icon/${PKG_NAME}.png"
+              echo "  -> Tim thay icon: $ICON_FILE => $ICON_URL"
+            else
+              ICON_URL=""
+            fi
             echo "--> Gốc: $deb (môi trường: $ORIG_ENV / $ORIG_ARCH) — giữ nguyên làm 1 vùng"
             for TARGET in $TARGETS; do
               T_ENV=${TARGET%%:*}
@@ -540,7 +577,7 @@ jobs:
                 echo "  [2/5] Bỏ qua relocate (rootless giữ /var/jb)"
               fi
               echo "  [3/5] Patch control + plists + text files..."
-              python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', '$T_ARCH', '$T_ENV')"
+              python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', '$T_ARCH', '$T_ENV', '$ICON_URL')"
               python3 -c "import patch; patch.patch_plists('temp_dir', '$T_ENV')"
               python3 -c "import patch; patch.patch_text_files('temp_dir', '$T_ENV')"
               echo "  [4/5] Patch Mach-O binaries (LOAD_DYLIB/WEAK/REEXPORT + RPATH + resign)..."
@@ -605,7 +642,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add Packages Packages.bz2 Packages.xz Release debs/
+          git add Packages Packages.bz2 Packages.xz Release debs/ icon/ 2>/dev/null || git add Packages Packages.bz2 Packages.xz Release debs/
           git commit -m "Perfect 3-Env Build — rootful/rootless/roothide + @rpath/.jbroot + zstd [skip ci]" || exit 0
           git pull origin main --rebase
           git push origin main
