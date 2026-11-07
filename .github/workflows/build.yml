@@ -237,7 +237,12 @@ jobs:
           def patch_control(path, target_arch, env_mode):
               with open(path, 'r') as f: lines = f.readlines()
               new_lines = []
+              skip_continuation = False
               for line in lines:
+                  if skip_continuation:
+                      if line.startswith(' ') or line.startswith('\t'):
+                          continue  # bo continuation cu cua Depends -> tranh parse loi
+                      skip_continuation = False
                   if line.startswith('Architecture:'):
                       new_lines.append(f'Architecture: {target_arch}\n')
                   elif line.startswith('Package:'):
@@ -246,22 +251,30 @@ jobs:
                       new_lines.append(f'Package: {pkg_id}\n')
                   elif line.startswith('Depends:'):
                       deps = line.replace('Depends:', '').strip()
-                      deps = re.sub(r'\bmobilesubstrate\b\s*(\([^)]*\))?\s*,?', '', deps)
-                      deps = re.sub(r'\bpreferenceloader\b\s*(\([^)]*\))?\s*,?', '', deps)
-                      deps = re.sub(r'\broothide\b\s*(\([^)]*\))?\s*,?', '', deps)
-                      deps = re.sub(r'\bellekit\b\s*(\([^)]*\))?\s*,?', '', deps)
-                      dep_list = [d.strip() for d in deps.split(',') if d.strip()]
+                      for pat in [r'\bmobilesubstrate\b(\s*\([^)]*\))?', r'\bpreferenceloader\b(\s*\([^)]*\))?',
+                                  r'\broothide\b(\s*\([^)]*\))?', r'\bellekit\b(\s*\([^)]*\))?',
+                                  r'\bsubstrate\b(\s*\([^)]*\))?']:
+                          deps = re.sub(pat, '', deps)
+                      dep_list = []
+                      for d in re.split(r',', deps):
+                          d = d.strip().strip(',').strip()
+                          if d and not re.match(r'^[,;\s]+$', d):
+                              dep_list.append(d)
                       if env_mode == 'rootful':
                           new_deps = ['mobilesubstrate', 'preferenceloader'] + dep_list
                       elif env_mode == 'roothide':
                           new_deps = ['roothide', 'ellekit', 'preferenceloader'] + dep_list
-                      else:  # rootless
+                      else:
                           new_deps = ['ellekit', 'preferenceloader'] + dep_list
                       final_deps = []
                       for d in new_deps:
-                          if d not in final_deps:
+                          d = d.strip()
+                          if d and d not in final_deps:
                               final_deps.append(d)
-                      new_lines.append(f'Depends: {", ".join(final_deps)}\n')
+                      if final_deps:
+                          new_lines.append('Depends: %s\n' % ', '.join(final_deps))
+                      # neu rong thi khong ghi dong Depends (tranh missing package name)
+                      skip_continuation = True
                   else:
                       new_lines.append(line)
               with open(path, 'w') as f:
