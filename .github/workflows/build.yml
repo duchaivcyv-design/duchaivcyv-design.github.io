@@ -264,6 +264,43 @@ jobs:
                       except Exception:
                           pass
 
+          def verify_deb(deb_path, env_mode):
+              """Verify nghiêm túc: giải nén lại, kiểm tra CÒN /var/jb trong load commands + control đúng. In PASS/WARN."""
+              import tempfile, shutil, subprocess
+              if not os.path.exists(deb_path):
+                  print(f"[FAIL] {deb_path} KHONG TON TAI")
+                  return
+              sz = os.path.getsize(deb_path)
+              if sz < 1024:
+                  print(f"[FAIL] {deb_path} QUA NHO ({sz} bytes) — bi hong")
+                  return
+              d = tempfile.mkdtemp()
+              try:
+                  subprocess.run(['dpkg-deb', '-R', deb_path, d], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                  bad = []
+                  for root, dirs, files in os.walk(d):
+                      for file in files:
+                          p = os.path.join(root, file)
+                          try:
+                              b = lief.parse(p)
+                              if b and b.format == lief.Binary.FORMATS.MACHO:
+                                  for cmd in b.commands:
+                                      nm = getattr(cmd, 'name', None)
+                                      pt = getattr(cmd, 'path', None)
+                                      if nm and '/var/jb' in nm:
+                                          bad.append((os.path.basename(p), nm))
+                                      if pt and '/var/jb' in pt:
+                                          bad.append((os.path.basename(p), pt))
+                          except: pass
+                  if bad:
+                      print(f"[WARN] {os.path.basename(deb_path)} ({env_mode}) con /var/jb trong {len(bad)} load command(s): {bad[:2]}")
+                  else:
+                      print(f"[PASS] {os.path.basename(deb_path)} ({env_mode}) — khong con /var/jb trong load commands, size={sz} bytes")
+              except Exception as e:
+                  print(f"[FAIL] {deb_path} verify loi: {e}")
+              finally:
+                  shutil.rmtree(d, ignore_errors=True)
+
           def patch_control(path, target_arch, env_mode):
               """PARSE CHUẨN DEBIAN: tach field + continuation -> dict -> viet lai theo thu tu chuan. KHONG the sai."""
               with open(path, 'r') as f:
@@ -415,6 +452,12 @@ jobs:
           rm -f debs/*_rootful_iphoneos-arm.deb
           rm -f debs/*_roothide_iphoneos-arm64e.deb
 
+          echo "=== ĐỔI TÊN DEB KHÔNG KHOẢNG TRÁNG (tránh Sileo -1 byte) ==="
+          for f in debs/*.deb; do
+            [ -f "$f" ] || continue
+            newname=$(echo "$f" | sed 's/ /_/g; s/[()]/_/g; s/__*/_/g')
+            if [ "$f" != "$newname" ]; then mv -f "$f" "$newname"; echo "  -> doi ten: $f => $newname"; fi
+          done
           echo "=== TỰ ĐỘNG PHÁT HIỆN MÔI TRƯỜNG GỐC → BUILD 2 VÙNG CÒN LẠI (đủ 3 vùng chuẩn) ==="
           for deb in debs/*.deb; do
             [ -f "$deb" ] || continue
@@ -453,7 +496,8 @@ jobs:
               done
               echo "  [5/5] Đóng gói deb $T_ENV..."
               if dpkg-deb --help 2>/dev/null | grep -q zstd; then ZSTD='-Zzstd'; else ZSTD=''; fi
-              fakeroot dpkg-deb -b --root-owner-group $ZSTD temp_dir "debs/${PKG_NAME}_${PKG_VER}_${T_ENV}_${T_ARCH}.deb" > /dev/null
+              fakeroot dpkg-deb -b --root-owner-group $ZSTD temp_dir "debs/${PKG_NAME}_${PKG_VER}_${T_ENV}_${T_ARCH}.deb"
+              python3 -c "import patch; patch.verify_deb('debs/${PKG_NAME}_${PKG_VER}_${T_ENV}_${T_ARCH}.deb', '$T_ENV')"
               rm -rf temp_dir
               echo "  ✅ Xong: debs/${PKG_NAME}_${PKG_VER}_${T_ENV}_${T_ARCH}.deb"
             done
