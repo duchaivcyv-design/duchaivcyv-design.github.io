@@ -235,50 +235,71 @@ jobs:
                               pass
 
           def patch_control(path, target_arch, env_mode):
-              with open(path, 'r') as f: lines = f.readlines()
-              new_lines = []
-              skip_continuation = False
-              for line in lines:
-                  if skip_continuation:
-                      if line.startswith(' ') or line.startswith('\t'):
-                          continue  # bo continuation cu cua Depends -> tranh parse loi
-                      skip_continuation = False
-                  if line.startswith('Architecture:'):
-                      new_lines.append(f'Architecture: {target_arch}\n')
-                  elif line.startswith('Package:'):
-                      pkg_id = line.replace('Package:', '').strip()
-                      pkg_id = re.sub(r'\.(roothide|rootless|rootful)$', '', pkg_id)
-                      new_lines.append(f'Package: {pkg_id}\n')
-                  elif line.startswith('Depends:'):
-                      deps = line.replace('Depends:', '').strip()
-                      for pat in [r'\bmobilesubstrate\b(\s*\([^)]*\))?', r'\bpreferenceloader\b(\s*\([^)]*\))?',
-                                  r'\broothide\b(\s*\([^)]*\))?', r'\bellekit\b(\s*\([^)]*\))?',
-                                  r'\bsubstrate\b(\s*\([^)]*\))?']:
-                          deps = re.sub(pat, '', deps)
-                      dep_list = []
-                      for d in re.split(r',', deps):
-                          d = d.strip().strip(',').strip()
-                          if d and not re.match(r'^[,;\s]+$', d):
-                              dep_list.append(d)
-                      if env_mode == 'rootful':
-                          new_deps = ['mobilesubstrate', 'preferenceloader'] + dep_list
-                      elif env_mode == 'roothide':
-                          new_deps = ['roothide', 'ellekit', 'preferenceloader'] + dep_list
-                      else:
-                          new_deps = ['ellekit', 'preferenceloader'] + dep_list
-                      final_deps = []
-                      for d in new_deps:
-                          d = d.strip()
-                          if d and d not in final_deps:
-                              final_deps.append(d)
-                      if final_deps:
-                          new_lines.append('Depends: %s\n' % ', '.join(final_deps))
-                      # neu rong thi khong ghi dong Depends (tranh missing package name)
-                      skip_continuation = True
-                  else:
-                      new_lines.append(line)
+              with open(path, 'r') as f:
+                  raw = f.read()
+              # 1. Thay Architecture (toan bo field, ke ca continuation)
+              raw = re.sub(r'(?m)^Architecture:.*(\n[ \t].*)*', f'Architecture: {target_arch}\n', raw, count=1)
+              # 2. Thay Package (bo suffix .roothide/.rootless/.rootful)
+              def _pkg_sub(m):
+                  pid = m.group(1).strip()
+                  pid = re.sub(r'\.(roothide|rootless|rootful)$', '', pid)
+                  return f'Package: {pid}\n'
+              raw = re.sub(r'(?m)^Package:[ \t]*(.*?)(\n[ \t].*)*\n', _pkg_sub, raw, count=1)
+              # 3. Thay toan bo block Depends (field + continuation) — regex dotall cho den dong tiep theo khong bat dau bang space/tab
+              deps_str = ''
+              m = re.search(r'(?ms)^Depends:[ \t]*(.*?)(?=\n[A-Za-z-]+:|\Z)', raw)
+              if m:
+                  deps_str = m.group(1)
+                  # gop continuation (xuong dong + space) thanh 1 dong
+                  deps_str = re.sub(r'\n[ \t]+', ' ', deps_str)
+              # 4. Xu ly deps: xoa cac package khong mong muon (ke ca version constraint)
+              for pat in [r'\bmobilesubstrate\b(\s*\([^)]*\))?', r'\bpreferenceloader\b(\s*\([^)]*\))?',
+                          r'\broothide\b(\s*\([^)]*\))?', r'\bellekit\b(\s*\([^)]*\))?',
+                          r'\bsubstrate\b(\s*\([^)]*\))?']:
+                  deps_str = re.sub(pat, '', deps_str)
+              # 5. Tach tung dep, LOC HOP LE: phan tu phai co package name hop le (a-z0-9+.-)
+              dep_list = []
+              for d in re.split(r',', deps_str):
+                  d = d.strip().strip(',').strip()
+                  if not d:
+                      continue
+                  # lay package name (phan truoc space hoac '(')
+                  pkgname = re.split(r'[\s(]', d, 1)[0].strip()
+                  if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9+._-]*$', pkgname):
+                      continue  # LOAI phan tu rac -> khong gay missing package name
+                  dep_list.append(d)
+              if env_mode == 'rootful':
+                  new_deps = ['mobilesubstrate', 'preferenceloader'] + dep_list
+              elif env_mode == 'roothide':
+                  new_deps = ['roothide', 'ellekit', 'preferenceloader'] + dep_list
+              else:
+                  new_deps = ['ellekit', 'preferenceloader'] + dep_list
+              final_deps = []
+              seen = set()
+              for d in new_deps:
+                  d = d.strip()
+                  key = re.split(r'[\s(]', d, 1)[0].strip().lower()
+                  if d and key not in seen:
+                      seen.add(key)
+                      final_deps.append(d)
+              # 6. Ghi de block Depends (hoac bo neu rong)
+              if final_deps:
+                  new_dep_line = 'Depends: %s\n' % ', '.join(final_deps)
+              else:
+                  new_dep_line = ''
+              if m:
+                  raw = raw[:m.start()] + new_dep_line + raw[m.end():]
+              else:
+                  # khong co Depends truoc do, them vao sau Package
+                  raw = re.sub(r'(?m)^(Package:.*\n)', r'\1' + new_dep_line, raw, count=1)
               with open(path, 'w') as f:
-                  f.writelines(new_lines)
+                  f.write(raw)
+              # 7. DEBUG: in control da patch (de biet chinh xac neu van loi)
+              try:
+                  import sys as _sys
+                  with open(path) as _f:
+                      _sys.stderr.write("=== DEBUG control after patch ===\n" + _f.read() + "=== END DEBUG ===\n")
+              except: pass
 
           def relocate_roothide(temp_dir):
               """Di chuyển /var/jb/* lên gốc, file còn lại -> /rootfs/ (theo RootHide Patcher chuẩn)"""
@@ -349,6 +370,7 @@ jobs:
                 rm -rf temp_dir
                 dpkg-deb -R "$deb" temp_dir
                 python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm', 'rootful')"
+                echo "[DEBUG rootful Depends]"; grep -A1 '^Depends:' temp_dir/DEBIAN/control | head -3
                 python3 -c "import patch; patch.patch_plists('temp_dir', 'rootful')"
                 find temp_dir -type f -exec sh -c 'file -b "$1" | grep -q Mach-O && printf "%s\n" "$1"' _ {} \; | while IFS= read -r bin; do
                     python3 -c "import patch; patch.patch_binary('$bin', 'rootful')"
@@ -362,6 +384,7 @@ jobs:
                 dpkg-deb -R "$deb" temp_dir
                 python3 -c "import patch; patch.relocate_roothide('temp_dir')"
                 python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm64e', 'roothide')"
+                echo "[DEBUG roothide Depends]"; grep -A1 '^Depends:' temp_dir/DEBIAN/control | head -3
                 python3 -c "import patch; patch.patch_plists('temp_dir', 'roothide')"
                 find temp_dir -type f -exec sh -c 'file -b "$1" | grep -q Mach-O && printf "%s\n" "$1"' _ {} \; | while IFS= read -r bin; do
                     python3 -c "import patch; patch.patch_binary('$bin', 'roothide')"
