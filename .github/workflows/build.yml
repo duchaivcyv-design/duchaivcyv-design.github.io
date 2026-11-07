@@ -282,36 +282,54 @@ jobs:
 
           def relocate_roothide(temp_dir):
               """Di chuyển /var/jb/* lên gốc, file còn lại -> /rootfs/ (theo RootHide Patcher chuẩn)"""
+              import shutil
               jb = os.path.join(temp_dir, 'var', 'jb')
+              kept_from_jb = set()
               if os.path.isdir(jb):
                   for item in os.listdir(jb):
-                      src = os.path.join(jb, item)
-                      dst = os.path.join(temp_dir, item)
-                      if os.path.exists(dst):
-                          import shutil
-                          if os.path.isdir(src):
-                              for sub in os.listdir(src):
-                                  os.makedirs(dst, exist_ok=True)
-                                  os.rename(os.path.join(src, sub), os.path.join(dst, sub))
+                      s = os.path.join(jb, item)
+                      d = os.path.join(temp_dir, item)
+                      if os.path.exists(d):
+                          if os.path.isdir(s):
+                              for sub in os.listdir(s):
+                                  os.makedirs(d, exist_ok=True)
+                                  try: os.rename(os.path.join(s, sub), os.path.join(d, sub))
+                                  except: pass
                           else:
-                              os.remove(dst)
-                              os.rename(src, dst)
+                              try:
+                                  os.remove(d)
+                                  os.rename(s, d)
+                              except: pass
                       else:
-                          os.rename(src, dst)
-                  os.rmdir(jb)
+                          try: os.rename(s, d)
+                          except: pass
+                      kept_from_jb.add(item)
+                  # xoa var/jb va var (ignore error neu co dotfile)
+                  shutil.rmtree(jb, ignore_errors=True)
                   var_dir = os.path.join(temp_dir, 'var')
-                  try: os.rmdir(var_dir)
-                  except: pass
-              # file còn lại (rootfs) chuyển vào /rootfs/
+                  if os.path.isdir(var_dir) and not os.listdir(var_dir):
+                      try: os.rmdir(var_dir)
+                      except: pass
+              # file con lai (rootfs) chuyen vao /rootfs/ — CHI giu cac thu muc da di chuyen tu /var/jb
               rootfs = os.path.join(temp_dir, 'rootfs')
               os.makedirs(rootfs, exist_ok=True)
+              # cac thu muc duoc phep o goc: nhung thu muc den tu /var/jb (thuong la Applications, Library, usr, bin, sbin, etc)
+              KEEP_AT_ROOT = {'Applications','Library','usr','bin','sbin','etc'}
               for item in os.listdir(temp_dir):
-                  if item in ('DEBIAN', 'rootfs', 'var'):
+                  if item in ('DEBIAN', 'rootfs'):
                       continue
-                  src = os.path.join(temp_dir, item)
-                  if os.path.isdir(src) and item in ('Applications','Library','usr','bin','sbin','etc','var','System','private'):
-                      continue  # đã là đường dẫn tweak chuẩn, giữ ở gốc
-                  os.rename(src, os.path.join(rootfs, item))
+                  s = os.path.join(temp_dir, item)
+                  if item in kept_from_jb and item in KEEP_AT_ROOT:
+                      continue  # thu muc tu /var/jb -> giu o goc
+                  if os.path.isdir(s) and item in KEEP_AT_ROOT and item in kept_from_jb:
+                      continue
+                  # moi thu khac (var, System, private, file rootfs...) -> vao /rootfs/
+                  d = os.path.join(rootfs, item)
+                  try:
+                      if os.path.exists(d):
+                          shutil.rmtree(d, ignore_errors=True)
+                      os.rename(s, d)
+                  except: pass
           PYEOF
 
           echo "=== DỌN DẸP FILE CŨ (giữ NGUYÊN deb gốc làm rootless arm64) ==="
@@ -328,24 +346,27 @@ jobs:
                 PKG_VER=$(dpkg-deb -f "$deb" Version)
 
                 # ========== 1. BẢN ROOTFUL (iphoneos-arm) — bỏ /var/jb prefix ==========
+                rm -rf temp_dir
                 dpkg-deb -R "$deb" temp_dir
                 python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm', 'rootful')"
                 python3 -c "import patch; patch.patch_plists('temp_dir', 'rootful')"
-                find temp_dir -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 | while read bin; do
+                find temp_dir -type f -exec sh -c 'file -b "$1" | grep -q Mach-O && printf "%s\n" "$1"' _ {} \; | while IFS= read -r bin; do
                     python3 -c "import patch; patch.patch_binary('$bin', 'rootful')"
                 done
-                fakeroot dpkg-deb -b --root-owner-group -Zzstd temp_dir "debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
+                if dpkg-deb --help 2>/dev/null | grep -q zstd; then ZSTD='-Zzstd'; else ZSTD=''; fi
+                fakeroot dpkg-deb -b --root-owner-group $ZSTD temp_dir "debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
                 rm -rf temp_dir
 
                 # ========== 2. BẢN ROOTHIDE (iphoneos-arm64e) — di chuyển /var/jb lên gốc + @loader_path/.jbroot ==========
+                rm -rf temp_dir
                 dpkg-deb -R "$deb" temp_dir
                 python3 -c "import patch; patch.relocate_roothide('temp_dir')"
                 python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm64e', 'roothide')"
                 python3 -c "import patch; patch.patch_plists('temp_dir', 'roothide')"
-                find temp_dir -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 | while read bin; do
+                find temp_dir -type f -exec sh -c 'file -b "$1" | grep -q Mach-O && printf "%s\n" "$1"' _ {} \; | while IFS= read -r bin; do
                     python3 -c "import patch; patch.patch_binary('$bin', 'roothide')"
                 done
-                fakeroot dpkg-deb -b --root-owner-group -Zzstd temp_dir "debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
+                fakeroot dpkg-deb -b --root-owner-group $ZSTD temp_dir "debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
                 rm -rf temp_dir
 
                 echo "=== Xong 2 vùng: rootful(arm) + roothide(arm64e) — rootless(arm64) giữ nguyên gốc: $PKG_NAME ==="
