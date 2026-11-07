@@ -63,10 +63,11 @@ jobs:
           import plistlib
 
           # ===== BLACKLIST chuẩn (theo ConversionRuleset.json) — KHÔNG patch các đường dẫn hệ thống =====
+          # FIX ROOTHIDE #1: đã xóa "/var/jb" khỏi blacklist (trước đây làm mọi đường dẫn /var/jb/... bị bỏ qua, không được chuyển đổi)
           BLACKLIST = [
               "/System", "/usr/lib/libobjc", "/usr/lib/libc++", "/usr/lib/libstdc++", "/usr/lib/dyld",
               "/usr/lib/libMobileGestalt.dylib", "/usr/lib/system", "/usr/lib/swift", "/usr/lib/libswift",
-              "/usr/lib/libsql", "/usr/lib/libz", "/var/jb",
+              "/usr/lib/libsql", "/usr/lib/libz",
               "/var/mobile/Library/Preferences/com.apple.", "/var/mobile/Library/Preferences/systemgroup.com.apple.",
               "/var/mobile/Library/Preferences/group.com.apple.", "/var/mobile/Library/Preferences/.GlobalPreferences",
               "/var/mobile/Library/SpringBoard", "/var/mobile/Library/WebClips", "/Library/Wallpaper",
@@ -118,9 +119,10 @@ jobs:
                       except: pass
 
           def _patch_binary_strings(bin_path, env_mode):
-              """Ky thuat chuan: thay /var/jb/ (8 bytes) -> //////// (8 bytes) trong strings binary. Khong doi kich thuoc, duong dan van hop le (nhieu / = 1 /)."""
-              if env_mode == 'rootless':
-                  return  # rootless giu nguyen /var/jb
+              """Ky thuat: thay /var/jb/ (8 bytes) -> //////// (8 bytes) trong strings binary. CHI dung cho rootful.
+              FIX ROOTHIDE #2: roothide/rootless KHONG patch strings (////////usr/lib tren roothide tro ve rootfs that, gay crash/safe mode)."""
+              if env_mode != 'rootful':
+                  return
               try:
                   with open(bin_path, 'rb') as f:
                       data = f.read()
@@ -131,117 +133,137 @@ jobs:
               except Exception:
                   pass
 
+          # FIX ROOTHIDE #4: patch_binary viết lại (lief.MachO.parse hỗ trợ fat, chỉ ghi khi có thay đổi, tạo symlink .jbroot, log lỗi)
+          DEP_TYPES = {'LOAD_DYLIB', 'LOAD_WEAK_DYLIB', 'REEXPORT_DYLIB', 'LOAD_REEXPORT_DYLIB', 'LAZY_LOAD_DYLIB'}
+
+          def _ctype(cmd):
+              return str(cmd.command).split('.')[-1]
+
+          def _new_rpath(rp):
+              try:
+                  return lief.MachO.RPathCommand.create(rp)
+              except Exception:
+                  return lief.MachO.RPathCommand(rp)
+
+          def _convert_name(name, env_mode, is_id):
+              base = os.path.basename(name)
+              if env_mode == 'roothide':
+                  if name.startswith('/var/jb/'):
+                      return '@loader_path/.jbroot' + name[len('/var/jb'):]
+                  if name.endswith('CydiaSubstrate.framework/CydiaSubstrate'):
+                      return '@loader_path/.jbroot/usr/lib/libsubstrate.dylib'
+                  return name
+              if is_blacklisted(name):
+                  return name
+              if env_mode == 'rootful':
+                  if base == 'libellekit.dylib':
+                      return '@rpath/libsubstrate.dylib' if name.startswith('@rpath/') else '/usr/lib/libsubstrate.dylib'
+                  return strip_varjb(name)
+              # rootless
+              if is_id:
+                  if not name.startswith('@rpath/') and not name.startswith('/var/jb/'):
+                      return '@rpath/' + base
+                  return name
+              if name == '/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate':
+                  return '@rpath/libsubstrate.dylib'
+              if name.startswith('/Library/Frameworks/'):
+                  fw = name.split('/')[-2]
+                  return '@rpath/%s.framework/%s' % (fw, fw)
+              if name.startswith('/Library/PreferenceBundles/') and name.endswith('.bundle'):
+                  return '@rpath/%s/%s' % (base, base.replace('.bundle', ''))
+              if name.startswith('/Library/MobileSubstrate/DynamicLibraries/'):
+                  return '@rpath/' + base
+              if name.startswith('/usr/lib/') or name.startswith('/usr/local/lib/'):
+                  return '@rpath/' + base
+              return name
+
           def patch_binary(bin_path, env_mode):
-              """env_mode: rootful | rootless | roothide — theo cơ chế chuẩn install_name_tool của RootHide Patcher + rootless-patcher"""
-              if not os.path.exists(bin_path): return
-              ent_file = bin_path + ".ent"
+              """env_mode: rootful | rootless | roothide"""
+              if not os.path.isfile(bin_path) or os.path.islink(bin_path):
+                  return
+              ent_file = bin_path + '.ent'
               has_ent = False
               try:
                   with open(ent_file, 'w') as f:
-                      res = subprocess.run(['ldid', '-e', bin_path], stdout=f, stderr=subprocess.DEVNULL)
-                      if res.returncode == 0 and os.path.getsize(ent_file) > 0:
-                          has_ent = True
-              except: pass
-              is_exec = False
-              try:
-                  binary = lief.parse(bin_path)
-                  if not binary or binary.format != lief.Binary.FORMATS.MACHO:
-                      return
-                  is_exec = binary.header.file_type == lief.MachO.Header.FILE_TYPES.EXECUTE
-                  changed = False
-                  for cmd in binary.commands:
-                      # ---- LC_LOAD_DYLIB ----
-                      if cmd.command in (lief.MachO.LoadCommand.TYPE.LOAD_DYLIB, lief.MachO.LoadCommand.TYPE.LOAD_WEAK_DYLIB, lief.MachO.LoadCommand.TYPE.LOAD_REEXPORT_DYLIB):
-                          name = cmd.name
-                          if is_blacklisted(name):
-                              continue
-                          bname = os.path.basename(name)
-                          # CHUYEN DOI CHUNG: rootful khong co libellekit -> doi sang libsubstrate (API tuong thich)
-                          if env_mode == 'rootful' and bname == 'libellekit.dylib':
-                              if name.startswith('@rpath/'):
-                                  cmd.name = '@rpath/libsubstrate.dylib'
-                              else:
-                                  cmd.name = '/usr/lib/libsubstrate.dylib'
-                              changed = True
-                              continue
-                          if env_mode == 'rootful':
-                              new = strip_varjb(name)
-                              if new != name:
-                                  cmd.name = new; changed = True
-                          elif env_mode == 'roothide':
-                              if name.startswith("/var/jb/"):
-                                  cmd.name = to_jbroot(name); changed = True
-                          elif env_mode == 'rootless':
-                              # chuẩn hóa @rpath theo repack-rootless.sh
-                              if name == "/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate":
-                                  cmd.name = "@rpath/libsubstrate.dylib"; changed = True
-                              elif name.startswith("/Library/Frameworks/") and not name.startswith("/System/"):
-                                  fw = name.split("/")[-2]
-                                  cmd.name = "@rpath/%s.framework/%s" % (fw, fw); changed = True
-                              elif name.startswith("/Library/PreferenceBundles/") and name.endswith(".bundle"):
-                                  bn = os.path.basename(name)
-                                  cmd.name = "@rpath/%s/%s" % (bn, bn.replace(".bundle","")); changed = True
-                              elif name.startswith("/Library/MobileSubstrate/DynamicLibraries/"):
-                                  cmd.name = "@rpath/" + os.path.basename(name); changed = True
-                              elif (name.startswith("/usr/lib/") or name.startswith("/usr/local/lib/")) and not is_blacklisted(name):
-                                  if not name.startswith("/var/jb/"):
-                                      cmd.name = "@rpath/" + os.path.basename(name); changed = True
-                      # ---- LC_RPATH ----
-                      elif cmd.command == lief.MachO.LoadCommand.TYPE.RPATH:
-                          p = cmd.path
-                          if env_mode == 'rootful':
-                              new = strip_varjb(p)
-                              if new != p:
-                                  cmd.path = new; changed = True
-                          elif env_mode == 'roothide':
-                              if p.startswith("/var/jb/"):
-                                  cmd.path = to_jbroot(p); changed = True
-                      # ---- LC_ID_DYLIB ----
-                      elif hasattr(cmd, 'name') and cmd.command == lief.MachO.LoadCommand.TYPE.ID_DYLIB:
-                          name = cmd.name
-                          if env_mode == 'rootful':
-                              new = strip_varjb(name)
-                              if new != name:
-                                  cmd.name = new; changed = True
-                          elif env_mode == 'roothide':
-                              if name.startswith("/var/jb/"):
-                                  cmd.name = to_jbroot(name); changed = True
-                          elif env_mode == 'rootless':
-                              if not name.startswith("@rpath/") and not name.startswith("/var/jb/") and not is_blacklisted(name):
-                                  cmd.name = "@rpath/" + os.path.basename(name); changed = True
-                  # ---- Thêm RPATH chuẩn cho từng môi trường ----
-                  rpaths_to_add = []
-                  if env_mode == 'rootless':
-                      rpaths_to_add = ["/var/jb/usr/lib", "/var/jb/usr/local/lib",
-                                       "/var/jb/Library/Frameworks", "/var/jb/Library/PreferenceBundles",
-                                       "/var/jb/Library/MobileSubstrate/DynamicLibraries"]
-                  elif env_mode == 'roothide':
-                      rpaths_to_add = ["/usr/lib", "/usr/local/lib",
-                                       "/Library/Frameworks", "/Library/PreferenceBundles",
-                                       "/Library/MobileSubstrate/DynamicLibraries",
-                                       "@loader_path/.jbroot/usr/lib", "@loader_path/.jbroot/usr/local/lib",
-                                       "@loader_path/.jbroot/Library/Frameworks",
-                                       "@loader_path/.jbroot/Library/PreferenceBundles",
-                                       "@loader_path/.jbroot/Library/MobileSubstrate/DynamicLibraries"]
-                  elif env_mode == 'rootful':
-                      rpaths_to_add = ["/usr/lib", "/usr/local/lib", "/Library/Frameworks",
-                                       "/Library/PreferenceBundles", "/Library/MobileSubstrate/DynamicLibraries",
-                                       "/Library/Frameworks/CydiaSubstrate.framework"]
-                  existing = set()
-                  for cmd in binary.commands:
-                      if cmd.command == lief.MachO.LoadCommand.TYPE.RPATH:
-                          existing.add(cmd.path)
-                  for rp in rpaths_to_add:
-                      if rp not in existing:
-                          try:
-                              binary.add(lief.MachO.RPathCommand(rp))
-                              changed = True
-                          except: pass
-                  if changed:
-                      binary.write(bin_path)
+                      r = subprocess.run(['ldid', '-e', bin_path], stdout=f, stderr=subprocess.DEVNULL)
+                  has_ent = (r.returncode == 0 and os.path.getsize(ent_file) > 0)
               except Exception:
                   pass
-              # ---- Patch strings trong binary (ky thuat ////////) ----
+              is_exec = False
+              needs_jbroot_link = False
+              try:
+                  fat = lief.MachO.parse(bin_path)
+                  if fat is None:
+                      return
+                  changed = False
+                  for binary in fat:
+                      is_exec = is_exec or ('EXECUTE' in str(binary.header.file_type))
+                      needs_rpath = False
+                      for cmd in binary.commands:
+                          t = _ctype(cmd)
+                          if t in DEP_TYPES or t == 'ID_DYLIB':
+                              new = _convert_name(cmd.name, env_mode, t == 'ID_DYLIB')
+                              if new != cmd.name:
+                                  cmd.name = new
+                                  changed = True
+                              if new.startswith('@loader_path/.jbroot'):
+                                  needs_jbroot_link = True
+                              if new.startswith('@rpath/') and t in DEP_TYPES:
+                                  needs_rpath = True
+                          elif t == 'RPATH':
+                              p = cmd.path
+                              if env_mode == 'roothide' and p.startswith('/var/jb/'):
+                                  cmd.path = '@loader_path/.jbroot' + p[len('/var/jb'):]
+                                  changed = True
+                                  needs_jbroot_link = True
+                              elif env_mode == 'rootful':
+                                  np_ = strip_varjb(p)
+                                  if np_ != p:
+                                      cmd.path = np_
+                                      changed = True
+                      # thêm RPATH: roothide chỉ thêm khi thật sự có dependency @rpath/ (và chỉ dạng @loader_path/.jbroot)
+                      if env_mode == 'roothide':
+                          rps = ['@loader_path/.jbroot/usr/lib', '@loader_path/.jbroot/usr/local/lib',
+                                 '@loader_path/.jbroot/Library/Frameworks',
+                                 '@loader_path/.jbroot/Library/PreferenceBundles',
+                                 '@loader_path/.jbroot/Library/MobileSubstrate/DynamicLibraries']
+                          do_add = needs_rpath
+                          if do_add:
+                              needs_jbroot_link = True
+                      elif env_mode == 'rootless':
+                          rps = ['/var/jb/usr/lib', '/var/jb/usr/local/lib', '/var/jb/Library/Frameworks',
+                                 '/var/jb/Library/PreferenceBundles', '/var/jb/Library/MobileSubstrate/DynamicLibraries']
+                          do_add = True
+                      else:
+                          rps = ['/usr/lib', '/usr/local/lib', '/Library/Frameworks',
+                                 '/Library/PreferenceBundles', '/Library/MobileSubstrate/DynamicLibraries',
+                                 '/Library/Frameworks/CydiaSubstrate.framework']
+                          do_add = True
+                      if do_add:
+                          existing = {c.path for c in binary.commands if _ctype(c) == 'RPATH'}
+                          for rp in rps:
+                              if rp not in existing:
+                                  try:
+                                      binary.add(_new_rpath(rp))
+                                      changed = True
+                                  except Exception as e:
+                                      sys.stderr.write("[rpath] %s %s: %r\n" % (bin_path, rp, e))
+                  if changed:
+                      fat.write(bin_path)
+              except Exception as e:
+                  sys.stderr.write("[patch_binary] %s: %r\n" % (bin_path, e))
+              # symlink .jbroot cạnh binary (relative -> trỏ về gốc jbroot)
+              if env_mode == 'roothide' and needs_jbroot_link:
+                  try:
+                      rel = os.path.relpath(os.path.dirname(bin_path), 'temp_dir')
+                      depth = 0 if rel == '.' else len(rel.split(os.sep))
+                      target = '/'.join(['..'] * depth) if depth else '.'
+                      link = os.path.join(os.path.dirname(bin_path), '.jbroot')
+                      if not os.path.lexists(link):
+                          os.symlink(target, link)
+                  except Exception as e:
+                      sys.stderr.write("[symlink] %r\n" % (e,))
+              # ---- Patch strings trong binary (chi rootful) ----
               _patch_binary_strings(bin_path, env_mode)
               # ---- Resign đúng theo môi trường ----
               try:
@@ -255,10 +277,12 @@ jobs:
                       subprocess.run(['ldid', f'-S{ent_file}', bin_path], stderr=subprocess.DEVNULL)
                   else:
                       subprocess.run(['ldid', '-S', bin_path], stderr=subprocess.DEVNULL)
-              except: pass
+              except Exception:
+                  pass
               try:
                   if os.path.exists(ent_file): os.remove(ent_file)
-              except: pass
+              except Exception:
+                  pass
 
           def patch_plists(directory, env_mode):
               for root, dirs, files in os.walk(directory):
@@ -480,6 +504,9 @@ jobs:
               """Di chuyển /var/jb/* lên gốc, file còn lại -> /rootfs/ (theo RootHide Patcher chuẩn)"""
               import shutil
               jb = os.path.join(temp_dir, 'var', 'jb')
+              # FIX ROOTHIDE #3: deb gốc không có /var/jb (rootful) -> giữ nguyên, KHÔNG đẩy mọi thứ vào /rootfs/
+              if not os.path.isdir(jb):
+                  return
               kept_from_jb = set()
               if os.path.isdir(jb):
                   for item in os.listdir(jb):
