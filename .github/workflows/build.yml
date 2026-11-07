@@ -51,8 +51,6 @@ jobs:
               <true/>
               <key>get-task-allow</key>
               <false/>
-              <key>task_for_pid-allow</key>
-              <true/>
           </dict>
           </plist>
           EOF
@@ -209,8 +207,13 @@ jobs:
                                        "/var/jb/Library/Frameworks", "/var/jb/Library/PreferenceBundles",
                                        "/var/jb/Library/MobileSubstrate/DynamicLibraries"]
                   elif env_mode == 'roothide':
-                      rpaths_to_add = ["/usr/lib", "@loader_path/.jbroot/usr/lib",
-                                       "/Library/Frameworks", "@loader_path/.jbroot/Library/Frameworks"]
+                      rpaths_to_add = ["/usr/lib", "/usr/local/lib",
+                                       "/Library/Frameworks", "/Library/PreferenceBundles",
+                                       "/Library/MobileSubstrate/DynamicLibraries",
+                                       "@loader_path/.jbroot/usr/lib", "@loader_path/.jbroot/usr/local/lib",
+                                       "@loader_path/.jbroot/Library/Frameworks",
+                                       "@loader_path/.jbroot/Library/PreferenceBundles",
+                                       "@loader_path/.jbroot/Library/MobileSubstrate/DynamicLibraries"]
                   elif env_mode == 'rootful':
                       rpaths_to_add = ["/usr/lib", "/usr/local/lib", "/Library/Frameworks",
                                        "/Library/PreferenceBundles", "/Library/MobileSubstrate/DynamicLibraries"]
