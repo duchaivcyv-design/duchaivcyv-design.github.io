@@ -1,17 +1,12 @@
-name: Build Sileo Repo (Final Perfect Patcher)
-
-# ĐOẠN CODE CHỐNG LỖI DEPLOYMENT (CONCURRENCY)
+name: Build Sileo Repo (3 Env Perfect Patcher — rootful/rootless/roothide)
 concurrency:
   group: "pages"
   cancel-in-progress: true
-# -----------------------------------------------
-
 on:
   push:
     paths:
       - 'debs/**.deb'
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,28 +16,81 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
-          
+          fetch-depth: 0
+
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev bzip2 fakeroot python3 pip python3-pip wget unzip
+          sudo apt-get install -y dpkg-dev bzip2 fakeroot python3 pip python3-pip wget unzip zstd
           pip3 install lief
-          
+
       - name: Install ldid
         run: |
           wget https://github.com/ProcursusTeam/ldid/releases/download/v2.1.5-procursus7/ldid_linux_x86_64
           chmod +x ldid_linux_x86_64
           sudo mv ldid_linux_x86_64 /usr/local/bin/ldid
 
-      - name: Process Debs
+      - name: Tạo roothide.entitlements chuẩn
+        run: |
+          cat > roothide.entitlements <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>platform-application</key>
+              <true/>
+              <key>com.apple.private.security.no-container</key>
+              <true/>
+              <key>com.apple.private.security.no-sandbox</key>
+              <true/>
+              <key>com.apple.private.amfi.can-execute-cdhash</key>
+              <true/>
+              <key>com.apple.private.amfi.can-load-cdhash</key>
+              <true/>
+              <key>get-task-allow</key>
+              <false/>
+              <key>task_for_pid-allow</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+
+      - name: Process Debs (3 môi trường chuẩn)
         run: |
           cat << 'PYEOF' > patch.py
           import sys, os, subprocess, re
           import lief
           import plistlib
 
-          def patch_binary(bin_path, is_rootless):
+          # ===== BLACKLIST chuẩn (theo ConversionRuleset.json) — KHÔNG patch các đường dẫn hệ thống =====
+          BLACKLIST = [
+              "/System", "/usr/lib/libobjc", "/usr/lib/libc++", "/usr/lib/libstdc++", "/usr/lib/dyld",
+              "/usr/lib/libMobileGestalt.dylib", "/usr/lib/system", "/usr/lib/swift", "/usr/lib/libswift",
+              "/usr/lib/libsql", "/usr/lib/libz", "/var/jb",
+              "/var/mobile/Library/Preferences/com.apple.", "/var/mobile/Library/Preferences/systemgroup.com.apple.",
+              "/var/mobile/Library/Preferences/group.com.apple.", "/var/mobile/Library/Preferences/.GlobalPreferences",
+              "/var/mobile/Library/SpringBoard", "/var/mobile/Library/WebClips", "/Library/Wallpaper",
+              "/Library/Application Support/AggregateDictionary", "/var/mobile/Library/Caches/com.apple.",
+              "/var/checkra1n.dmg", "/private/etc/apt/undecimus", "/Library/Ringtones", "://"
+          ]
+          def is_blacklisted(p):
+              for b in BLACKLIST:
+                  if p.startswith(b): return True
+              return False
+
+          def strip_varjb(p):
+              if p.startswith("/var/jb/"): return p[len("/var/jb"):]
+              if p == "/var/jb": return "/"
+              return p
+
+          def to_jbroot(p):
+              # /var/jb/usr/lib/xxx -> @loader_path/.jbroot/usr/lib/xxx
+              if p.startswith("/var/jb/"):
+                  return "@loader_path/.jbroot" + p[len("/var/jb"):]
+              return p
+
+          def patch_binary(bin_path, env_mode):
+              """env_mode: rootful | rootless | roothide — theo cơ chế chuẩn install_name_tool của RootHide Patcher + rootless-patcher"""
               if not os.path.exists(bin_path): return
               ent_file = bin_path + ".ent"
               has_ent = False
@@ -52,33 +100,108 @@ jobs:
                       if res.returncode == 0 and os.path.getsize(ent_file) > 0:
                           has_ent = True
               except: pass
-
+              is_exec = False
               try:
                   binary = lief.parse(bin_path)
-                  if binary and binary.format == lief.Binary.FORMATS.MACHO:
-                      changed = False
-                      for cmd in binary.commands:
-                          if cmd.command == lief.MachO.LoadCommand.TYPE.RPATH:
-                              if is_rootless and '/var/jb' not in cmd.path:
-                                  cmd.path = '/var/jb' + cmd.path
-                                  changed = True
-                          elif cmd.command == lief.MachO.LoadCommand.TYPE.LOAD_DYLIB:
-                              if is_rootless and '/var/jb' not in cmd.name and cmd.name.startswith('/Library/'):
-                                  cmd.name = '/var/jb' + cmd.name
-                                  changed = True
-                      if changed:
-                          binary.write(bin_path)
-              except Exception: pass
-
+                  if not binary or binary.format != lief.Binary.FORMATS.MACHO:
+                      return
+                  is_exec = binary.header.file_type == lief.MachO.Header.FILE_TYPES.EXECUTE
+                  changed = False
+                  for cmd in binary.commands:
+                      # ---- LC_LOAD_DYLIB ----
+                      if cmd.command == lief.MachO.LoadCommand.TYPE.LOAD_DYLIB:
+                          name = cmd.name
+                          if is_blacklisted(name):
+                              continue
+                          if env_mode == 'rootful':
+                              new = strip_varjb(name)
+                              if new != name:
+                                  cmd.name = new; changed = True
+                          elif env_mode == 'roothide':
+                              if name.startswith("/var/jb/"):
+                                  cmd.name = to_jbroot(name); changed = True
+                          elif env_mode == 'rootless':
+                              # chuẩn hóa @rpath theo repack-rootless.sh
+                              if name == "/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate":
+                                  cmd.name = "@rpath/libsubstrate.dylib"; changed = True
+                              elif name.startswith("/Library/Frameworks/") and not name.startswith("/System/"):
+                                  fw = name.split("/")[-2]
+                                  cmd.name = "@rpath/%s.framework/%s" % (fw, fw); changed = True
+                              elif name.startswith("/Library/PreferenceBundles/") and name.endswith(".bundle"):
+                                  bn = os.path.basename(name)
+                                  cmd.name = "@rpath/%s/%s" % (bn, bn.replace(".bundle","")); changed = True
+                              elif name.startswith("/Library/MobileSubstrate/DynamicLibraries/"):
+                                  cmd.name = "@rpath/" + os.path.basename(name); changed = True
+                              elif (name.startswith("/usr/lib/") or name.startswith("/usr/local/lib/")) and not is_blacklisted(name):
+                                  if not name.startswith("/var/jb/"):
+                                      cmd.name = "@rpath/" + os.path.basename(name); changed = True
+                      # ---- LC_RPATH ----
+                      elif cmd.command == lief.MachO.LoadCommand.TYPE.RPATH:
+                          p = cmd.path
+                          if env_mode == 'rootful':
+                              new = strip_varjb(p)
+                              if new != p:
+                                  cmd.path = new; changed = True
+                          elif env_mode == 'roothide':
+                              if p.startswith("/var/jb/"):
+                                  cmd.path = to_jbroot(p); changed = True
+                      # ---- LC_ID_DYLIB ----
+                      elif hasattr(cmd, 'name') and cmd.command == lief.MachO.LoadCommand.TYPE.ID_DYLIB:
+                          name = cmd.name
+                          if env_mode == 'rootful':
+                              new = strip_varjb(name)
+                              if new != name:
+                                  cmd.name = new; changed = True
+                          elif env_mode == 'roothide':
+                              if name.startswith("/var/jb/"):
+                                  cmd.name = to_jbroot(name); changed = True
+                          elif env_mode == 'rootless':
+                              if not name.startswith("@rpath/") and not name.startswith("/var/jb/") and not is_blacklisted(name):
+                                  cmd.name = "@rpath/" + os.path.basename(name); changed = True
+                  # ---- Thêm RPATH chuẩn cho từng môi trường ----
+                  rpaths_to_add = []
+                  if env_mode == 'rootless':
+                      rpaths_to_add = ["/var/jb/usr/lib", "/var/jb/usr/local/lib",
+                                       "/var/jb/Library/Frameworks", "/var/jb/Library/PreferenceBundles",
+                                       "/var/jb/Library/MobileSubstrate/DynamicLibraries"]
+                  elif env_mode == 'roothide':
+                      rpaths_to_add = ["/usr/lib", "@loader_path/.jbroot/usr/lib",
+                                       "/Library/Frameworks", "@loader_path/.jbroot/Library/Frameworks"]
+                  elif env_mode == 'rootful':
+                      rpaths_to_add = ["/usr/lib", "/usr/local/lib", "/Library/Frameworks",
+                                       "/Library/PreferenceBundles", "/Library/MobileSubstrate/DynamicLibraries"]
+                  existing = set()
+                  for cmd in binary.commands:
+                      if cmd.command == lief.MachO.LoadCommand.TYPE.RPATH:
+                          existing.add(cmd.path)
+                  for rp in rpaths_to_add:
+                      if rp not in existing:
+                          try:
+                              binary.add(lief.MachO.RPathCommand(rp))
+                              changed = True
+                          except: pass
+                  if changed:
+                      binary.write(bin_path)
+              except Exception:
+                  pass
+              # ---- Resign đúng theo môi trường ----
               try:
-                  if has_ent:
+                  if env_mode == 'roothide' and is_exec:
+                      # executable roothide: dùng -M + entitlements (theo RootHide Patcher)
+                      if has_ent:
+                          subprocess.run(['ldid', '-M', f'-S{ent_file}', bin_path], stderr=subprocess.DEVNULL)
+                      else:
+                          subprocess.run(['ldid', '-M', '-Sroothide.entitlements', bin_path], stderr=subprocess.DEVNULL)
+                  elif has_ent:
                       subprocess.run(['ldid', f'-S{ent_file}', bin_path], stderr=subprocess.DEVNULL)
-                      os.remove(ent_file)
                   else:
                       subprocess.run(['ldid', '-S', bin_path], stderr=subprocess.DEVNULL)
               except: pass
+              try:
+                  if os.path.exists(ent_file): os.remove(ent_file)
+              except: pass
 
-          def patch_plists(directory, is_rootless):
+          def patch_plists(directory, env_mode):
               for root, dirs, files in os.walk(directory):
                   for file in files:
                       if file.endswith('.plist'):
@@ -86,21 +209,25 @@ jobs:
                           try:
                               with open(path, 'rb') as f:
                                   plist = plistlib.load(f)
-                              
                               def replace_in_plist(obj):
                                   if isinstance(obj, str):
-                                      if is_rootless:
-                                          obj = obj.replace('/Library/', '/var/jb/Library/')
-                                          obj = obj.replace('/var/jb/var/jb/', '/var/jb/')
-                                      else:
-                                          obj = obj.replace('/var/jb/', '/')
-                                      return obj
+                                      if is_blacklisted(obj):
+                                          return obj
+                                      if env_mode == 'rootful' or env_mode == 'roothide':
+                                          # rootful & roothide: bỏ /var/jb prefix (roothide di chuyển lên gốc, map .jbroot runtime)
+                                          if obj.startswith("/var/jb/"):
+                                              return obj[len("/var/jb"):]
+                                          return obj
+                                      else:  # rootless
+                                          if obj.startswith("/Library/") or obj.startswith("/usr/") or obj.startswith("/var/"):
+                                              if not obj.startswith("/var/jb/") and not obj.startswith("/var/mobile/"):
+                                                  return "/var/jb" + obj
+                                          return obj
                                   elif isinstance(obj, dict):
                                       return {k: replace_in_plist(v) for k, v in obj.items()}
                                   elif isinstance(obj, list):
                                       return [replace_in_plist(v) for v in obj]
                                   return obj
-                              
                               plist = replace_in_plist(plist)
                               with open(path, 'wb') as f:
                                   plistlib.dump(plist, f)
@@ -111,80 +238,116 @@ jobs:
               with open(path, 'r') as f: lines = f.readlines()
               new_lines = []
               for line in lines:
-                  if line.startswith('Architecture:'): 
+                  if line.startswith('Architecture:'):
                       new_lines.append(f'Architecture: {target_arch}\n')
                   elif line.startswith('Package:'):
                       pkg_id = line.replace('Package:', '').strip()
-                      pkg_id = pkg_id.replace('.roothide', '').replace('.rootless', '').replace('.rootful', '')
+                      pkg_id = re.sub(r'\.(roothide|rootless|rootful)$', '', pkg_id)
                       new_lines.append(f'Package: {pkg_id}\n')
                   elif line.startswith('Depends:'):
                       deps = line.replace('Depends:', '').strip()
                       deps = re.sub(r'\bmobilesubstrate\b\s*(\([^)]*\))?\s*,?', '', deps)
                       deps = re.sub(r'\bpreferenceloader\b\s*(\([^)]*\))?\s*,?', '', deps)
+                      deps = re.sub(r'\broothide\b\s*(\([^)]*\))?\s*,?', '', deps)
+                      deps = re.sub(r'\bellekit\b\s*(\([^)]*\))?\s*,?', '', deps)
                       dep_list = [d.strip() for d in deps.split(',') if d.strip()]
-                      
                       if env_mode == 'rootful':
                           new_deps = ['mobilesubstrate', 'preferenceloader'] + dep_list
                       elif env_mode == 'roothide':
                           new_deps = ['roothide', 'ellekit', 'preferenceloader'] + dep_list
-                          
+                      else:  # rootless
+                          new_deps = ['ellekit', 'preferenceloader'] + dep_list
                       final_deps = []
                       for d in new_deps:
                           if d not in final_deps:
                               final_deps.append(d)
                       new_lines.append(f'Depends: {", ".join(final_deps)}\n')
-                  else: 
+                  else:
                       new_lines.append(line)
-                      
               with open(path, 'w') as f:
                   f.writelines(new_lines)
+
+          def relocate_roothide(temp_dir):
+              """Di chuyển /var/jb/* lên gốc, file còn lại -> /rootfs/ (theo RootHide Patcher chuẩn)"""
+              jb = os.path.join(temp_dir, 'var', 'jb')
+              if os.path.isdir(jb):
+                  for item in os.listdir(jb):
+                      src = os.path.join(jb, item)
+                      dst = os.path.join(temp_dir, item)
+                      if os.path.exists(dst):
+                          import shutil
+                          if os.path.isdir(src):
+                              for sub in os.listdir(src):
+                                  os.makedirs(dst, exist_ok=True)
+                                  os.rename(os.path.join(src, sub), os.path.join(dst, sub))
+                          else:
+                              os.remove(dst)
+                              os.rename(src, dst)
+                      else:
+                          os.rename(src, dst)
+                  os.rmdir(jb)
+                  var_dir = os.path.join(temp_dir, 'var')
+                  try: os.rmdir(var_dir)
+                  except: pass
+              # file còn lại (rootfs) chuyển vào /rootfs/
+              rootfs = os.path.join(temp_dir, 'rootfs')
+              os.makedirs(rootfs, exist_ok=True)
+              for item in os.listdir(temp_dir):
+                  if item in ('DEBIAN', 'rootfs', 'var'):
+                      continue
+                  src = os.path.join(temp_dir, item)
+                  if os.path.isdir(src) and item in ('Applications','Library','usr','bin','sbin','etc','var','System','private'):
+                      continue  # đã là đường dẫn tweak chuẩn, giữ ở gốc
+                  os.rename(src, os.path.join(rootfs, item))
           PYEOF
 
-          echo "=== DỌN DẸP FILE CŨ ==="
+          echo "=== DỌN DẸP FILE CŨ (giữ NGUYÊN deb gốc làm rootless arm64) ==="
           rm -f debs/*_rootful_iphoneos-arm.deb
           rm -f debs/*_roothide_iphoneos-arm64e.deb
 
-          echo "=== TÁCH VÀ BUILD LẠI ==="
+          echo "=== TÁCH GỐC arm64 (rootless) THÀNH 2 VÙNG: rootful(arm) + roothide(arm64e) — rootless GIỮ NGUYÊN GỐC ==="
           for deb in debs/*.deb; do
             [ -f "$deb" ] || continue
             if [[ "$deb" != *"_rootful_"* ]] && [[ "$deb" != *"_roothide_"* ]]; then
               if [[ "$deb" == *"arm64"* ]]; then
-                echo "--> Xử lý: $deb"
+                echo "--> Xử lý: $deb (giữ nguyên làm bản rootless)"
                 PKG_NAME=$(dpkg-deb -f "$deb" Package)
                 PKG_VER=$(dpkg-deb -f "$deb" Version)
-                
-                # 1. BẢN ROOTFUL (arm)
+
+                # ========== 1. BẢN ROOTFUL (iphoneos-arm) — bỏ /var/jb prefix ==========
                 dpkg-deb -R "$deb" temp_dir
                 python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm', 'rootful')"
-                python3 -c "import patch; patch.patch_plists('temp_dir', False)"
+                python3 -c "import patch; patch.patch_plists('temp_dir', 'rootful')"
                 find temp_dir -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 | while read bin; do
-                    python3 -c "import patch; patch.patch_binary('$bin', False)"
+                    python3 -c "import patch; patch.patch_binary('$bin', 'rootful')"
                 done
-                fakeroot dpkg-deb -b --root-owner-group temp_dir "debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
+                fakeroot dpkg-deb -b --root-owner-group -Zzstd temp_dir "debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
                 rm -rf temp_dir
-                
-                # 2. BẢN ROOTHIDE (arm64e)
+
+                # ========== 2. BẢN ROOTHIDE (iphoneos-arm64e) — di chuyển /var/jb lên gốc + @loader_path/.jbroot ==========
                 dpkg-deb -R "$deb" temp_dir
+                python3 -c "import patch; patch.relocate_roothide('temp_dir')"
                 python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm64e', 'roothide')"
-                python3 -c "import patch; patch.patch_plists('temp_dir', True)"
+                python3 -c "import patch; patch.patch_plists('temp_dir', 'roothide')"
                 find temp_dir -type f -exec file {} \; | grep "Mach-O" | cut -d: -f1 | while read bin; do
-                    python3 -c "import patch; patch.patch_binary('$bin', True)"
+                    python3 -c "import patch; patch.patch_binary('$bin', 'roothide')"
                 done
-                fakeroot dpkg-deb -b --root-owner-group temp_dir "debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
+                fakeroot dpkg-deb -b --root-owner-group -Zzstd temp_dir "debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
                 rm -rf temp_dir
-                
-                echo "=== Xong: $PKG_NAME ==="
+
+                echo "=== Xong 2 vùng: rootful(arm) + roothide(arm64e) — rootless(arm64) giữ nguyên gốc: $PKG_NAME ==="
               fi
             fi
           done
-          
-          rm -f patch.py
+
+          rm -f patch.py roothide.entitlements
 
       - name: Generate Packages (Clean)
         run: |
-          rm -f Packages Packages.bz2
+          rm -f Packages Packages.bz2 Packages.xz Packages.zst
           dpkg-scanpackages -m ./debs /dev/null > Packages
           bzip2 -kf Packages
+          xz -kf Packages
           echo "=== KIỂM TRA KÍCH THƯỚC FILE ==="
           grep -E "^(Package|Architecture|Size|Filename):" Packages
 
@@ -197,14 +360,14 @@ jobs:
           Version: 1.0
           Architectures: iphoneos-arm iphoneos-arm64 iphoneos-arm64e
           Components: main
-          Description: Kho tweak ca nhan cua TaoJB
+          Description: Kho tweak ca nhan cua TaoJB — 3 moi truong rootful/rootless/roothide chuan 100%
           EOF
-          
+
       - name: Commit and Push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add Packages Packages.bz2 Release debs/
-          git commit -m "Final Perfect Build - Fixed Size Mismatch [skip ci]" || exit 0
+          git add Packages Packages.bz2 Packages.xz Release debs/
+          git commit -m "Perfect 3-Env Build — rootful/rootless/roothide + @rpath/.jbroot + zstd [skip ci]" || exit 0
           git pull origin main --rebase
           git push origin main
