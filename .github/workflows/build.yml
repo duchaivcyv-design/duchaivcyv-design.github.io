@@ -239,17 +239,25 @@ jobs:
               with open(path, 'r') as f:
                   raw = f.read()
               # 1. Parse tung field (ke ca continuation) — regex: field name + value den field tiep theo hoac cuoi
+              def _norm_field(n):
+                  return '-'.join(p.capitalize() for p in n.lower().split('-'))
               field_re = re.compile(r'(?ms)^([A-Za-z][A-Za-z0-9-]*):[ \t]*(.*?)(?=\n[A-Za-z][A-Za-z0-9-]*:|\Z)')
               fields = {}
               order = []
               for m in field_re.finditer(raw):
-                  name = m.group(1)
+                  raw_name = m.group(1)
+                  name = _norm_field(raw_name)  # normalize: depends -> Depends, installed-size -> Installed-Size
                   val = m.group(2).rstrip()
                   if name != 'Description':
                       val = re.sub(r'\n[ \t]+', ' ', val).strip()
-                  if name not in fields:
+                  if name in fields:
+                      # TRUNG field -> gop (voi Depends/Conflicts/Replaces/Provides noi bang ', ', con lai giu gia tri dau)
+                      if name in ('Depends','Conflicts','Replaces','Provides','Suggests','Recommends','Enhances','Pre-Depends'):
+                          fields[name] = fields[name].rstrip().rstrip(',') + ', ' + val.lstrip(',')
+                      # cac field khac: giu gia tri dau (khong ghi de)
+                  else:
                       order.append(name)
-                  fields[name] = val
+                      fields[name] = val
               # 2. Cap nhat cac field can thay
               if 'Package' in fields:
                   fields['Package'] = re.sub(r'\.(roothide|rootless|rootful)$', '', fields['Package'].strip())
