@@ -109,7 +109,7 @@ jobs:
                   changed = False
                   for cmd in binary.commands:
                       # ---- LC_LOAD_DYLIB ----
-                      if cmd.command == lief.MachO.LoadCommand.TYPE.LOAD_DYLIB:
+                      if cmd.command in (lief.MachO.LoadCommand.TYPE.LOAD_DYLIB, lief.MachO.LoadCommand.TYPE.LOAD_WEAK_DYLIB, lief.MachO.LoadCommand.TYPE.LOAD_REEXPORT_DYLIB):
                           name = cmd.name
                           if is_blacklisted(name):
                               continue
@@ -413,46 +413,49 @@ jobs:
           rm -f debs/*_rootful_iphoneos-arm.deb
           rm -f debs/*_roothide_iphoneos-arm64e.deb
 
-          echo "=== TÁCH GỐC arm64 (rootless) THÀNH 2 VÙNG: rootful(arm) + roothide(arm64e) — rootless GIỮ NGUYÊN GỐC ==="
+          echo "=== TỰ ĐỘNG PHÁT HIỆN MÔI TRƯỜNG GỐC → BUILD 2 VÙNG CÒN LẠI (đủ 3 vùng chuẩn) ==="
           for deb in debs/*.deb; do
             [ -f "$deb" ] || continue
-            if [[ "$deb" != *"_rootful_"* ]] && [[ "$deb" != *"_roothide_"* ]]; then
-              if [[ "$deb" == *"arm64"* ]]; then
-                echo "--> Xử lý: $deb (giữ nguyên làm bản rootless)"
-                PKG_NAME=$(dpkg-deb -f "$deb" Package)
-                PKG_VER=$(dpkg-deb -f "$deb" Version)
-
-                # ========== 1. BẢN ROOTFUL (iphoneos-arm) — bỏ /var/jb prefix ==========
-                rm -rf temp_dir
-                dpkg-deb -R "$deb" temp_dir
-                python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm', 'rootful')"
-                echo "[DEBUG rootful Depends]"; grep -A1 '^Depends:' temp_dir/DEBIAN/control | head -3
-                python3 -c "import patch; patch.patch_plists('temp_dir', 'rootful')"
-                python3 -c "import patch; patch.patch_text_files('temp_dir', 'rootful')"
-                find temp_dir -type f -exec sh -c 'file -b "$1" | grep -q Mach-O && printf "%s\n" "$1"' _ {} \; | while IFS= read -r bin; do
-                    python3 -c "import patch; patch.patch_binary('$bin', 'rootful')"
-                done
-                if dpkg-deb --help 2>/dev/null | grep -q zstd; then ZSTD='-Zzstd'; else ZSTD=''; fi
-                fakeroot dpkg-deb -b --root-owner-group $ZSTD temp_dir "debs/${PKG_NAME}_${PKG_VER}_rootful_iphoneos-arm.deb" > /dev/null
-                rm -rf temp_dir
-
-                # ========== 2. BẢN ROOTHIDE (iphoneos-arm64e) — di chuyển /var/jb lên gốc + @loader_path/.jbroot ==========
-                rm -rf temp_dir
-                dpkg-deb -R "$deb" temp_dir
+            # bo qua cac deb da la output (co _rootful_/_rootless_/_roothide_ trong ten)
+            case "$deb" in
+              *_rootful_*|*_rootless_*|*_roothide_*) continue ;;
+            esac
+            ORIG_ARCH=$(dpkg-deb -f "$deb" Architecture 2>/dev/null || echo "iphoneos-arm64")
+            PKG_NAME=$(dpkg-deb -f "$deb" Package)
+            PKG_VER=$(dpkg-deb -f "$deb" Version)
+            case "$ORIG_ARCH" in
+              iphoneos-arm)    ORIG_ENV=rootful;  TARGETS="rootless:iphoneos-arm64 roothide:iphoneos-arm64e" ;;
+              iphoneos-arm64e) ORIG_ENV=roothide; TARGETS="rootless:iphoneos-arm64 rootful:iphoneos-arm" ;;
+              *)               ORIG_ENV=rootless; TARGETS="rootful:iphoneos-arm roothide:iphoneos-arm64e" ;;
+            esac
+            echo "--> Gốc: $deb (môi trường: $ORIG_ENV / $ORIG_ARCH) — giữ nguyên làm 1 vùng"
+            for TARGET in $TARGETS; do
+              T_ENV=${TARGET%%:*}
+              T_ARCH=${TARGET##*:}
+              echo "  [1/5] Build $T_ENV ($T_ARCH) — giải nén..."
+              rm -rf temp_dir
+              dpkg-deb -R "$deb" temp_dir
+              if [ "$T_ENV" = "roothide" ]; then
+                echo "  [2/5] Di chuyển /var/jb lên gốc + /rootfs/ (roothide)..."
                 python3 -c "import patch; patch.relocate_roothide('temp_dir')"
-                python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm64e', 'roothide')"
-                echo "[DEBUG roothide Depends]"; grep -A1 '^Depends:' temp_dir/DEBIAN/control | head -3
-                python3 -c "import patch; patch.patch_plists('temp_dir', 'roothide')"
-                python3 -c "import patch; patch.patch_text_files('temp_dir', 'roothide')"
-                find temp_dir -type f -exec sh -c 'file -b "$1" | grep -q Mach-O && printf "%s\n" "$1"' _ {} \; | while IFS= read -r bin; do
-                    python3 -c "import patch; patch.patch_binary('$bin', 'roothide')"
-                done
-                fakeroot dpkg-deb -b --root-owner-group $ZSTD temp_dir "debs/${PKG_NAME}_${PKG_VER}_roothide_iphoneos-arm64e.deb" > /dev/null
-                rm -rf temp_dir
-
-                echo "=== Xong 2 vùng: rootful(arm) + roothide(arm64e) — rootless(arm64) giữ nguyên gốc: $PKG_NAME ==="
+              else
+                echo "  [2/5] Bỏ qua relocate (không phải roothide)"
               fi
-            fi
+              echo "  [3/5] Patch control + plists + text files..."
+              python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', '$T_ARCH', '$T_ENV')"
+              python3 -c "import patch; patch.patch_plists('temp_dir', '$T_ENV')"
+              python3 -c "import patch; patch.patch_text_files('temp_dir', '$T_ENV')"
+              echo "  [4/5] Patch Mach-O binaries (LOAD_DYLIB/WEAK/REEXPORT + RPATH + resign)..."
+              find temp_dir -type f -exec sh -c 'file -b "$1" | grep -q Mach-O && printf "%s\n" "$1"' _ {} \; | while IFS= read -r bin; do
+                  python3 -c "import patch; patch.patch_binary('$bin', '$T_ENV')"
+              done
+              echo "  [5/5] Đóng gói deb $T_ENV..."
+              if dpkg-deb --help 2>/dev/null | grep -q zstd; then ZSTD='-Zzstd'; else ZSTD=''; fi
+              fakeroot dpkg-deb -b --root-owner-group $ZSTD temp_dir "debs/${PKG_NAME}_${PKG_VER}_${T_ENV}_${T_ARCH}.deb" > /dev/null
+              rm -rf temp_dir
+              echo "  ✅ Xong: debs/${PKG_NAME}_${PKG_VER}_${T_ENV}_${T_ARCH}.deb"
+            done
+            echo "=== Hoàn thành $PKG_NAME (gốc $ORIG_ENV + 2 vùng tách) ==="
           done
 
           rm -f patch.py roothide.entitlements
