@@ -234,6 +234,34 @@ jobs:
                           except Exception:
                               pass
 
+          def patch_text_files(directory, env_mode):
+              """Chuyen sach duong dan /var/jb trong TAT CA file text (.sh/.json/.strings/.conf/.entitlements/.py...) — tranh sot duong dan gay loi ellekit/setting."""
+              TEXT_EXT = ('.sh', '.json', '.strings', '.conf', '.cfg', '.py', '.txt', '.xml', '.entitlements', '.rules', '.yaml', '.yml', '.plist', '.lproj', '.override')
+              TEXT_NAMES = ('Filter', 'control', 'postinst', 'prerm', 'postrm', 'extrainst_', 'preinst')
+              for root, dirs, files in os.walk(directory):
+                  for file in files:
+                      path = os.path.join(root, file)
+                      if not (file.endswith(TEXT_EXT) or file in TEXT_NAMES or '.lproj/' in path.replace('\\','/')):
+                          continue
+                      try:
+                          with open(path, 'rb') as f:
+                              raw_bytes = f.read()
+                          # bo qua file binary/co null byte
+                          if b'\x00' in raw_bytes:
+                              continue
+                          content = raw_bytes.decode('utf-8', errors='replace')
+                          if env_mode in ('rootful', 'roothide'):
+                              # thay /var/jb/ -> / ; /var/jb rieng le -> /
+                              new = content.replace('/var/jb/', '/')
+                              new = re.sub(r'(?<![\w/])/var/jb(?![\w/])', '/', new)
+                          else:
+                              new = content
+                          if new != content:
+                              with open(path, 'wb') as f:
+                                  f.write(new.encode('utf-8'))
+                      except Exception:
+                          pass
+
           def patch_control(path, target_arch, env_mode):
               """PARSE CHUẨN DEBIAN: tach field + continuation -> dict -> viet lai theo thu tu chuan. KHONG the sai."""
               with open(path, 'r') as f:
@@ -400,6 +428,7 @@ jobs:
                 python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm', 'rootful')"
                 echo "[DEBUG rootful Depends]"; grep -A1 '^Depends:' temp_dir/DEBIAN/control | head -3
                 python3 -c "import patch; patch.patch_plists('temp_dir', 'rootful')"
+                python3 -c "import patch; patch.patch_text_files('temp_dir', 'rootful')"
                 find temp_dir -type f -exec sh -c 'file -b "$1" | grep -q Mach-O && printf "%s\n" "$1"' _ {} \; | while IFS= read -r bin; do
                     python3 -c "import patch; patch.patch_binary('$bin', 'rootful')"
                 done
@@ -414,6 +443,7 @@ jobs:
                 python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', 'iphoneos-arm64e', 'roothide')"
                 echo "[DEBUG roothide Depends]"; grep -A1 '^Depends:' temp_dir/DEBIAN/control | head -3
                 python3 -c "import patch; patch.patch_plists('temp_dir', 'roothide')"
+                python3 -c "import patch; patch.patch_text_files('temp_dir', 'roothide')"
                 find temp_dir -type f -exec sh -c 'file -b "$1" | grep -q Mach-O && printf "%s\n" "$1"' _ {} \; | while IFS= read -r bin; do
                     python3 -c "import patch; patch.patch_binary('$bin', 'roothide')"
                 done
