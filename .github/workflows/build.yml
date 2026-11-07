@@ -1,4 +1,4 @@
-name: Build Sileo Repo (3 Env Perfect Patcher — rootful/rootless/roothide)
+name: Build Sileo Repo (rootful/rootless/roothide)
 concurrency:
   group: "pages"
   cancel-in-progress: true
