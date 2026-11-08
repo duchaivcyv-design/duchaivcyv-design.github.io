@@ -56,6 +56,8 @@ jobs:
           EOF
 
       - name: Process Debs (3 môi trường chuẩn)
+        env:
+          PAGES_URL: ${{ steps.pages.outputs.base_url || '' }}
         run: |
           cat << 'PYEOF' > patch.py
           import sys, os, subprocess, re
@@ -400,34 +402,62 @@ jobs:
               finally:
                   shutil.rmtree(d, ignore_errors=True)
 
+          # ===== CONTROL: sửa theo yêu cầu =====
+          # - Name: thêm hậu tố môi trường, vd "DynaFake (Rootless)" / "(Roothide)" / "(Rootful)"
+          # - Version: đổi hậu tố revision thành -5, vd 6.0.21 -> 6.0.21-5 (6.0.21-3 -> 6.0.21-5)
+          # - Depends firmware: đặt thành firmware (>= 11.0) (thêm nếu chưa có)
+          # - Maintainer / Author: thêm ", TaoJB" (không thêm lặp lại)
+          REVISION = '5'
+          FIRMWARE_DEP = 'firmware (>= 11.0)'
+          ENV_LABEL = {'rootful': 'Rootful', 'rootless': 'Rootless', 'roothide': 'Roothide'}
+          OWNER = 'TaoJB'
+
           def patch_control(path, target_arch, env_mode, icon_url=''):
-              """PARSE CHUẨN DEBIAN: tach field + continuation -> dict -> viet lai theo thu tu chuan. KHONG the sai."""
+              """PARSE CHUẨN DEBIAN: tach field + continuation -> dict -> viet lai theo thu tu chuan."""
               with open(path, 'r') as f:
                   raw = f.read()
-              # 1. Parse tung field (ke ca continuation) — regex: field name + value den field tiep theo hoac cuoi
+              # 1. Parse tung field (ke ca continuation)
               def _norm_field(n):
                   return '-'.join(p.capitalize() for p in n.lower().split('-'))
               field_re = re.compile(r'(?ms)^([A-Za-z][A-Za-z0-9-]*):[ \t]*(.*?)(?=\n[A-Za-z][A-Za-z0-9-]*:|\Z)')
               fields = {}
               order = []
               for m in field_re.finditer(raw):
-                  raw_name = m.group(1)
-                  name = _norm_field(raw_name)  # normalize: depends -> Depends, installed-size -> Installed-Size
+                  name = _norm_field(m.group(1))
                   val = m.group(2).rstrip()
                   if name != 'Description':
                       val = re.sub(r'\n[ \t]+', ' ', val).strip()
                   if name in fields:
-                      # TRUNG field -> gop (voi Depends/Conflicts/Replaces/Provides noi bang ', ', con lai giu gia tri dau)
                       if name in ('Depends','Conflicts','Replaces','Provides','Suggests','Recommends','Enhances','Pre-Depends'):
                           fields[name] = fields[name].rstrip().rstrip(',') + ', ' + val.lstrip(',')
-                      # cac field khac: giu gia tri dau (khong ghi de)
                   else:
                       order.append(name)
                       fields[name] = val
-              # 2. Cap nhat cac field can thay
+
+              # 2. Package / Architecture
               if 'Package' in fields:
                   fields['Package'] = re.sub(r'\.(roothide|rootless|rootful)$', '', fields['Package'].strip())
               fields['Architecture'] = target_arch
+
+              # 2b. NAME: bỏ hậu tố cũ rồi thêm hậu tố môi trường
+              base_name = fields.get('Name') or fields.get('Package', '')
+              base_name = re.sub(r'\s*\((Rootful|Rootless|Roothide)\)\s*$', '', base_name, flags=re.I).strip()
+              if base_name:
+                  fields['Name'] = '%s (%s)' % (base_name, ENV_LABEL[env_mode])
+
+              # 2c. VERSION: thay revision thành -REVISION
+              if 'Version' in fields:
+                  ver = re.sub(r'-\d+$', '', fields['Version'].strip())
+                  fields['Version'] = '%s-%s' % (ver, REVISION)
+
+              # 2d. MAINTAINER / AUTHOR: thêm TaoJB, không lặp
+              for key in ('Maintainer', 'Author'):
+                  cur = fields.get(key, '').strip().rstrip(',').strip()
+                  if OWNER not in cur:
+                      fields[key] = (cur + ', ' + OWNER) if cur else OWNER
+                  if key not in order:
+                      order.append(key)
+
               # 3. Xu ly Depends
               deps_str = fields.get('Depends', '')
               for pat in [r'\bmobilesubstrate\b(\s*\([^)]*\))?', r'\bpreferenceloader\b(\s*\([^)]*\))?',
@@ -435,12 +465,22 @@ jobs:
                           r'\bsubstrate\b(\s*\([^)]*\))?']:
                   deps_str = re.sub(pat, '', deps_str)
               dep_list = []
+              has_fw = False
               for d in re.split(r',', deps_str):
                   d = d.strip().strip(',').strip()
                   if not d: continue
                   pkgname = re.split(r'[\s(]', d, 1)[0].strip()
                   if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9+._-]*$', pkgname): continue
+                  if pkgname.lower() == 'firmware':
+                      # firmware: luôn đặt thành >= 11.0 (không lặp)
+                      if not has_fw:
+                          dep_list.append(FIRMWARE_DEP)
+                          has_fw = True
+                      continue
                   dep_list.append(d)
+              if not has_fw:
+                  dep_list.append(FIRMWARE_DEP)
+
               if env_mode == 'rootful':
                   new_deps = ['mobilesubstrate', 'preferenceloader'] + dep_list
               elif env_mode == 'roothide':
@@ -458,12 +498,14 @@ jobs:
                   fields['Depends'] = ', '.join(final_deps)
               elif 'Depends' in fields:
                   del fields['Depends']
+
               # Them Icon neu co URL (tu thu muc icon/ trong repo)
               if icon_url:
                   fields['Icon'] = icon_url.strip()
                   if 'Icon' not in order:
                       order.append('Icon')
-              # 4. Viet lai theo THU TU CHUAN dpkg (dam bao Version/Architecture/Package o dau)
+
+              # 4. Viet lai theo THU TU CHUAN dpkg
               STD_ORDER = ['Package', 'Name', 'Version', 'Architecture', 'Section', 'Priority',
                            'Depends', 'Pre-Depends', 'Conflicts', 'Replaces', 'Provides',
                            'Suggests', 'Recommends', 'Enhances', 'Description', 'Maintainer',
@@ -474,7 +516,6 @@ jobs:
                   if fn in fields and fn not in written:
                       val = fields[fn]
                       if fn == 'Description':
-                          # Description: dong dau + continuation (neu co newline thi giu, dong tiep theo bat dau bang space)
                           lines = val.split('\n')
                           out.append(f'Description: {lines[0]}\n')
                           for ln in lines[1:]:
@@ -485,20 +526,18 @@ jobs:
                       else:
                           out.append(f'{fn}: {val}\n')
                       written.add(fn)
-              # cac field con lai (theo thu tu xuat hien goc)
               for fn in order:
-                  if fn not in written:
-                      val = fields[fn]
-                      out.append(f'{fn}: {val}\n')
+                  if fn not in written and fn in fields:
+                      out.append(f'{fn}: {fields[fn]}\n')
                       written.add(fn)
               with open(path, 'w') as f:
                   f.writelines(out)
               # 5. DEBUG
               try:
-                  import sys as _sys
                   with open(path) as _f:
-                      _sys.stderr.write("=== DEBUG control after patch ===\n" + _f.read() + "=== END DEBUG ===\n")
-              except: pass
+                      sys.stderr.write("=== DEBUG control after patch ===\n" + _f.read() + "=== END DEBUG ===\n")
+              except Exception:
+                  pass
 
           def relocate_roothide(temp_dir):
               """Di chuyển /var/jb/* lên gốc, file còn lại -> /rootfs/ (theo RootHide Patcher chuẩn)"""
@@ -508,45 +547,39 @@ jobs:
               if not os.path.isdir(jb):
                   return
               kept_from_jb = set()
-              if os.path.isdir(jb):
-                  for item in os.listdir(jb):
-                      s = os.path.join(jb, item)
-                      d = os.path.join(temp_dir, item)
-                      if os.path.exists(d):
-                          if os.path.isdir(s):
-                              for sub in os.listdir(s):
-                                  os.makedirs(d, exist_ok=True)
-                                  try: os.rename(os.path.join(s, sub), os.path.join(d, sub))
-                                  except: pass
-                          else:
-                              try:
-                                  os.remove(d)
-                                  os.rename(s, d)
+              for item in os.listdir(jb):
+                  s = os.path.join(jb, item)
+                  d = os.path.join(temp_dir, item)
+                  if os.path.exists(d):
+                      if os.path.isdir(s):
+                          for sub in os.listdir(s):
+                              os.makedirs(d, exist_ok=True)
+                              try: os.rename(os.path.join(s, sub), os.path.join(d, sub))
                               except: pass
                       else:
-                          try: os.rename(s, d)
+                          try:
+                              os.remove(d)
+                              os.rename(s, d)
                           except: pass
-                      kept_from_jb.add(item)
-                  # xoa var/jb va var (ignore error neu co dotfile)
-                  shutil.rmtree(jb, ignore_errors=True)
-                  var_dir = os.path.join(temp_dir, 'var')
-                  if os.path.isdir(var_dir) and not os.listdir(var_dir):
-                      try: os.rmdir(var_dir)
+                  else:
+                      try: os.rename(s, d)
                       except: pass
+                  kept_from_jb.add(item)
+              shutil.rmtree(jb, ignore_errors=True)
+              var_dir = os.path.join(temp_dir, 'var')
+              if os.path.isdir(var_dir) and not os.listdir(var_dir):
+                  try: os.rmdir(var_dir)
+                  except: pass
               # file con lai (rootfs) chuyen vao /rootfs/ — CHI giu cac thu muc da di chuyen tu /var/jb
               rootfs = os.path.join(temp_dir, 'rootfs')
               os.makedirs(rootfs, exist_ok=True)
-              # cac thu muc duoc phep o goc: nhung thu muc den tu /var/jb (thuong la Applications, Library, usr, bin, sbin, etc)
               KEEP_AT_ROOT = {'Applications','Library','usr','bin','sbin','etc'}
               for item in os.listdir(temp_dir):
                   if item in ('DEBIAN', 'rootfs'):
                       continue
                   s = os.path.join(temp_dir, item)
                   if item in kept_from_jb and item in KEEP_AT_ROOT:
-                      continue  # thu muc tu /var/jb -> giu o goc
-                  if os.path.isdir(s) and item in KEEP_AT_ROOT and item in kept_from_jb:
                       continue
-                  # moi thu khac (var, System, private, file rootfs...) -> vao /rootfs/
                   d = os.path.join(rootfs, item)
                   try:
                       if os.path.exists(d):
@@ -568,7 +601,6 @@ jobs:
           echo "=== TỰ ĐỘNG PHÁT HIỆN MÔI TRƯỜNG GỐC → BUILD 2 VÙNG CÒN LẠI (đủ 3 vùng chuẩn) ==="
           for deb in debs/*.deb; do
             [ -f "$deb" ] || continue
-            # bo qua cac deb da la output (co _rootful_/_rootless_/_roothide_ trong ten)
             case "$deb" in
               *_rootful_*|*_rootless_*|*_roothide_*) continue ;;
             esac
@@ -630,7 +662,7 @@ jobs:
           bzip2 -kf Packages
           xz -kf Packages
           echo "=== KIỂM TRA KÍCH THƯỚC FILE ==="
-          grep -E "^(Package|Architecture|Size|Filename):" Packages
+          grep -E "^(Package|Name|Version|Architecture|Depends|Maintainer|Author|Size|Filename):" Packages
 
       - name: Generate Release
         run: |
@@ -647,7 +679,7 @@ jobs:
       - name: Cancel in-progress Pages deployment (tránh lỗi "in progress deployment")
         run: |
           echo "=== Hủy các Pages deployment đang chạy (nếu có) ==="
-          DEPLOYS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"             "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/deployments" || echo "[]")
+          DEPLOYS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/deployments" || echo "[]")
           echo "$DEPLOYS" | python3 -c "
           import sys, json
           try:
@@ -660,7 +692,7 @@ jobs:
           " | while read -r dep_id; do
               [ -n "$dep_id" ] || continue
               echo "Hủy deployment $dep_id..."
-              curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}"                 "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/deployments/$dep_id/cancel" || true
+              curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages/deployments/$dep_id/cancel" || true
               sleep 2
           done
           echo "=== Đã hủy xong (nếu có) ==="
