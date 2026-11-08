@@ -57,15 +57,15 @@ jobs:
 
       - name: Process Debs (3 môi trường chuẩn)
         env:
-          PAGES_URL: ${{ steps.pages.outputs.base_url || '' }}
+          PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
         run: |
           cat << 'PYEOF' > patch.py
           import sys, os, subprocess, re
           import lief
           import plistlib
 
-          # ===== BLACKLIST chuẩn (theo ConversionRuleset.json) — KHÔNG patch các đường dẫn hệ thống =====
-          # FIX ROOTHIDE #1: đã xóa "/var/jb" khỏi blacklist (trước đây làm mọi đường dẫn /var/jb/... bị bỏ qua, không được chuyển đổi)
+          # ===== BLACKLIST chuẩn (theo ConversionRuleset.json) =====
+          # roothide: KHÔNG có "/var/jb" trong blacklist (nếu có thì mọi /var/jb/... bị bỏ qua, không chuyển đổi)
           BLACKLIST = [
               "/System", "/usr/lib/libobjc", "/usr/lib/libc++", "/usr/lib/libstdc++", "/usr/lib/dyld",
               "/usr/lib/libMobileGestalt.dylib", "/usr/lib/system", "/usr/lib/swift", "/usr/lib/libswift",
@@ -86,14 +86,8 @@ jobs:
               if p == "/var/jb": return "/"
               return p
 
-          def to_jbroot(p):
-              # /var/jb/usr/lib/xxx -> @loader_path/.jbroot/usr/lib/xxx
-              if p.startswith("/var/jb/"):
-                  return "@loader_path/.jbroot" + p[len("/var/jb"):]
-              return p
-
           def relocate_rootful(temp_dir):
-              """BAN ROOTFUL: di chuyen /var/jb/* len goc (rootful KHONG dung /var/jb). Khong tao /rootfs/ (file rootfs giu nguyen)."""
+              """rootful: đưa /var/jb/* lên gốc. Không tạo /rootfs/."""
               import shutil
               jb = os.path.join(temp_dir, 'var', 'jb')
               if os.path.isdir(jb):
@@ -121,8 +115,7 @@ jobs:
                       except: pass
 
           def _patch_binary_strings(bin_path, env_mode):
-              """Ky thuat: thay /var/jb/ (8 bytes) -> //////// (8 bytes) trong strings binary. CHI dung cho rootful.
-              FIX ROOTHIDE #2: roothide/rootless KHONG patch strings (////////usr/lib tren roothide tro ve rootfs that, gay crash/safe mode)."""
+              """Thay /var/jb/ -> //////// trong strings binary. CHỈ rootful."""
               if env_mode != 'rootful':
                   return
               try:
@@ -135,7 +128,6 @@ jobs:
               except Exception:
                   pass
 
-          # FIX ROOTHIDE #4: patch_binary viết lại (lief.MachO.parse hỗ trợ fat, chỉ ghi khi có thay đổi, tạo symlink .jbroot, log lỗi)
           DEP_TYPES = {'LOAD_DYLIB', 'LOAD_WEAK_DYLIB', 'REEXPORT_DYLIB', 'LOAD_REEXPORT_DYLIB', 'LAZY_LOAD_DYLIB'}
 
           def _ctype(cmd):
@@ -223,7 +215,6 @@ jobs:
                                   if np_ != p:
                                       cmd.path = np_
                                       changed = True
-                      # thêm RPATH: roothide chỉ thêm khi thật sự có dependency @rpath/ (và chỉ dạng @loader_path/.jbroot)
                       if env_mode == 'roothide':
                           rps = ['@loader_path/.jbroot/usr/lib', '@loader_path/.jbroot/usr/local/lib',
                                  '@loader_path/.jbroot/Library/Frameworks',
@@ -254,7 +245,7 @@ jobs:
                       fat.write(bin_path)
               except Exception as e:
                   sys.stderr.write("[patch_binary] %s: %r\n" % (bin_path, e))
-              # symlink .jbroot cạnh binary (relative -> trỏ về gốc jbroot)
+              # symlink .jbroot cạnh binary (trỏ về gốc jbroot)
               if env_mode == 'roothide' and needs_jbroot_link:
                   try:
                       rel = os.path.relpath(os.path.dirname(bin_path), 'temp_dir')
@@ -265,12 +256,9 @@ jobs:
                           os.symlink(target, link)
                   except Exception as e:
                       sys.stderr.write("[symlink] %r\n" % (e,))
-              # ---- Patch strings trong binary (chi rootful) ----
               _patch_binary_strings(bin_path, env_mode)
-              # ---- Resign đúng theo môi trường ----
               try:
                   if env_mode == 'roothide' and is_exec:
-                      # executable roothide: dùng -M + entitlements (theo RootHide Patcher)
                       if has_ent:
                           subprocess.run(['ldid', '-M', f'-S{ent_file}', bin_path], stderr=subprocess.DEVNULL)
                       else:
@@ -299,7 +287,6 @@ jobs:
                                       if is_blacklisted(obj):
                                           return obj
                                       if env_mode == 'rootful' or env_mode == 'roothide':
-                                          # rootful & roothide: bỏ /var/jb prefix (roothide di chuyển lên gốc, map .jbroot runtime)
                                           if obj.startswith("/var/jb/"):
                                               return obj[len("/var/jb"):]
                                           return obj
@@ -320,7 +307,6 @@ jobs:
                               pass
 
           def patch_text_files(directory, env_mode):
-              """Chuyen sach duong dan /var/jb trong TAT CA file text (.sh/.json/.strings/.conf/.entitlements/.py...) — tranh sot duong dan gay loi ellekit/setting."""
               TEXT_EXT = ('.sh', '.json', '.strings', '.conf', '.cfg', '.py', '.txt', '.xml', '.entitlements', '.rules', '.yaml', '.yml', '.plist', '.lproj', '.override')
               TEXT_NAMES = ('Filter', 'control', 'postinst', 'prerm', 'postrm', 'extrainst_', 'preinst')
               for root, dirs, files in os.walk(directory):
@@ -331,12 +317,10 @@ jobs:
                       try:
                           with open(path, 'rb') as f:
                               raw_bytes = f.read()
-                          # bo qua file binary/co null byte
                           if b'\x00' in raw_bytes:
                               continue
                           content = raw_bytes.decode('utf-8', errors='replace')
                           if env_mode in ('rootful', 'roothide'):
-                              # thay /var/jb/ -> / ; /var/jb rieng le -> /
                               new = content.replace('/var/jb/', '/')
                               new = re.sub(r'(?<![\w/])/var/jb(?![\w/])', '/', new)
                           else:
@@ -348,7 +332,6 @@ jobs:
                           pass
 
           def verify_deb(deb_path, env_mode):
-              """Verify nghiêm túc: giải nén lại, kiểm tra CÒN /var/jb trong load commands + control đúng. In PASS/WARN."""
               import tempfile, shutil, subprocess
               if not os.path.exists(deb_path):
                   print(f"[FAIL] {deb_path} KHONG TON TAI")
@@ -360,7 +343,6 @@ jobs:
               d = tempfile.mkdtemp()
               try:
                   subprocess.run(['dpkg-deb', '-R', deb_path, d], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                  # kiem tra filesystem: rootful & roothide KHONG duoc con var/jb
                   if env_mode != 'rootless' and os.path.isdir(os.path.join(d, 'var', 'jb')):
                       print(f"[FAIL] {os.path.basename(deb_path)} VAN CON thu muc var/jb trong deb (chua relocate)")
                   bad = []
@@ -381,169 +363,161 @@ jobs:
                   if bad:
                       print(f"[WARN] {os.path.basename(deb_path)} ({env_mode}) con /var/jb trong {len(bad)} load command(s): {bad[:2]}")
                   else:
-                      # canh bao them: neu rootful ma con load libellekit -> se khong chay
-                      dylibs = set()
-                      try:
-                          b2 = lief.parse(deb_path)
-                          if b2 and b2.format == lief.Binary.FORMATS.MACHO:
-                              for c2 in b2.commands:
-                                  nm2 = getattr(c2, 'name', None)
-                                  if nm2: dylibs.add(os.path.basename(nm2))
-                      except: pass
-                      warn_dylibs = []
-                      if env_mode == 'rootful' and 'libellekit.dylib' in dylibs:
-                          warn_dylibs.append('libellekit.dylib (khong ton tai tren rootful)')
-                      if warn_dylibs:
-                          print(f"[WARN] {os.path.basename(deb_path)} ({env_mode}) co the khong chay: {', '.join(warn_dylibs)}")
-                      else:
-                          print(f"[PASS] {os.path.basename(deb_path)} ({env_mode}) — khong con /var/jb, size={sz} bytes, {len(dylibs)} dylibs")
+                      print(f"[PASS] {os.path.basename(deb_path)} ({env_mode}) — khong con /var/jb, size={sz} bytes")
               except Exception as e:
                   print(f"[FAIL] {deb_path} verify loi: {e}")
               finally:
                   shutil.rmtree(d, ignore_errors=True)
 
-          # ===== CONTROL: sửa theo yêu cầu =====
-          # - Name: thêm hậu tố môi trường, vd "DynaFake (Rootless)" / "(Roothide)" / "(Rootful)"
-          # - Version: đổi hậu tố revision thành -5, vd 6.0.21 -> 6.0.21-5 (6.0.21-3 -> 6.0.21-5)
-          # - Depends firmware: đặt thành firmware (>= 11.0) (thêm nếu chưa có)
-          # - Maintainer / Author: thêm ", TaoJB" (không thêm lặp lại)
-          REVISION = '5'
-          FIRMWARE_DEP = 'firmware (>= 11.0)'
+          # ===================== CONTROL =====================
+          # Quy ước môi trường theo kiến trúc:
+          #   iphoneos-arm    -> rootful
+          #   iphoneos-arm64  -> rootless
+          #   iphoneos-arm64e -> roothide
+          ENV_BY_ARCH = {'iphoneos-arm': 'rootful', 'iphoneos-arm64': 'rootless', 'iphoneos-arm64e': 'roothide'}
           ENV_LABEL = {'rootful': 'Rootful', 'rootless': 'Rootless', 'roothide': 'Roothide'}
+          ENV_TOKEN_RE = re.compile(r'\(\s*(rootful|rootless|roothide)\s*\)', re.I)
+          ENV_DEPS = {
+              'rootful': ['mobilesubstrate', 'preferenceloader'],
+              'rootless': ['ellekit', 'preferenceloader'],
+              'roothide': ['roothide', 'ellekit', 'preferenceloader'],
+          }
+          DROP_DEPS = {'mobilesubstrate', 'preferenceloader', 'roothide', 'ellekit', 'substrate', 'firmware'}
+          FIRMWARE_DEP = 'firmware (>= 11.0)'
+          REVISION = '5'
           OWNER = 'TaoJB'
+          STD_ORDER = ['Package', 'Name', 'Version', 'Architecture', 'Section', 'Priority',
+                       'Depends', 'Pre-Depends', 'Conflicts', 'Replaces', 'Provides',
+                       'Suggests', 'Recommends', 'Enhances', 'Description', 'Maintainer',
+                       'Author', 'Homepage', 'Tag', 'Icon', 'Installed-Size']
+
+          def read_control(path):
+              """Đọc control thành list [key, [giá trị/dòng tiếp theo]], giữ thứ tự."""
+              entries = []
+              with open(path, 'r', encoding='utf-8', errors='replace') as f:
+                  for line in f.read().split('\n'):
+                      if not line.strip():
+                          continue
+                      if line[0] in ' \t' and entries:
+                          entries[-1][1].append(line.strip())
+                      elif ':' in line:
+                          k, v = line.split(':', 1)
+                          entries.append([k.strip(), [v.strip()]])
+              return entries
+
+          def _get(entries, key):
+              for e in entries:
+                  if e[0].lower() == key.lower():
+                      return e
+              return None
+
+          def _val(entries, key):
+              e = _get(entries, key)
+              return ' '.join(e[1]).strip() if e else ''
+
+          def _set(entries, key, vals):
+              e = _get(entries, key)
+              if e:
+                  e[1] = vals
+              else:
+                  entries.append([key, vals])
 
           def patch_control(path, target_arch, env_mode, icon_url=''):
-              """PARSE CHUẨN DEBIAN: tach field + continuation -> dict -> viet lai theo thu tu chuan."""
-              with open(path, 'r') as f:
-                  raw = f.read()
-              # 1. Parse tung field (ke ca continuation)
-              def _norm_field(n):
-                  return '-'.join(p.capitalize() for p in n.lower().split('-'))
-              field_re = re.compile(r'(?ms)^([A-Za-z][A-Za-z0-9-]*):[ \t]*(.*?)(?=\n[A-Za-z][A-Za-z0-9-]*:|\Z)')
-              fields = {}
-              order = []
-              for m in field_re.finditer(raw):
-                  name = _norm_field(m.group(1))
-                  val = m.group(2).rstrip()
-                  if name != 'Description':
-                      val = re.sub(r'\n[ \t]+', ' ', val).strip()
-                  if name in fields:
-                      if name in ('Depends','Conflicts','Replaces','Provides','Suggests','Recommends','Enhances','Pre-Depends'):
-                          fields[name] = fields[name].rstrip().rstrip(',') + ', ' + val.lstrip(',')
-                  else:
-                      order.append(name)
-                      fields[name] = val
+              entries = read_control(path)
+              before = open(path, 'r', encoding='utf-8', errors='replace').read()
 
-              # 2. Package / Architecture
-              if 'Package' in fields:
-                  fields['Package'] = re.sub(r'\.(roothide|rootless|rootful)$', '', fields['Package'].strip())
-              fields['Architecture'] = target_arch
+              # 1. Package: bỏ hậu tố môi trường cũ nếu có
+              pkg = re.sub(r'\.(roothide|rootless|rootful)$', '', _val(entries, 'Package'))
+              if pkg:
+                  _set(entries, 'Package', [pkg])
 
-              # 2b. NAME: bỏ hậu tố cũ rồi thêm hậu tố môi trường
-              base_name = fields.get('Name') or fields.get('Package', '')
-              base_name = re.sub(r'\s*\((Rootful|Rootless|Roothide)\)\s*$', '', base_name, flags=re.I).strip()
-              if base_name:
-                  fields['Name'] = '%s (%s)' % (base_name, ENV_LABEL[env_mode])
+              # 2. Architecture theo môi trường đích
+              _set(entries, 'Architecture', [target_arch])
 
-              # 2c. VERSION: thay revision thành -REVISION
-              if 'Version' in fields:
-                  ver = re.sub(r'-\d+$', '', fields['Version'].strip())
-                  fields['Version'] = '%s-%s' % (ver, REVISION)
-
-              # 2d. MAINTAINER / AUTHOR: thêm TaoJB, không lặp
-              for key in ('Maintainer', 'Author'):
-                  cur = fields.get(key, '').strip().rstrip(',').strip()
-                  if OWNER not in cur:
-                      fields[key] = (cur + ', ' + OWNER) if cur else OWNER
-                  if key not in order:
-                      order.append(key)
-
-              # 3. Xu ly Depends
-              deps_str = fields.get('Depends', '')
-              for pat in [r'\bmobilesubstrate\b(\s*\([^)]*\))?', r'\bpreferenceloader\b(\s*\([^)]*\))?',
-                          r'\broothide\b(\s*\([^)]*\))?', r'\bellekit\b(\s*\([^)]*\))?',
-                          r'\bsubstrate\b(\s*\([^)]*\))?']:
-                  deps_str = re.sub(pat, '', deps_str)
-              dep_list = []
-              has_fw = False
-              for d in re.split(r',', deps_str):
-                  d = d.strip().strip(',').strip()
-                  if not d: continue
-                  pkgname = re.split(r'[\s(]', d, 1)[0].strip()
-                  if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9+._-]*$', pkgname): continue
-                  if pkgname.lower() == 'firmware':
-                      # firmware: luôn đặt thành >= 11.0 (không lặp)
-                      if not has_fw:
-                          dep_list.append(FIRMWARE_DEP)
-                          has_fw = True
-                      continue
-                  dep_list.append(d)
-              if not has_fw:
-                  dep_list.append(FIRMWARE_DEP)
-
-              if env_mode == 'rootful':
-                  new_deps = ['mobilesubstrate', 'preferenceloader'] + dep_list
-              elif env_mode == 'roothide':
-                  new_deps = ['roothide', 'ellekit', 'preferenceloader'] + dep_list
+              # 3. Name: thay (rootX) có sẵn bằng môi trường đích; nếu chưa có thì thêm vào cuối
+              label = ENV_LABEL[env_mode]
+              name = _val(entries, 'Name') or pkg
+              if ENV_TOKEN_RE.search(name):
+                  def _rep(m):
+                      tok = m.group(1)
+                      new = label.lower() if tok.islower() else label
+                      return '(%s)' % new
+                  name = ENV_TOKEN_RE.sub(_rep, name)
               else:
-                  new_deps = ['ellekit', 'preferenceloader'] + dep_list
-              final_deps = []
-              seen = set()
-              for d in new_deps:
+                  name = '%s (%s)' % (name, label)
+              _set(entries, 'Name', [name])
+
+              # 4. Version: thay revision bằng -REVISION
+              ver = _val(entries, 'Version')
+              if ver:
+                  ver = re.sub(r'-\d+$', '', ver)
+                  _set(entries, 'Version', ['%s-%s' % (ver, REVISION)])
+
+              # 5. Maintainer / Author: thêm TaoJB nếu chưa có
+              for key in ('Maintainer', 'Author'):
+                  cur = _val(entries, key).rstrip(',').strip()
+                  if OWNER not in cur:
+                      cur = (cur + ', ' + OWNER) if cur else OWNER
+                  _set(entries, key, [cur])
+
+              # 6. Depends: gộp tất cả dòng Depends, dựng lại theo môi trường, firmware >= 11.0
+              deps_raw = ', '.join(' '.join(e[1]) for e in entries if e[0].lower() == 'depends')
+              entries = [e for e in entries if e[0].lower() != 'depends']
+              rest, seen = [], set()
+              for d in deps_raw.split(','):
+                  d = d.strip()
+                  if not d:
+                      continue
                   key = re.split(r'[\s(]', d, 1)[0].strip().lower()
-                  if key and key not in seen:
-                      seen.add(key)
-                      final_deps.append(d.strip())
-              if final_deps:
-                  fields['Depends'] = ', '.join(final_deps)
-              elif 'Depends' in fields:
-                  del fields['Depends']
+                  if key in DROP_DEPS or key in seen:
+                      continue
+                  seen.add(key)
+                  rest.append(d)
+              final = ENV_DEPS[env_mode] + [FIRMWARE_DEP] + rest
+              _set(entries, 'Depends', [', '.join(final)])
 
-              # Them Icon neu co URL (tu thu muc icon/ trong repo)
+              # 7. Icon
               if icon_url:
-                  fields['Icon'] = icon_url.strip()
-                  if 'Icon' not in order:
-                      order.append('Icon')
+                  _set(entries, 'Icon', [icon_url.strip()])
 
-              # 4. Viet lai theo THU TU CHUAN dpkg
-              STD_ORDER = ['Package', 'Name', 'Version', 'Architecture', 'Section', 'Priority',
-                           'Depends', 'Pre-Depends', 'Conflicts', 'Replaces', 'Provides',
-                           'Suggests', 'Recommends', 'Enhances', 'Description', 'Maintainer',
-                           'Author', 'Homepage', 'Tag', 'Icon', 'Installed-Size']
+              # 8. Ghi lại theo thứ tự chuẩn
+              def _rank(e):
+                  for i, s in enumerate(STD_ORDER):
+                      if s.lower() == e[0].lower():
+                          return i
+                  return len(STD_ORDER)
+              ordered = sorted(entries, key=_rank)
               out = []
-              written = set()
-              for fn in STD_ORDER:
-                  if fn in fields and fn not in written:
-                      val = fields[fn]
-                      if fn == 'Description':
-                          lines = val.split('\n')
-                          out.append(f'Description: {lines[0]}\n')
-                          for ln in lines[1:]:
-                              if ln.strip():
-                                  out.append(' ' + ln.strip() + '\n')
-                              else:
-                                  out.append(' .\n')
-                      else:
-                          out.append(f'{fn}: {val}\n')
-                      written.add(fn)
-              for fn in order:
-                  if fn not in written and fn in fields:
-                      out.append(f'{fn}: {fields[fn]}\n')
-                      written.add(fn)
-              with open(path, 'w') as f:
+              for k, vals in ordered:
+                  if k.lower() == 'description':
+                      out.append('Description: %s\n' % vals[0])
+                      for ln in vals[1:]:
+                          out.append(' %s\n' % (ln if ln else '.'))
+                  else:
+                      out.append('%s: %s\n' % (k, ' '.join(vals)))
+              with open(path, 'w', encoding='utf-8') as f:
                   f.writelines(out)
-              # 5. DEBUG
-              try:
-                  with open(path) as _f:
-                      sys.stderr.write("=== DEBUG control after patch ===\n" + _f.read() + "=== END DEBUG ===\n")
-              except Exception:
-                  pass
+
+              # 9. Kiểm tra lại: nếu không đúng thì làm job FAIL để thấy lỗi ngay
+              chk = read_control(path)
+              got_name = _val(chk, 'Name')
+              got_ver = _val(chk, 'Version')
+              got_arch = _val(chk, 'Architecture')
+              print("=== CONTROL %s (%s) ===" % (target_arch, env_mode))
+              print("--- TRUOC ---"); print(before)
+              print("--- SAU ---"); print(open(path, encoding='utf-8').read())
+              ok = (re.search(r'\(%s\)$' % label, got_name, re.I) is not None
+                    and got_ver.endswith('-' + REVISION)
+                    and got_arch == target_arch)
+              if not ok:
+                  print("[FAIL] control khong dung: Name=%r Version=%r Arch=%r" % (got_name, got_ver, got_arch))
+                  sys.exit(1)
+              print("[OK] control dung: %s | %s | %s" % (got_name, got_ver, got_arch))
 
           def relocate_roothide(temp_dir):
-              """Di chuyển /var/jb/* lên gốc, file còn lại -> /rootfs/ (theo RootHide Patcher chuẩn)"""
+              """roothide: đưa /var/jb/* lên gốc, phần còn lại -> /rootfs/. Nếu deb không có /var/jb thì giữ nguyên."""
               import shutil
               jb = os.path.join(temp_dir, 'var', 'jb')
-              # FIX ROOTHIDE #3: deb gốc không có /var/jb (rootful) -> giữ nguyên, KHÔNG đẩy mọi thứ vào /rootfs/
               if not os.path.isdir(jb):
                   return
               kept_from_jb = set()
@@ -570,10 +544,9 @@ jobs:
               if os.path.isdir(var_dir) and not os.listdir(var_dir):
                   try: os.rmdir(var_dir)
                   except: pass
-              # file con lai (rootfs) chuyen vao /rootfs/ — CHI giu cac thu muc da di chuyen tu /var/jb
               rootfs = os.path.join(temp_dir, 'rootfs')
               os.makedirs(rootfs, exist_ok=True)
-              KEEP_AT_ROOT = {'Applications','Library','usr','bin','sbin','etc'}
+              KEEP_AT_ROOT = {'Applications', 'Library', 'usr', 'bin', 'sbin', 'etc'}
               for item in os.listdir(temp_dir):
                   if item in ('DEBIAN', 'rootfs'):
                       continue
@@ -598,6 +571,7 @@ jobs:
             newname=$(echo "$f" | sed 's/ /_/g; s/[()]/_/g; s/__*/_/g')
             if [ "$f" != "$newname" ]; then mv -f "$f" "$newname"; echo "  -> doi ten: $f => $newname"; fi
           done
+
           echo "=== TỰ ĐỘNG PHÁT HIỆN MÔI TRƯỜNG GỐC → BUILD 2 VÙNG CÒN LẠI (đủ 3 vùng chuẩn) ==="
           for deb in debs/*.deb; do
             [ -f "$deb" ] || continue
@@ -630,7 +604,7 @@ jobs:
                 echo "  [2/5] Di chuyển /var/jb lên gốc + /rootfs/ (roothide)..."
                 python3 -c "import patch; patch.relocate_roothide('temp_dir')"
               elif [ "$T_ENV" = "rootful" ]; then
-                echo "  [2/5] Di chuyển /var/jb lên gốc (rootful — không dùng /var/jb)..."
+                echo "  [2/5] Di chuyển /var/jb lên gốc (rootful)..."
                 python3 -c "import patch; patch.relocate_rootful('temp_dir')"
               else
                 echo "  [2/5] Bỏ qua relocate (rootless giữ /var/jb)"
@@ -661,7 +635,7 @@ jobs:
           dpkg-scanpackages -m ./debs /dev/null > Packages
           bzip2 -kf Packages
           xz -kf Packages
-          echo "=== KIỂM TRA KÍCH THƯỚC FILE ==="
+          echo "=== KIỂM TRA ==="
           grep -E "^(Package|Name|Version|Architecture|Depends|Maintainer|Author|Size|Filename):" Packages
 
       - name: Generate Release
