@@ -19,12 +19,12 @@ Version: 1.0.8-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 468
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.2.2), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.2.2)
 Filename: ./debs/bzip2_1.0.8_roothide_iphoneos-arm64e.deb
-Size: 54670
-MD5sum: 56c959455a42e4986dc2b8cb35f81e59
-SHA1: 647505e006b1864cdc8a12ca8bf5f3b15defab92
-SHA256: 961947926d4e8326918ffb6e9a70893798621a00630e60c1b1048b3c3528dc23
+Size: 54662
+MD5sum: 5bebdcbb724ef9d7c3d52fed0b132e6c
+SHA1: 6e6a1f79f25845e5455c526b8699c6fa94fd60b5
+SHA256: e5af233f9b3c7986907f5ac06357d743d6390877263ba7124f3c30177d51912f
 Section: Archiving
 Priority: important
 Homepage: http://www.bzip.org/
@@ -37,12 +37,12 @@ Version: 1.0.8-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 468
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.2.2), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.2.2)
 Filename: ./debs/bzip2_1.0.8_rootful_iphoneos-arm.deb
-Size: 54722
-MD5sum: 98cbfe52a3623178523b5b9e1dea27db
-SHA1: 8681900d4aeb72649bf6fc33a75cf722279cc667
-SHA256: 189f2b90ecf55c7e78a6fc5451d30d82c69a4bbebc3a1e1f9309b68d95d794f3
+Size: 54712
+MD5sum: f683b41f54aca2e496b747d288ce6740
+SHA1: c5bfd7f7515625a59bde26e0710c402516bc1b29
+SHA256: 5dd3aa26d3e516c4ee4eb51fad8a9bdd8e0a7f7a026463b83c9e6c15624f48b6
 Section: Archiving
 Priority: important
 Homepage: http://www.bzip.org/
@@ -78,15 +78,15 @@ Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0)
 Conflicts: com.bazik.codexgenie27, com.bazik.genie27
 Replaces: com.bazik.codexgenie27
 Filename: ./debs/com.bazik1337.ios2627anims_1.5.2_roothide_iphoneos-arm64e.deb
-Size: 47336
-MD5sum: f77fcabc3d2b985f194b0270bb0d405d
-SHA1: 7333d724ff55e043f18cec0cfc97c1e97eb82492
-SHA256: 5cd98b3c7a06b0efaad3567adf5902869d076b3a0873ec58249cb278abe65309
+Size: 47356
+MD5sum: 691bded78c157b66a2afd44d2a740a77
+SHA1: bd7cd4fef00af544990853447e98f52f3221068d
+SHA256: 95297e430ace4b639cbff2fd853620c9ad993dc4e1bd71d8c2d2e77743958e5b
 Section: Tweaks
 Homepage: https://t.me/ba31k_tweaks
 Description: iOS 27 app open/close and Notification Center animations, each switchable in Settings. Authors: bazik1337 (Telegram @bazik1337). Channel: https://t.me/ba31k_tweaks
 Author: bazik1337 (@bazik1337), TaoJB
-Icon: icon/com.bazik1337.ios2627anims.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.bazik1337.ios2627anims.png
 Name: iOS 27 Animations VH (Roothide)
 
 Package: com.bazik1337.ios2627anims
@@ -98,15 +98,15 @@ Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Conflicts: com.bazik.codexgenie27, com.bazik.genie27
 Replaces: com.bazik.codexgenie27
 Filename: ./debs/com.bazik1337.ios2627anims_1.5.2_rootful_iphoneos-arm.deb
-Size: 47226
-MD5sum: 201d7a2674634a62e7280cc302a5d931
-SHA1: d68295e8b57ae4aadb7ce3e25f1704895f1b9d30
-SHA256: d3e43ce5f3200e6b4c696e82c601be5186be781661e06b06ea043aff2ea083d5
+Size: 47296
+MD5sum: dc81610bb53be19608f6f4fb5d45b7d4
+SHA1: faa8804bab878d449330f1ad03138812795cd48f
+SHA256: cc3ad7f946cadc6787a4034ceb172ed728185836f676c35786a9bf09c52b9714
 Section: Tweaks
 Homepage: https://t.me/ba31k_tweaks
 Description: iOS 27 app open/close and Notification Center animations, each switchable in Settings. Authors: bazik1337 (Telegram @bazik1337). Channel: https://t.me/ba31k_tweaks
 Author: bazik1337 (@bazik1337), TaoJB
-Icon: icon/com.bazik1337.ios2627anims.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.bazik1337.ios2627anims.png
 Name: iOS 27 Animations VH (Rootful)
 
 Package: com.bvn.ghostboard.rl
@@ -118,10 +118,10 @@ Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), com.mrgcgamer.li
 Conflicts: com.den.locktouchx, com.bvn.lockscreenbatterymagsafe.r2, com.bvn.lockscreenbatterymagsafe, com.bvn.locktouchx.h2, com.bvn.locktouchx, com.jtisvn.unlockboard, com.bvn.infobattery, com.bvn.infobattery-r2, com.ttt.cccurrentmodule, com.bvn.batteryinfomodule, com.bvn.ccborder15plus, com.jtis.ccbonder16, com.fiore.ccborder, com.p2kdev.ccborder
 Replaces: com.ttt.cccurrentmodule, com.bvn.batteryinfomodule, com.bvn.bvnrecorder, com.bvn.ghostvoice
 Filename: ./debs/com.bvn.ghostboard.rl_7.3.8-9_rootful_iphoneos-arm.deb
-Size: 6238236
-MD5sum: 80b10dbf493afbdc47d9013bcdcae022
-SHA1: a9ec6b806c1e7fab0fd38eaaff13aed8078fbe21
-SHA256: 518ba7e1345e7b84ee2184d15969dc4128f35194722a8b123207042d2b139641
+Size: 6238266
+MD5sum: 37dac6c15af28efcb9964f23f630789f
+SHA1: 534779c0c3161e91e4f7f39d1430887f34cf6540
+SHA256: 0adcfea85e49d730edecf1005780e22a955cbff9c847991bc6bd96b99b5d4bb6
 Section: Tweaks
 Description: All In One Tweak
 Author: BVN, JB, TaoJB
@@ -139,10 +139,10 @@ Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), com.mrgcgamer.
 Conflicts: com.den.locktouchx, com.bvn.lockscreenbatterymagsafe.r2, com.bvn.lockscreenbatterymagsafe, com.bvn.locktouchx.h2, com.bvn.locktouchx, com.jtisvn.unlockboard, com.bvn.infobattery, com.bvn.infobattery-r2, com.ttt.cccurrentmodule, com.bvn.batteryinfomodule, com.bvn.ccborder15plus, com.jtis.ccbonder16, com.fiore.ccborder, com.p2kdev.ccborder
 Replaces: com.ttt.cccurrentmodule, com.bvn.batteryinfomodule, com.bvn.bvnrecorder, com.bvn.ghostvoice
 Filename: ./debs/com.bvn.ghostboard.rl_7.3.8-9_roothide_iphoneos-arm64e.deb
-Size: 6238436
-MD5sum: 8d274225f269d9d78150a472bf42a416
-SHA1: 17d5ea8574eddd700172b61db4ed17645833365a
-SHA256: afc7e60f2bb431cc9b42c6f93e8e17f6e3f3290616e251fd0341f710bc513f46
+Size: 6238666
+MD5sum: 5fcf18b050f8e6d66306838c2a168ea7
+SHA1: 15fd17528d20cb1fdb2d24a38002815158dd6eb7
+SHA256: ab75eac32ce573bbc4cf6d00b36609032bfdaf407cd5901e851b1783a668723d
 Section: Tweaks
 Description: All In One Tweak
 Author: BVN, JB, TaoJB
@@ -198,17 +198,17 @@ Maintainer: Nguyễn Minh Hải, Taojb, TaoJB
 Installed-Size: 1512
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0)
 Filename: ./debs/com.dell.promotioncontrol_5.8.69t_roothide_iphoneos-arm64e.deb
-Size: 883714
-MD5sum: 9adf857b2f356115654694a3a067b6a8
-SHA1: d23d555a42b6ac3f7411297a96654fc94ec46f8e
-SHA256: 950e6109a3e94f28b07ecc69e086da363359c63f789dc5472e89417ea19f33f9
+Size: 883730
+MD5sum: 6f095025dab7c608fde991257fdf3138
+SHA1: ec0abbca8f29a8f44bdcae213971c9a3cf90b8d0
+SHA256: eebc8452ab94b53dd6edc80e996289359ecb666b1d0bb75433c2423e7abebc0f
 Section: Tweaks
 Description: Không biết để gì, lên TikTok @nguyenminhhai_2012 để tham khảo. Hỗ trợ iOS 15+.
  ProMotion Control tweak và ứng dụng cấu hình độc lập: hồ sơ theo từng app, điều khiển Hz/FPS,
  bản đồ chỉ hiển thị vị trí GPS chính xác của iPhone, và tách rõ giới hạn phần cứng với yêu cầu phần mềm.
  Runtime hooks are isolated to the control app and follow the FREE/PREMIUM/ADMIN TitaniumSettingsAPI snapshot.
 Author: Nguyễn Minh Hải, Taojb, TaoJB
-Icon: icon/com.dell.promotioncontrol.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.dell.promotioncontrol.png
 Name: ProMotion Control (Roothide)
 
 Package: com.dell.promotioncontrol
@@ -218,17 +218,17 @@ Maintainer: Nguyễn Minh Hải, Taojb, TaoJB
 Installed-Size: 1512
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Filename: ./debs/com.dell.promotioncontrol_5.8.69t_rootful_iphoneos-arm.deb
-Size: 883458
-MD5sum: c3047b762abc1911014055ee61725f2d
-SHA1: 0296597804ae345c49ab0acecddf1de99e99dc48
-SHA256: bf0926703b69ecb572f152ba884be887d6af729114ca5ca8448f9b43130b0530
+Size: 883456
+MD5sum: 8ef8a045540faeb47c9ecd0bd658691d
+SHA1: 3cf4ed3019ebe81552b143972ef80035e034b4b8
+SHA256: dd805b9a3de46b37d06257b4b034911c49d4903aa972aceed7d2b1da83c8d64d
 Section: Tweaks
 Description: Không biết để gì, lên TikTok @nguyenminhhai_2012 để tham khảo. Hỗ trợ iOS 15+.
  ProMotion Control tweak và ứng dụng cấu hình độc lập: hồ sơ theo từng app, điều khiển Hz/FPS,
  bản đồ chỉ hiển thị vị trí GPS chính xác của iPhone, và tách rõ giới hạn phần cứng với yêu cầu phần mềm.
  Runtime hooks are isolated to the control app and follow the FREE/PREMIUM/ADMIN TitaniumSettingsAPI snapshot.
 Author: Nguyễn Minh Hải, Taojb, TaoJB
-Icon: icon/com.dell.promotioncontrol.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.dell.promotioncontrol.png
 Name: ProMotion Control (Rootful)
 
 Package: com.foxfort.exiwall
@@ -236,13 +236,13 @@ Version: 2.1.7-5
 Architecture: iphoneos-arm64e
 Maintainer: FoxfortMobile, TaoJB
 Installed-Size: 25584
-Depends: roothide, ellekit, preferenceloader, com.foxfort.foxforttools (>= 1.4.16), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), com.foxfort.foxforttools (>= 1.4.16)
 Conflicts: com.p2kdev.vartaman, com.julioverne.autowall, com.spark.freshwall, com.shinvou.wallmart, com.yourepo.cydiageek.lsvibrantclockdate, ru.rj.exiwallhack
 Filename: ./debs/com.foxfort.exiwall_2.1.7-5_roothide_iphoneos-arm64e.deb
-Size: 23283638
-MD5sum: c68c755a27b76d8eacacf225ee1073ba
-SHA1: 86db9259d73b58b238452d1ee403110de32a10b4
-SHA256: b3f2395b2e874a62e04456e4fe5c8b19919780f669744643364569c825c8ab78
+Size: 23284286
+MD5sum: 5c94cdd3704929fae2774d1befb9cc55
+SHA1: 80e6ded85efdf65e3db4930fca1038b88fbce1b0
+SHA256: 067770d01c9b2dd2b911d239718fa20b9b1862f132fe763eadfbbb9336803067
 Section: Tweaks
 Description: Depth effect for lockscreen wallpaper (chúng tôi xin quyền được crack tweak exiwall mong ông foxfort sẽ chấp nhận để chúng tôi crack dùng cho roothide, thank you ) Lưu ý yêu cầu tải 2 file foxforttools và libfoxfortutils trước ở trong repo này
 Author: FoxfortMobile, TaoJB
@@ -272,13 +272,13 @@ Version: 2.1.7-5
 Architecture: iphoneos-arm
 Maintainer: FoxfortMobile, TaoJB
 Installed-Size: 25584
-Depends: mobilesubstrate, preferenceloader, com.foxfort.foxforttools (>= 1.4.16), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), com.foxfort.foxforttools (>= 1.4.16)
 Conflicts: com.p2kdev.vartaman, com.julioverne.autowall, com.spark.freshwall, com.shinvou.wallmart, com.yourepo.cydiageek.lsvibrantclockdate, ru.rj.exiwallhack
 Filename: ./debs/com.foxfort.exiwall_2.1.7-5_rootful_iphoneos-arm.deb
-Size: 23283602
-MD5sum: e06541ad52e21b76fb3c03c9b74b0150
-SHA1: c6d4e3c4d05bd813217104a9f10ac0c50c2f43ce
-SHA256: 8cd32eea69db19b1cd4345fe79f854a644bf76503645089efcb9713c5bfe2d9f
+Size: 23283664
+MD5sum: a8501fc53b40f44f3951e641f63667a9
+SHA1: c20a129c406be0ea5ceddff850ca964994e46da7
+SHA256: 17fddb55fdbb7876a7b7274d7c0bfcb4fb99aa9105b3207f62fbc21d0df1dc41
 Section: Tweaks
 Description: Depth effect for lockscreen wallpaper (chúng tôi xin quyền được crack tweak exiwall mong ông foxfort sẽ chấp nhận để chúng tôi crack dùng cho roothide, thank you ) Lưu ý yêu cầu tải 2 file foxforttools và libfoxfortutils trước ở trong repo này
 Author: FoxfortMobile, TaoJB
@@ -308,13 +308,13 @@ Version: 1.4.16-5
 Architecture: iphoneos-arm
 Maintainer: FoxfortMobile, TaoJB
 Installed-Size: 2068
-Depends: mobilesubstrate, preferenceloader, com.foxfort.libfoxfortutils (>= 1.4.10), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), com.foxfort.libfoxfortutils (>= 1.4.10)
 Conflicts: com.hackyouriphone.foxforthack, com.pulandres.foxforthack, org.cydia.kiimo.foxforthack, ru.rejail.foxforthack, me.pulandres.foxforttools, co.xrepo.appletweakjailbreak.foxforttools, net.kenhtao.foxforttools, sileoturkiye.foxforttools, com.yourepo.mohadu31.foxforttools, org.cydia.kiimo.foxforttools, com.hackyouriphone.foxforttools, com.hackyouriphone.mgspoof, org.mr.mgspoof, com.34306.foxforttools, roothide, com.roothide.manager
 Filename: ./debs/com.foxfort.foxforttools_1.4.16_rootful_iphoneos-arm.deb
-Size: 580442
-MD5sum: 2306262a797ece475105d50bfa8e9e63
-SHA1: 8f9a8c42bee1daea3b910984d5999cc740b21bb3
-SHA256: 4daa1248460d2d2abca516e31df239dea483b39f826982ab855970b8132db6b5
+Size: 580434
+MD5sum: 3aba5045859d2a8a6ae49b3e4ce4ee59
+SHA1: b9652e3a87237a411874d709917ec0880ff82b4a
+SHA256: a866866a299a00351104f9a8d577d97c7ff4837a23a3f2d50d294f42cffe0f80
 Section: Development
 Description: Helper tools for Foxfort tweaks
 Tag: role::developer
@@ -326,13 +326,13 @@ Version: 1.4.16-5
 Architecture: iphoneos-arm64e
 Maintainer: FoxfortMobile, TaoJB
 Installed-Size: 2068
-Depends: roothide, ellekit, preferenceloader, com.foxfort.libfoxfortutils (>= 1.4.10), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), com.foxfort.libfoxfortutils (>= 1.4.10)
 Conflicts: com.hackyouriphone.foxforthack, com.pulandres.foxforthack, org.cydia.kiimo.foxforthack, ru.rejail.foxforthack, me.pulandres.foxforttools, co.xrepo.appletweakjailbreak.foxforttools, net.kenhtao.foxforttools, sileoturkiye.foxforttools, com.yourepo.mohadu31.foxforttools, org.cydia.kiimo.foxforttools, com.hackyouriphone.foxforttools, com.hackyouriphone.mgspoof, org.mr.mgspoof, com.34306.foxforttools, roothide, com.roothide.manager
 Filename: ./debs/com.foxfort.foxforttools_1.4.16_roothide_iphoneos-arm64e.deb
-Size: 580132
-MD5sum: 0579aefdf5de778acd9c1d97593a9e42
-SHA1: 7e15ac04de7f045ca3bb1b9b4f9ac243ea3dcc8b
-SHA256: 17ea8a16730a7c62604d62252c566513bf66c7e4d4451d3abc0c0dd1bc0501b0
+Size: 580490
+MD5sum: 5d4387c06902d3c54ed6e211445d36f1
+SHA1: fca5eb807587bf8f6fe5e2987a6367d889747e84
+SHA256: 05ec8056b7c273db2fdb326384814812b5eb1058cf3b4f3a08c40ee185fb08a2
 Section: Development
 Description: Helper tools for Foxfort tweaks
 Tag: role::developer
@@ -365,10 +365,10 @@ Installed-Size: 1304
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), com.opa334.libsandy
 Conflicts: co.xrepo.appletweakjailbreak.libfoxfortutils, co.xrepo.appletweakjailbreak.libfoxfortutils64, org.cydia.kiimo.libfoxfortutils64, org.cydia.kiimo.libfoxfortutils64e, com.hackyouriphone.libfoxfortutils64, com.hackyouriphone.libfoxfortutils64e, com.yourepo.mohadu31.libfoxfortutils64, me.pulandres.libfoxfortutils64, me.pulandres.libfoxfortutils64e, net.kenhtao.libfoxfortutils64, sileoturkiye.libfoxfortutils64, sileoturkiye.libfoxfortutils64e, com.badr.libfoxfortutils, com.hackyouriphone.mgspoof, org.mr.mgspoof, com.34306.libfoxfortutils, roothide
 Filename: ./debs/com.foxfort.libfoxfortutils_1.4.10_rootful_iphoneos-arm.deb
-Size: 332868
-MD5sum: 99a401768d4b0f32080495ea7df7fb7b
-SHA1: 74d6ec0dd4c031fc48d5d36efbd0ee3f8e35706a
-SHA256: ca1af439fec982245f09daa283d909ff7484c780c20c94c1efdb7ad4d52ff74f
+Size: 332902
+MD5sum: 19b6ab8cabf779852db79a9c903e71ae
+SHA1: 0af7c932a6daa034a0de4f0c82a12e09bf45784e
+SHA256: 47629530875f26ccb9af26fcc868bdcf9ac404170f44114c07a97e2ca3436fb6
 Section: Development
 Description: library for Foxfort tweaks
 Tag: role::developer
@@ -384,9 +384,9 @@ Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), com.opa334.lib
 Conflicts: co.xrepo.appletweakjailbreak.libfoxfortutils, co.xrepo.appletweakjailbreak.libfoxfortutils64, org.cydia.kiimo.libfoxfortutils64, org.cydia.kiimo.libfoxfortutils64e, com.hackyouriphone.libfoxfortutils64, com.hackyouriphone.libfoxfortutils64e, com.yourepo.mohadu31.libfoxfortutils64, me.pulandres.libfoxfortutils64, me.pulandres.libfoxfortutils64e, net.kenhtao.libfoxfortutils64, sileoturkiye.libfoxfortutils64, sileoturkiye.libfoxfortutils64e, com.badr.libfoxfortutils, com.hackyouriphone.mgspoof, org.mr.mgspoof, com.34306.libfoxfortutils, roothide
 Filename: ./debs/com.foxfort.libfoxfortutils_1.4.10_roothide_iphoneos-arm64e.deb
 Size: 332882
-MD5sum: 0dc8ba2d0e7d8e0f9177c5fbd123bb12
-SHA1: e9615319fec9287b187b8afda377fddd0647880d
-SHA256: dec1775933c8a2565f3c98589705e4574fc47f715bf953f0ec39555455b5de18
+MD5sum: cb07dc7e8466440aa080cd8e1a779c44
+SHA1: a49f5d607de595d4a3c22b1765af8e46fd85e43e
+SHA256: 9b4e7809ad5419e2f46a08154930670f7a72abc8db22bbfa66e1ac6101534c1f
 Section: Development
 Description: library for Foxfort tweaks
 Tag: role::developer
@@ -416,14 +416,14 @@ Maintainer: me, TaoJB
 Installed-Size: 168
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Filename: ./debs/com.gpt.alert_9.9.9-5+debug_rootful_iphoneos-arm.deb
-Size: 3740
-MD5sum: 5be9bc35b949664555bfc60177846da9
-SHA1: 56cb986ab50b72325ddeb934748a8304f83e5ddd
-SHA256: 3ee463d7bfc5b314186f69222633136459b35dba1caeecac6381d48653cd1712
+Size: 3824
+MD5sum: 88ee4bdf5cb21183f1c77aaebacd02aa
+SHA1: 729f9c4fee7ea1abd705e0a2d8b74622ce34f102
+SHA256: 706439e10bf56ba70fe2b0c37a8dda156eafd4e513152202b3cacd0b88b90231
 Section: Tweaks
 Description: remove upgrade dialog
 Author: idk, TaoJB
-Icon: icon/com.gpt.alert.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.gpt.alert.png
 Name: no gpt alert (Rootful)
 
 Package: com.gpt.alert
@@ -433,14 +433,14 @@ Maintainer: me, TaoJB
 Installed-Size: 168
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0)
 Filename: ./debs/com.gpt.alert_9.9.9-5+debug_roothide_iphoneos-arm64e.deb
-Size: 3824
-MD5sum: 852113a219fdea55636d9919f43fe907
-SHA1: bb0c0b5b8b597254d15a421c785c229397065d7e
-SHA256: eea1b0f383d24111e887062338c8e57f79e7c667dd55afeb737c7427a1de9bce
+Size: 3830
+MD5sum: aae1e23745876b5d9f66f82d4662d515
+SHA1: 97bb960974e60f0c234d0cbe05b696da035a4269
+SHA256: 79e04e2fc9ab5bce6eb07a53cc4705a89fda537aaf27971790da85519e5c7459
 Section: Tweaks
 Description: remove upgrade dialog
 Author: idk, TaoJB
-Icon: icon/com.gpt.alert.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.gpt.alert.png
 Name: no gpt alert (Roothide)
 
 Package: com.jb.aodreal
@@ -466,14 +466,14 @@ Maintainer: jb, TaoJB
 Installed-Size: 412
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0)
 Filename: ./debs/com.jb.aodreal_0.0.1_roothide_iphoneos-arm64e.deb
-Size: 26940
-MD5sum: 78b0f6f1be500a30bfdbf66b494615ab
-SHA1: 1604fb190b13bdc17888247a9651735d7790de22
-SHA256: ab9b39e984dd7e905e09a6865ae3659fe815495c7744db60d2bd79d904dfcbc0
+Size: 26968
+MD5sum: a62b0b81934e19a360eeaceb5267ad69
+SHA1: 3d3365c9a2d718e3bc64b395bca8b06c162ea85c
+SHA256: ca7fb41ac51fac7fae11ab10477609f0ddef1bd03a6aba2ee2a560f4444d47c1
 Section: Tweaks
 Description: Unlock native AOD engine with forced 2-20Hz hardware refresh rate for iPhone 8 - XS Max
 Author: jb, TaoJB
-Icon: icon/com.jb.aodreal.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.jb.aodreal.png
 Name: AODREAL (Roothide)
 
 Package: com.jb.aodreal
@@ -483,14 +483,14 @@ Maintainer: jb, TaoJB
 Installed-Size: 412
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Filename: ./debs/com.jb.aodreal_0.0.1_rootful_iphoneos-arm.deb
-Size: 26942
-MD5sum: 5a20321d79c0bd5fe43a809c98302f30
-SHA1: 6b78ed177f1773f353c125a38863b9c4027e9d15
-SHA256: 1ef1360b40c6659800d15d213a7c49b41fbf477ab0bf81972a8187bf7ced8ae3
+Size: 26970
+MD5sum: a8136883e4be60b430c3ef02ff88a7f7
+SHA1: 5f905a621c6fc8f196bc68935c1816d878c6be19
+SHA256: afe243f5e33170c6e4f46876a8f68b5ddae47c75ea20269c2bbd75ba9874f467
 Section: Tweaks
 Description: Unlock native AOD engine with forced 2-20Hz hardware refresh rate for iPhone 8 - XS Max
 Author: jb, TaoJB
-Icon: icon/com.jb.aodreal.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.jb.aodreal.png
 Name: AODREAL (Rootful)
 
 Package: com.jb.rootless-patcher
@@ -515,12 +515,12 @@ Version: 1.0.0-5
 Architecture: iphoneos-arm
 Maintainer: JB, TaoJB
 Installed-Size: 116
-Depends: mobilesubstrate, preferenceloader, odcctools, ldid, firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), odcctools, ldid
 Filename: ./debs/com.jb.rootless-patcher_1.0.0_rootful_iphoneos-arm.deb
-Size: 26890
-MD5sum: 2a11ea2b99530180964848435f49d368
-SHA1: aa743f959be2cec7850192c8658a05faceba0427
-SHA256: 7ee9a8a91e6414fd0b5e4dc3716da5036cb69e3f82598d5d47dd4159f02db46d
+Size: 26886
+MD5sum: 97aa62814af5b282c0a1894616a2db85
+SHA1: 773cd0385a64d96a98d9350acbea762da565a581
+SHA256: 78739bc2811149fcce70d9637fa6c5409e7e98e53574801cc684bc6e90904f8a
 Section: System
 Description: Tweak chuyển đổi rootful sang rootless
 Tag: role::hacker
@@ -532,12 +532,12 @@ Version: 1.0.0-5
 Architecture: iphoneos-arm64e
 Maintainer: JB, TaoJB
 Installed-Size: 116
-Depends: roothide, ellekit, preferenceloader, odcctools, ldid, firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), odcctools, ldid
 Filename: ./debs/com.jb.rootless-patcher_1.0.0_roothide_iphoneos-arm64e.deb
-Size: 26904
-MD5sum: cc5aa69daa7ddc4a6d395f258e0f808e
-SHA1: 98c6fb5daf662793d99a0e4d6f848fea35b8e2b5
-SHA256: e3bbdbd460dabc2153be12088f761db931de822b57f0b6f928a7a2504edad5c7
+Size: 26898
+MD5sum: 9d4b62600213cc103183295ca63086c0
+SHA1: 82cf6ec75c8742871bf82cb8172b66ae7c3f6e4a
+SHA256: 259148ce79a73f91eb71dc9fbd06798cb66ef7e91313dc79a3f1a2a939990a3f
 Section: System
 Description: Tweak chuyển đổi rootful sang rootless
 Tag: role::hacker
@@ -569,15 +569,15 @@ Architecture: iphoneos-arm
 Maintainer: Korboy <korboybeats@gmail.com>, TaoJB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), coreutils (>= 8.30-1), dpkg (>= 1.19.4-1), apt (>= 1.8.2), libzstd1
 Filename: ./debs/com.korboy.sileo_2.5.7_rootful_iphoneos-arm.deb
-Size: 3383994
-MD5sum: 9fb9b3751d84ebd4a3fa32aaadf07762
-SHA1: 3e669790c9c5315abe3fa8d2a61c304f2b69425e
-SHA256: 915b14721e1c39efcd2b8ab7e3b2f5bdd44539d53039edcc47d3fb9ac8cbc2e9
+Size: 3383984
+MD5sum: 884bcac26638309e9d66823f8b037b06
+SHA1: dfdf87fcb01e036843e783b7031d022e02a34a90
+SHA256: 264ffe773d2fbcbb500ba8997b72205886eb69069372797dd09304c1f51c43e7
 Section: Packaging
 Description: A modern APT package manager frontend.
 Author: Korboy <korboybeats@gmail.com>, Amy While, waruhachi, TaoJB
 Depiction: https://korboybeats.github.io/sileo/depiction/?v=2.5.7
-Icon: icon/com.korboy.sileo.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.korboy.sileo.png
 Name: Sileo (Rootful)
 Sileodepiction: https://korboybeats.github.io/sileo/sileo_depiction/index.json?v=2.5.7
 X-Sileo-Fork: com.korboy.sileo
@@ -588,15 +588,15 @@ Architecture: iphoneos-arm64e
 Maintainer: Korboy <korboybeats@gmail.com>, TaoJB
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), coreutils (>= 8.30-1), dpkg (>= 1.19.4-1), apt (>= 1.8.2), libzstd1
 Filename: ./debs/com.korboy.sileo_2.5.7_roothide_iphoneos-arm64e.deb
-Size: 3383940
-MD5sum: 9ef01aa21cd10baa921f61b0c73a506f
-SHA1: 8d04af671f5eca28b8862a9542ce337ed251b5af
-SHA256: 3417d9de8bfab4ff34a1aa1a51e8e6da04bd1064e87570b1d30399b3d1cc1702
+Size: 3384022
+MD5sum: 4b7b06d972dcb93faaf3538dc9443317
+SHA1: e049bb005eb5db648afad8afd1ccf292f64900d3
+SHA256: cb52fc7aa745f8a9be83b3954d74887854ee129817899c407fad4f0f0a2ef264
 Section: Packaging
 Description: A modern APT package manager frontend.
 Author: Korboy <korboybeats@gmail.com>, Amy While, waruhachi, TaoJB
 Depiction: https://korboybeats.github.io/sileo/depiction/?v=2.5.7
-Icon: icon/com.korboy.sileo.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.korboy.sileo.png
 Name: Sileo (Roothide)
 Sileodepiction: https://korboybeats.github.io/sileo/sileo_depiction/index.json?v=2.5.7
 X-Sileo-Fork: com.korboy.sileo
@@ -631,10 +631,10 @@ Installed-Size: 416
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Conflicts: ws.hbang.stopcrashingpls (<= 1.0.2)
 Filename: ./debs/com.opa334.libsandy_1.1.6-4_rootful_iphoneos-arm.deb
-Size: 19560
-MD5sum: ec68ac0ed509b19110a77461dbf6039e
-SHA1: 102bddc3c33f3acfab7a253b6222dc307043152d
-SHA256: a1007666bbedc5357013db6692f7d81fb7b595070a545bc547d7be9814792527
+Size: 19556
+MD5sum: a3997cf6f1136b2f1acc729b9d610084
+SHA1: e3ce8b8cd256df2a697d690faf5d5e288f7d6112
+SHA256: b8589bc3b0f48078ce6c04f30bfbebafba0175c3788bde4a5a6527d7ff014c13
 Section: System
 Homepage: http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=libsandyDp
 Description: Securely extend the sandbox of system processes and user applications
@@ -653,10 +653,10 @@ Installed-Size: 416
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0)
 Conflicts: ws.hbang.stopcrashingpls (<= 1.0.2)
 Filename: ./debs/com.opa334.libsandy_1.1.6-4_roothide_iphoneos-arm64e.deb
-Size: 19642
-MD5sum: 0fb6ea015830393834b20fd5028694d7
-SHA1: 5ba6f00e3dffbdb54cec69144547ed0925c190fd
-SHA256: cd079c3b69dda15fb7360d2cdfe0410eeebf96329b656b2033709c3a52458c8e
+Size: 19622
+MD5sum: 1450cd31d87d6b15545ea664240f1c71
+SHA1: 1662fceb32f9bd5564ecf3df34f1337ddad24b95
+SHA256: 2798e182ca8bd32401e2cd9a3b12779c3c9fc55a07af8c32225d097dad703691
 Section: System
 Homepage: http://moreinfo.thebigboss.org/moreinfo/depiction.php?file=libsandyDp
 Description: Securely extend the sandbox of system processes and user applications
@@ -692,10 +692,10 @@ Maintainer: TaoJB
 Installed-Size: 664
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Filename: ./debs/com.taojb.fgotw60fps_1.2.0~1b_rootful_iphoneos-arm.deb
-Size: 99766
-MD5sum: 0db2248c00e2347e98fbcc4c6f910b0b
-SHA1: 92cc263b4edc717d2f3a4af81bdbf2f752dbe493
-SHA256: c6f9e3f3e1b1ad956ae589e00695902f1a4694e275e11b34cd122088d4452808
+Size: 99754
+MD5sum: 7d501ea9919183e4fa90ccaed18d1532
+SHA1: a2b082ad5aa65e0161fdbda12754974e11600686
+SHA256: fe68bbdf0468bd5b915d18adbd9e50251026c932fc1b27014d129d527becd400
 Section: Tweaks
 Description: Tweak ép xung FPS từ 30 đến 240 cho toàn bộ ứng dụng và game. Tự động áp dụng cho mọi app tải từ App Store, hỗ trợ hoàn hảo cho môi trường Rootless và RootHide.
 Author: TaoJB (fork of brend0n)
@@ -710,10 +710,10 @@ Maintainer: TaoJB
 Installed-Size: 664
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0)
 Filename: ./debs/com.taojb.fgotw60fps_1.2.0~1b_roothide_iphoneos-arm64e.deb
-Size: 99808
-MD5sum: 3ce6f72b6d06ed94ac0e5d5315ea78dc
-SHA1: 2d2de3310561ea0904ab0a65649cf2e4fd70e7b2
-SHA256: ac8dd4da366fef9f6d0643f9ec762f22be0a5237698b7442057448a1919cad5b
+Size: 99790
+MD5sum: feec4bab26b619397e16d16b468f1664
+SHA1: 4635190854fec37c08248b4205608890f7a3a53d
+SHA256: 1ff30629c08477d65226ec5a1243cc805027aaec5eae13909b3968ae1af5dd14
 Section: Tweaks
 Description: Tweak ép xung FPS từ 30 đến 240 cho toàn bộ ứng dụng và game. Tự động áp dụng cho mọi app tải từ App Store, hỗ trợ hoàn hảo cho môi trường Rootless và RootHide.
 Author: TaoJB (fork of brend0n)
@@ -728,15 +728,15 @@ Maintainer: PucPucPuc, JB, TaoJB
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.box26_6.0.2-5_roothide_iphoneos-arm64e.deb
-Size: 190338
-MD5sum: 989ea2538797ef6631a927933726e2f1
-SHA1: a94225de0cdc2b24db8112c5e8e42ea3a35bec5d
-SHA256: ac2088c5abb7b4ec014f7e45bc0b300394e8b93b78b54956b233582adfbd8017
+Size: 190360
+MD5sum: 2615761e9d176e0872ce908542d5f32d
+SHA1: 4de3226e88d9f3d64c04cd1b9acf7895421a76ee
+SHA256: 149f59111f84d9196bd13241ded44906b97951d303505c1e8a6abe2d3594a333
 Section: Tweaks
 Description: Hộp thoại kiểu iOS 26
  Hộp thoại & bảng chọn: nút viên thuốc trong suốt, xếp chồng, chữ canh giữa · Hoạt động trong SpringBoard và mọi ứng dụng.
 Author: PucPucPuc, JB, TaoJB
-Icon: icon/com.wave12.box26.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.box26.png
 Name: 26Box Ios 14-18.0 (Roothide)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefBox.bundle/depiction.json
 
@@ -766,15 +766,15 @@ Maintainer: PucPucPuc, JB, TaoJB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.box26_6.0.2-5_rootful_iphoneos-arm.deb
-Size: 190234
-MD5sum: 325233e6c98cef14d899c4eaee859bd3
-SHA1: 83798bd87e8e02cc7b954f080f582d20ff8b84c3
-SHA256: 7ce99ea846de8d43e3526026fac574c1d208f98e72d897893898a5ccc2a04915
+Size: 190278
+MD5sum: 94d15552b2ed129c4c103bd5f775a38c
+SHA1: 9088c92e299cfed2fbaf63ee3bc00386db8c971c
+SHA256: 48400653ef9bbb1ddfc556f69c1f539b8437177aab1da7e4281f3821acd20761
 Section: Tweaks
 Description: Hộp thoại kiểu iOS 26
  Hộp thoại & bảng chọn: nút viên thuốc trong suốt, xếp chồng, chữ canh giữa · Hoạt động trong SpringBoard và mọi ứng dụng.
 Author: PucPucPuc, JB, TaoJB
-Icon: icon/com.wave12.box26.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.box26.png
 Name: 26Box Ios 14-18.0 (Rootful)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefBox.bundle/depiction.json
 
@@ -785,15 +785,15 @@ Maintainer: PucPucPuc, TaoJB, JB
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), xyz.cypwn.xinam1ne
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.cc27_6.0.5-5_roothide_iphoneos-arm64e.deb
-Size: 187764
-MD5sum: 5db1230e4fd8a2a6b34de724d4a89f04
-SHA1: b4b286c7fe5a080c7c669fc2082c0e6cfa02b8a4
-SHA256: 6aa0eda562f6369eccc23ca1b2084a53ec81ab67f93acaeedfc6999253916919
+Size: 187778
+MD5sum: 9ec02ee184180abe3a6da6a32444a107
+SHA1: 8ad7df451dfa7b8adb94c4bbef4f35b15f8f3306
+SHA256: ce2cf252da2d7833f7e70a4371f239ecd0188211c33038acaf29b65f77db4df9
 Section: Tweaks
 Description: Trung tâm điều khiển kiểu kính
  Viền kính mảnh quanh các ô trong Trung tâm điều khiển · Bo tròn ô, chỉnh độ đặc nền ô.
 Author: PucPucPuc, TaoJB, JB
-Icon: icon/com.wave12.cc27.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.cc27.png
 Name: 27CC Ios 14-18.0 (Roothide)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefCC.bundle/depiction.json
 
@@ -804,15 +804,15 @@ Maintainer: PucPucPuc, TaoJB, JB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), xyz.cypwn.xinam1ne
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.cc27_6.0.5-5_rootful_iphoneos-arm.deb
-Size: 187722
-MD5sum: f09c2d667206ec1687369abfeab70866
-SHA1: a2eca78bc39bbe61d892d33b6e754817abe2b8f3
-SHA256: 94c7c48c3693dbc2de289a083fb35bb5b7908ba733e44944b3154cd6c0fc6d15
+Size: 187768
+MD5sum: dc6adb1ebd383ee18650f877975a3b39
+SHA1: 6a3ebf409e14bfd39c1a173f140fedd41841b860
+SHA256: b47fa05f2a882ca81ce3a88f1832914334798a07422d4ef573109dbbb58f2864
 Section: Tweaks
 Description: Trung tâm điều khiển kiểu kính
  Viền kính mảnh quanh các ô trong Trung tâm điều khiển · Bo tròn ô, chỉnh độ đặc nền ô.
 Author: PucPucPuc, TaoJB, JB
-Icon: icon/com.wave12.cc27.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.cc27.png
 Name: 27CC Ios 14-18.0 (Rootful)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefCC.bundle/depiction.json
 
@@ -861,15 +861,15 @@ Maintainer: PucPucPuc, TaoJB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.dynafake_6.0.21_rootful_iphoneos-arm.deb
-Size: 216126
-MD5sum: 0dac0d4437b1581356849fa01f66e2b8
-SHA1: af0dab8996790bc77cacc25ef16fbf8f826c222e
-SHA256: 2bf15d0ffc42b46e633bcc69bc7b84ac5d59ef3cdb592056a617cd5d324f30f7
+Size: 216172
+MD5sum: faa15e53db44ab262e0e25497348908a
+SHA1: d320226381fef11dae69921dcfe0a85326605891
+SHA256: d7caa596368a8116bc1de9d3b9267c8b1c1743817578444498bac5c6c764c4c2
 Section: Tweaks
 Description: Dynamic Island ảo
  Island ảo: hẹn giờ, bấm giờ, báo thức, nhạc, cuộc gọi, âm lượng, đèn pin, pin yếu, sạc · Hiệu ứng Face ID khi mở khóa + ổ khóa trên màn hình khóa.
 Author: PucPucPuc, TaoJB
-Icon: icon/com.wave12.dynafake.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.dynafake.png
 Name: DynaFake (Rootful)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefDyna.bundle/depiction.json
 
@@ -880,15 +880,15 @@ Maintainer: PucPucPuc, TaoJB
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.dynafake_6.0.21_roothide_iphoneos-arm64e.deb
-Size: 216186
-MD5sum: 3a6673f704a70379fe414c72a90fa3ab
-SHA1: 800c10b3747657492665a2969a0040e5d1eec39a
-SHA256: 838711a48dfc11526c9c62e8eda22c704a831195ce174d87366b39a0582cf9f0
+Size: 216242
+MD5sum: 0717c560d49827a6546d1247fad55814
+SHA1: 5a4d3c20100e0c1a2c1a63fac839e48c37ff53ea
+SHA256: 68b355ff1df79fb9f3c95da455c93011f4935488c0b2f42451ebe4e1c4dcd34e
 Section: Tweaks
 Description: Dynamic Island ảo
  Island ảo: hẹn giờ, bấm giờ, báo thức, nhạc, cuộc gọi, âm lượng, đèn pin, pin yếu, sạc · Hiệu ứng Face ID khi mở khóa + ổ khóa trên màn hình khóa.
 Author: PucPucPuc, TaoJB
-Icon: icon/com.wave12.dynafake.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.dynafake.png
 Name: DynaFake (Roothide)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefDyna.bundle/depiction.json
 
@@ -918,15 +918,15 @@ Maintainer: PucPucPuc, TaoJB, JB
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), xyz.cypwn.xinam1ne
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.home26_6.0.4-5_roothide_iphoneos-arm64e.deb
-Size: 27456482
-MD5sum: 3cd1ad9708383d70723f7ba94e94dd35
-SHA1: 62b3b4935fdcd312ee063c82874e51e3ca6f1a87
-SHA256: b86945cdc434e86bbd2d731d1bfd7d60b0656e5a2844fa5b5d765a33d6f7024c
+Size: 27456512
+MD5sum: 335efa3d1c4ae87cb187bb0c15fa122b
+SHA1: ce76f26f3399b3593b53bf7864768584bf370b37
+SHA256: 2eafff022203bf4c80a866b912985b99c0909364d4f49f10af5f5b770dab3dc1
 Section: Tweaks
 Description: Icon màn hình chính kiểu iOS 26
  Kiểu icon: Mặc định, Tối, Trong suốt, Phủ màu · Giữ vào chỗ trống để mở bảng tùy chỉnh.
 Author: PucPucPuc, TaoJB, JB
-Icon: icon/com.wave12.home26.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.home26.png
 Name: 26Home Ios 14-18.0 (Roothide)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefHome.bundle/depiction.json
 
@@ -938,14 +938,14 @@ Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), xyz.cypwn.xinam1
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.home26_6.0.4-5_rootful_iphoneos-arm.deb
 Size: 27456436
-MD5sum: e7beed773b9c2e7631ec4641662684b7
-SHA1: d5c4cc959091d33f99a9559bbd5855d5ff267734
-SHA256: d2d4f269da7fca1cd7cae35f94135167d46cf0ae87956a7327a92f231aa6796b
+MD5sum: 32c85bd184618f80b63df5533956b894
+SHA1: ea17b25e6b6db7db8533b7a4cd0bd807e024074b
+SHA256: 4f3dbfe539284d156f2dc9bb5b69535e0aeb0202f13308893511bc4885404564
 Section: Tweaks
 Description: Icon màn hình chính kiểu iOS 26
  Kiểu icon: Mặc định, Tối, Trong suốt, Phủ màu · Giữ vào chỗ trống để mở bảng tùy chỉnh.
 Author: PucPucPuc, TaoJB, JB
-Icon: icon/com.wave12.home26.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.home26.png
 Name: 26Home Ios 14-18.0 (Rootful)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefHome.bundle/depiction.json
 
@@ -956,15 +956,15 @@ Maintainer: PucPucPuc, JB, TaoJB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.liquidtab_6.0.2-5_rootful_iphoneos-arm.deb
-Size: 209592
-MD5sum: 4eb5d98961a089ca391c0ad61e5a75c8
-SHA1: a71eac1acbc34516bff4f58bfa7f26c768fcdd22
-SHA256: 5ea5e015bde5cb0fe4403d52828da109f2eb8f39e12969caf589272fe4b59b03
+Size: 209588
+MD5sum: 2d1bee9def1a302274fb3bbc98e76aeb
+SHA1: a43154b5a3fa59575baab704a4e6b74aa5cc7938
+SHA256: 9084514cbb7e068d8f067e8e5b3d0f88de4612aee10a263a41357aa26e6d93e6
 Section: Tweaks
 Description: Thanh tab kính nổi
  Thanh tab nổi bằng kính, viên thấu kính lỏng khi chạm giữ · Tự đổi sáng / tối theo nền.
 Author: PucPucPuc, JB, TaoJB
-Icon: icon/com.wave12.liquidtab.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.liquidtab.png
 Name: Liquid Tab Ios 14-18.0 (Rootful)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefTab.bundle/depiction.json
 
@@ -975,15 +975,15 @@ Maintainer: PucPucPuc, JB, TaoJB
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.liquidtab_6.0.2-5_roothide_iphoneos-arm64e.deb
-Size: 209634
-MD5sum: a2522632cc9313284beaaac6c92ebadc
-SHA1: a5490f4dcc8e0c8c2d581c7758887caefe114049
-SHA256: 382e00d9eea54da672982537de6bbe725dbcf4d1993ac313d0a8e7e65caa5ad4
+Size: 209658
+MD5sum: 9179d749fe8fe68b45cbc76adf1ea865
+SHA1: 2a508fc91752743dfd84c744b75d7fbb5e286a20
+SHA256: 8aba272d10d5158af09e0cbaed1664ef63f0a7f186d67678a22dd0f2e751614d
 Section: Tweaks
 Description: Thanh tab kính nổi
  Thanh tab nổi bằng kính, viên thấu kính lỏng khi chạm giữ · Tự đổi sáng / tối theo nền.
 Author: PucPucPuc, JB, TaoJB
-Icon: icon/com.wave12.liquidtab.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.liquidtab.png
 Name: Liquid Tab Ios 14-18.0 (Roothide)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefTab.bundle/depiction.json
 
@@ -1032,15 +1032,15 @@ Maintainer: PucPucPuc, TaoJB
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.morph26_6.0.13_roothide_iphoneos-arm64e.deb
-Size: 211086
-MD5sum: 304963194f0a03b67e16f1ebc8ecf900
-SHA1: 86162818a47560cb42be464462fc0a9a8b3a2e24
-SHA256: 2c04e3427b0f39aaaf4d69f32c754bf4503e261bd3cfe456db8bfc1e469a0448
+Size: 211122
+MD5sum: 89f85e042c6bb6cfaa5a20c27cbc8c60
+SHA1: f138f7d3212f3479c93cc9eba1b0c3dce9e7a15f
+SHA256: f18e4ad8c9cc30d09e36f4b41fb1e50605e2a25eccbef02da41e72c855acf02e
 Section: Tweaks
 Description: Hiệu ứng mở / đóng ứng dụng kiểu iOS 26
  Ứng dụng phóng ra từ đúng icon vừa chạm, thu về icon khi thoát · Bo góc, nghiêng 3D, làm mờ màn hình chính.
 Author: PucPucPuc, TaoJB
-Icon: icon/com.wave12.morph26.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.morph26.png
 Name: 26Morph (Roothide)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefMorph.bundle/depiction.json
 
@@ -1051,15 +1051,15 @@ Maintainer: PucPucPuc, TaoJB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.morph26_6.0.13_rootful_iphoneos-arm.deb
-Size: 210990
-MD5sum: 984783b76fef503a0deb287aae335df0
-SHA1: fbc0531c84b22997e5d9ca8d12b9018cb49e037a
-SHA256: 59b365da2998a1d9b32100d45cdcd3d42511736ae2f337c45f6886808a883797
+Size: 211012
+MD5sum: 5d18d5df3dc6633aa9405c431fd551bb
+SHA1: 270e5aca0e9386c7aa1d4fa0bc64eef55aefdccd
+SHA256: 908c3ce8faf7290bc9a242fbde68a05d24a344a09beb40e933535c64cb6dce5c
 Section: Tweaks
 Description: Hiệu ứng mở / đóng ứng dụng kiểu iOS 26
  Ứng dụng phóng ra từ đúng icon vừa chạm, thu về icon khi thoát · Bo góc, nghiêng 3D, làm mờ màn hình chính.
 Author: PucPucPuc, TaoJB
-Icon: icon/com.wave12.morph26.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.morph26.png
 Name: 26Morph (Rootful)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefMorph.bundle/depiction.json
 
@@ -1082,32 +1082,32 @@ Package: com.wave12.suite
 Version: 6.1.34-5
 Architecture: iphoneos-arm64e
 Maintainer: PucPucPuc, TaoJB
-Depends: roothide, ellekit, preferenceloader, com.wave12.unlockcode, com.wave12.unlockwave, com.wave12.morph26, com.wave12.liquidtab, com.wave12.home26, com.wave12.cc27, com.wave12.box26, com.wave12.wall26, com.wave12.dynafake, firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), com.wave12.unlockcode, com.wave12.unlockwave, com.wave12.morph26, com.wave12.liquidtab, com.wave12.home26, com.wave12.cc27, com.wave12.box26, com.wave12.wall26, com.wave12.dynafake
 Filename: ./debs/com.wave12.suite_6.1.34_roothide_iphoneos-arm64e.deb
-Size: 714
-MD5sum: 8cd90470fa778808ed5d5e62bc29f22d
-SHA1: 0da203b4bf1ef1cc07b777a46b3a63c0cebb2634
-SHA256: 6013d7c414e5e1af0aba1f672e437b00aac1e3067289d159917e58da5b968ce0
+Size: 746
+MD5sum: 03aeea2a86110b61eb033be4adf8824b
+SHA1: cc6a93f9cac42aebe9c6a4f34e685aadb5acc273
+SHA256: aa09c0625c442790729682977d89cbb30ba69628a74109fe5cd74d2574c1da9f
 Section: Tweaks
 Description: Cài đủ 9 tweak của 2712 một lần
 Author: PucPucPuc, TaoJB
-Icon: icon/com.wave12.suite.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.suite.png
 Name: 2712 (trọn bộ) (Roothide)
 
 Package: com.wave12.suite
 Version: 6.1.34-5
 Architecture: iphoneos-arm
 Maintainer: PucPucPuc, TaoJB
-Depends: mobilesubstrate, preferenceloader, com.wave12.unlockcode, com.wave12.unlockwave, com.wave12.morph26, com.wave12.liquidtab, com.wave12.home26, com.wave12.cc27, com.wave12.box26, com.wave12.wall26, com.wave12.dynafake, firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), com.wave12.unlockcode, com.wave12.unlockwave, com.wave12.morph26, com.wave12.liquidtab, com.wave12.home26, com.wave12.cc27, com.wave12.box26, com.wave12.wall26, com.wave12.dynafake
 Filename: ./debs/com.wave12.suite_6.1.34_rootful_iphoneos-arm.deb
-Size: 692
-MD5sum: 1f6b932b45aad2155e4c39c87697c501
-SHA1: 07fb22bae80b81f34f323553063966e3f9237f73
-SHA256: d5f5da1b328f2dff8213a74fa0a97483a710c7236c0504cbc294e34a9bee7ec1
+Size: 724
+MD5sum: 4e10fba906cf8ad15f167f906f53affc
+SHA1: fe72920fc668bfe84f75600034026538dba44587
+SHA256: 3183c7acdbe8160918483f78ebc0c3def90cd94f6e79ee8da01c13ae90ddd0a6
 Section: Tweaks
 Description: Cài đủ 9 tweak của 2712 một lần
 Author: PucPucPuc, TaoJB
-Icon: icon/com.wave12.suite.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.suite.png
 Name: 2712 (trọn bộ) (Rootful)
 
 Package: com.wave12.unlockcode
@@ -1136,15 +1136,15 @@ Maintainer: PucPucPuc, TaoJB
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.unlockcode_6.0.7_roothide_iphoneos-arm64e.deb
-Size: 205458
-MD5sum: fbfb6af57c6a29513b0bc0ea5a595e72
-SHA1: 0efe903b71be5c1c9d36ca8abec013cbd93f7618
-SHA256: 210dd62d9a47e3b263050b7bbba544cb1f24ae170a19d7df2278f1d210c07a2d
+Size: 205482
+MD5sum: 2b9eaed338ec379dd092c39c8a61ccb1
+SHA1: 287eadfc96e2735a04afffbdcf319bf746aca895
+SHA256: ec0addcfe28a45a9da50ae7d346164e466c92b5db57c547f3d285545d0fd0841
 Section: Tweaks
 Description: Phím mật khẩu nảy kiểu iOS 26
  Phím mã khóa nảy theo làn sóng khi chạm · Viền kính quanh từng phím.
 Author: PucPucPuc, TaoJB
-Icon: icon/com.wave12.unlockcode.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.unlockcode.png
 Name: UnlockCode (Roothide)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefCode.bundle/depiction.json
 
@@ -1155,15 +1155,15 @@ Maintainer: PucPucPuc, TaoJB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.unlockcode_6.0.7_rootful_iphoneos-arm.deb
-Size: 205410
-MD5sum: b07d16450366813d7d7315aa093b9a5b
-SHA1: 2d1a96bd9d90d4e9f29b5735b35691001e6ee667
-SHA256: 01148d5d932164d60aa88d422207dc1cac0e0d1d379158ed4658e38c73752bda
+Size: 205394
+MD5sum: 5f635ab12c925138c73e2279c4552f59
+SHA1: f7f57976d599b7076efa04d99755dc9b0f6da0be
+SHA256: f8fdab711d7d5f2ce291eef90e8ab1075dcb1713c5bd524e25d2a78ff5f138c0
 Section: Tweaks
 Description: Phím mật khẩu nảy kiểu iOS 26
  Phím mã khóa nảy theo làn sóng khi chạm · Viền kính quanh từng phím.
 Author: PucPucPuc, TaoJB
-Icon: icon/com.wave12.unlockcode.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.unlockcode.png
 Name: UnlockCode (Rootful)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefCode.bundle/depiction.json
 
@@ -1174,15 +1174,15 @@ Maintainer: PucPucPuc, JB, TaoJB
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.unlockwave_6.0.2-5_roothide_iphoneos-arm64e.deb
-Size: 205418
-MD5sum: bd60632ae168a61349856dae4312880a
-SHA1: d30f88407de16d4be991b388d3aba07091fd3254
-SHA256: 2a646c56319c868fd8aec59ad169ae02f220974d166fa677199ce5f5ec4c17d1
+Size: 205440
+MD5sum: bfe82cd8174cb2b08036ba9e2b8623ee
+SHA1: de2230377c0dff1577ff33a5ed9a96521db5624a
+SHA256: a364757e44edc05aee4eb8530eac4eab4c3c8a3b8c6cc914cf017a5f896b65b6
 Section: Tweaks
 Description: Hiệu ứng mở khóa lan từ tâm
  Mở khóa: icon bay ra theo làn sóng từ tâm màn hình · Thoát app về Home cũng chạy làn sóng.
 Author: PucPucPuc, JB, TaoJB
-Icon: icon/com.wave12.unlockwave.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.unlockwave.png
 Name: OpenWave Ios 14-18.0 (Roothide)
 Sileodepiction: file:///Library/PreferenceBundles/Wave12Prefs.bundle/depiction.json
 
@@ -1212,15 +1212,15 @@ Maintainer: PucPucPuc, JB, TaoJB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0)
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.unlockwave_6.0.2-5_rootful_iphoneos-arm.deb
-Size: 205298
-MD5sum: 950f5ac0c899d0d4d39ec0c5eb3f2be5
-SHA1: 62df6b7c12a78d42347641a09863bcee658cd168
-SHA256: e6563a7cfc886e5a30929eee6e5cdb3419cfd3e5cf72dee0cabe145208e9559c
+Size: 205326
+MD5sum: 6e4900272bdd3811b70d1d607b664a06
+SHA1: 82fa38fedfb996246369e1775edc9dba6f94a5d6
+SHA256: c5660e140ceba298a21dad53aa25f3175c3a25e03e43ab88e73a25869b6bf219
 Section: Tweaks
 Description: Hiệu ứng mở khóa lan từ tâm
  Mở khóa: icon bay ra theo làn sóng từ tâm màn hình · Thoát app về Home cũng chạy làn sóng.
 Author: PucPucPuc, JB, TaoJB
-Icon: icon/com.wave12.unlockwave.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.unlockwave.png
 Name: OpenWave Ios 14-18.0 (Rootful)
 Sileodepiction: file:///Library/PreferenceBundles/Wave12Prefs.bundle/depiction.json
 
@@ -1250,15 +1250,15 @@ Maintainer: PucPucPuc, TaoJB, JB
 Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), xyz.cypwn.xinam1ne
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.wall26_1.0.7-5_roothide_iphoneos-arm64e.deb
-Size: 4433030
-MD5sum: f8cfeb388d944490235ebd403e7e6148
-SHA1: 197e85ca377fb08caa4966a47c9385bfae64baac
-SHA256: b481cdff7d114c9dd2ea05b2060607583de37cdff6b3720efc12ac8242f1a4fb
+Size: 4433058
+MD5sum: e014881e0a8c2d72546659d7cd8dad0f
+SHA1: 62c99f7d934199d70e54dee2a2e2562e9475af1b
+SHA256: 8ce7d5da5024f0fdbfd1a73029649762e3757be6e0edde622c16162c62091de0
 Section: Tweaks
 Description: Màn hình khóa kiểu iOS 16: chủ thể che đồng hồ
  Tự tách người, thú cưng, vật nổi bật khỏi hình nền khóa bằng AI chạy ngay trên máy · Đồng hồ chìm phía sau chủ thể, che cả ngày tháng.( Có thể 1 số ios gặp lỗi không tách được )
 Author: PucPucPuc, TaoJB, JB
-Icon: icon/com.wave12.wall26.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.wall26.png
 Name: 26Wall 11-18.0 (Roothide)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefWall.bundle/depiction.json
 
@@ -1269,15 +1269,15 @@ Maintainer: PucPucPuc, TaoJB, JB
 Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), xyz.cypwn.xinam1ne
 Suggests: preferenceloader
 Filename: ./debs/com.wave12.wall26_1.0.7-5_rootful_iphoneos-arm.deb
-Size: 4432650
-MD5sum: 704966d6161ee873e2be10fadbb2a655
-SHA1: f98691a5d9f9c44e40c3b18f0365c0cd23ed01d2
-SHA256: 5e89df7a36a208e8b304b6df60a4ba5341f2e770da10562d02644862b3d71771
+Size: 4432612
+MD5sum: cc2539244d4318ab545aa82669d85b21
+SHA1: 3940ac805a3586a09a01cfe63022092d8dceeece
+SHA256: d9a73f2bc33affed67cf2c2d8b94135ef6fcde85fa7453ecbcd516974b577aed
 Section: Tweaks
 Description: Màn hình khóa kiểu iOS 16: chủ thể che đồng hồ
  Tự tách người, thú cưng, vật nổi bật khỏi hình nền khóa bằng AI chạy ngay trên máy · Đồng hồ chìm phía sau chủ thể, che cả ngày tháng.( Có thể 1 số ios gặp lỗi không tách được )
 Author: PucPucPuc, TaoJB, JB
-Icon: icon/com.wave12.wall26.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/com.wave12.wall26.png
 Name: 26Wall 11-18.0 (Rootful)
 Sileodepiction: file:///Library/PreferenceBundles/W12PrefWall.bundle/depiction.json
 
@@ -1305,12 +1305,12 @@ Version: 5.45-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 124
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.3.1), libmagic1 (= 5.45), liblzma5 (>= 5.2.5), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libmagic1 (= 5.45), liblzma5 (>= 5.2.5)
 Filename: ./debs/file_5.45_roothide_iphoneos-arm64e.deb
-Size: 22532
-MD5sum: 559379b9de7519c979bf5ad0bb67325a
-SHA1: 9a81478adebbe29d05dd71ad3d087cfdbff18a4a
-SHA256: c50ef1c6a5918fd41488aedd1f72c2f93ba7b897b157cfa4746441094ce36261
+Size: 22524
+MD5sum: a8efc4bb9a16be96f1cbce537684ed9d
+SHA1: e0eb4b8ee3883a3ba3e636cff5e0cb3ca254e7f4
+SHA256: 21e3f39e6246070fb872e956099b6cf7994a88631eed51aab56780df60d73138
 Section: Utilities
 Priority: important
 Description: Recognize the type of data in a file using "magic" numbers
@@ -1326,12 +1326,12 @@ Version: 5.45-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 124
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.3.1), libmagic1 (= 5.45), liblzma5 (>= 5.2.5), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libmagic1 (= 5.45), liblzma5 (>= 5.2.5)
 Filename: ./debs/file_5.45_rootful_iphoneos-arm.deb
 Size: 22468
-MD5sum: 5a739811f5abe0267c89125e43234332
-SHA1: 132da2e84efdaaa684a570cf79a998b0bbde619e
-SHA256: 3118b71dd904f8b105c494b40121ffc38977f0cdf6fc95feec5113590f78a29f
+MD5sum: 29217af5523104350e822003b4c09814
+SHA1: 859762dbc0f24546fa06797967752baaccaee1df
+SHA256: 7a957a65e8c4470c363d6dbe0d4d2c4133808ec1048f4da5397d33a0382de3b2
 Section: Utilities
 Priority: important
 Description: Recognize the type of data in a file using "magic" numbers
@@ -1368,12 +1368,12 @@ Version: 1.13-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 324
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.3.1), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1)
 Filename: ./debs/gzip_1.13_rootful_iphoneos-arm.deb
-Size: 103192
-MD5sum: 0a9979588a44873b3ee23a4530548176
-SHA1: 79f8ce907ca0b746161b0587f681e2ccc1e389e9
-SHA256: 0e8bc1f1e006d6801b179f4a70aacd4e60fa67465c683eb0ffa4b14296dc112f
+Size: 103174
+MD5sum: 4360659369d2fa2a2385d76d9f935b6a
+SHA1: 36f32c3d63c526a66078fcfb9d7e3e4e5e674226
+SHA256: 25c55abc38ab2c178413bc0386c6a9f9e0e782a0ff6842f1133da9f59de9d16b
 Section: Archiving
 Priority: standard
 Multi-Arch: foreign
@@ -1391,12 +1391,12 @@ Version: 1.13-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 324
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.3.1), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1)
 Filename: ./debs/gzip_1.13_roothide_iphoneos-arm64e.deb
-Size: 103226
-MD5sum: 261c25f641250751b1b58a74e65ec691
-SHA1: d9b788866b0c7cfda5343a5ced357a489f1cd83a
-SHA256: e227fa256662147679908578b5784b72c15934091d5c53f39560fabb59b0b0b3
+Size: 103224
+MD5sum: 2b1f52753331c35f7b265f3a9c7696e8
+SHA1: 7a569e870fc4b04c55851cc601257a2b5ac025e7
+SHA256: d4c643c34197c15d879098a5963b9da2827565988fe5635f7fa26ba67344e41c
 Section: Archiving
 Priority: standard
 Multi-Arch: foreign
@@ -1429,12 +1429,12 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 62100
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1)
 Filename: ./debs/libclang-cpp16_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb
-Size: 13694810
-MD5sum: 15cba412ccf2c0df58ec7dcaf8bc72bf
-SHA1: 2e8233f5557b5222244595f24905fd020f42ac5b
-SHA256: 1fb2e4ad43244d53e5b89972629b22991c215d5540e97eb4defaf554ac31fca4
+Size: 13694808
+MD5sum: c94fbd9e232909a0f6fe5da990b58760
+SHA1: 433c90592b9e1236ee78ac83c9b243c28d95d7a0
+SHA256: 74c5074c3cc914e22d0df34bca68350adbaf7f9c6ef918ec6fb057da7d5d0a06
 Section: Development
 Priority: optional
 Description: Modular compiler and toolchain technologies, runtime library
@@ -1446,12 +1446,12 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 62100
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1)
 Filename: ./debs/libclang-cpp16_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb
-Size: 13694162
-MD5sum: b9c108645c21573f2c054c50e835e9ed
-SHA1: 6af60a11273462092e2732bb492a0170c8577ff0
-SHA256: cefdddf2d139a576a2f8ba1287f2ffa0a4514373d2fed47370b5a836c5266520
+Size: 13694150
+MD5sum: f0ff892d1a81917bc18374d045599849
+SHA1: eb8c536491700deff5ffba37e3a6d45e662d8cac
+SHA256: 05a51637c5356b8958f1079984260500cc36d3efc1fc802bfa1cc0d819dd81fb
 Section: Development
 Priority: optional
 Description: Modular compiler and toolchain technologies, runtime library
@@ -1478,12 +1478,12 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 110564
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.3.1), libncursesw6 (>= 6.0), libedit0, libffi8, firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libncursesw6 (>= 6.0), libedit0, libffi8
 Filename: ./debs/libllvm16_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb
-Size: 26861882
-MD5sum: b5cddd97ec145aa9cbd5cdaa05cafc0f
-SHA1: 062e7b62f44c77def535f9851ae0b2d0e19a723e
-SHA256: bd30ce9f087d5b4f8c6812f2319c715bd13640c6690cfa9b70ddc3a5b9d10fbb
+Size: 26861876
+MD5sum: d6dc5918bb3b29cb659cc1082236eb9e
+SHA1: fb4a66bf1199a096e5f19b96adbafff057929901
+SHA256: 5c78cd22d372c3a7cc7534762b8a6141e77cb452e8f6316718aa648c77422544
 Section: Development
 Priority: optional
 Description: Modular compiler and toolchain technologies, runtime library
@@ -1495,12 +1495,12 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 110564
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.3.1), libncursesw6 (>= 6.0), libedit0, libffi8, firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libncursesw6 (>= 6.0), libedit0, libffi8
 Filename: ./debs/libllvm16_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb
-Size: 26857538
-MD5sum: 088c31a54725757a03220b2e3d5b5759
-SHA1: 9b8a440162775690a7bbcb1038aeb991a741f4f8
-SHA256: cb51db35a539bda6a0f5652cd1cbe05e4708fa559509433a3ed4b0f2c30db316
+Size: 26857536
+MD5sum: d05c8732ac925321de342e425bb62e2e
+SHA1: 6921b7580f54177697a6dcbe11893840773e7305
+SHA256: fb8cc5dd7fdceb5e812a0e85359e5f248290df4fb1bb27c100ae14b53ced1726
 Section: Development
 Priority: optional
 Description: Modular compiler and toolchain technologies, runtime library
@@ -1531,14 +1531,14 @@ Version: 5.45-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 8512
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.3.1), liblzma5 (>= 5.2.5), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), liblzma5 (>= 5.2.5)
 Conflicts: file (<< 5.45)
 Replaces: file (<< 5.45)
 Filename: ./debs/libmagic1_5.45_roothide_iphoneos-arm64e.deb
-Size: 366574
-MD5sum: 218082ef5ec83b641b2baae4059ac632
-SHA1: b4ab7dac112c70a9b144f8f5081d1daca70bb5a1
-SHA256: 63861946c3f652571e25478dcff464e1328794e71d6353b7584c0d4982ed6de1
+Size: 366588
+MD5sum: 2c34346868586e8a65022607040ea3a0
+SHA1: ee8027afdb8a2d537b10f7417a1bf4b37645c866
+SHA256: 03019b93b8705620f18a3d632a7a00a80636683ea9baa2db1e2f8ab78633a94b
 Section: Libraries
 Priority: important
 Description: Recognize the type of data in a file using "magic" numbers - library
@@ -1552,14 +1552,14 @@ Version: 5.45-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 8512
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.3.1), liblzma5 (>= 5.2.5), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), liblzma5 (>= 5.2.5)
 Conflicts: file (<< 5.45)
 Replaces: file (<< 5.45)
 Filename: ./debs/libmagic1_5.45_rootful_iphoneos-arm.deb
-Size: 366088
-MD5sum: 609e64c62a5026f1d7f79f56a47fe237
-SHA1: 5e31aa915eb2c504a4559e2d2c30d822a9fdd4ce
-SHA256: 733c8e101e507b74f8dd78183ff08f40fa036610fa528d7728f85b9571a1e6e8
+Size: 366122
+MD5sum: 74fac7c59e417ed0d180916c8d93652c
+SHA1: 9495b45001b6355c2a40e082b9240449faefcae7
+SHA256: f1df5e5d3b1619ade15f9d2deab2a06bec47701307a4f2b8c65bfdcc2122a752
 Section: Libraries
 Priority: important
 Description: Recognize the type of data in a file using "magic" numbers - library
@@ -1594,12 +1594,12 @@ Version: 4.1.0-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 516
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.2.2), libgmp10, firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.2.2), libgmp10
 Filename: ./debs/libmpfr6_4.1.0_rootful_iphoneos-arm.deb
-Size: 208038
-MD5sum: 7e1d2c0bd90d8d6f8444d51c29948fcd
-SHA1: 1a236bf7e17efc0fc6773d3fa3372d10cf6a1ab0
-SHA256: d2020e430c364b29392dd90f98ee81202dbb81a47baf617877c7297c4dcedc63
+Size: 208042
+MD5sum: 0f9ff6731125965716599e2b8988ed08
+SHA1: 5f208afb62f8cb589c5bff70f9490863f7e5917b
+SHA256: 274df4cda3b98f3636902235f8f2c5b78f7579f0f604a67d95468fd74b04194e
 Section: Libraries
 Priority: optional
 Homepage: https://www.mpfr.org
@@ -1617,12 +1617,12 @@ Version: 4.1.0-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 516
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.2.2), libgmp10, firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.2.2), libgmp10
 Filename: ./debs/libmpfr6_4.1.0_roothide_iphoneos-arm64e.deb
-Size: 208084
-MD5sum: 5bad5bdd39c50de2795357f214624b2d
-SHA1: e069f50c0abc90a8be5729837290bfb905d4b322
-SHA256: 6c74c3d61c61abc1739961bb00df7042b52932e4e3e2d4314371867dfdc0ccdd
+Size: 208086
+MD5sum: 74b98e2d9394428d882beb78bf3432cc
+SHA1: 828e267f3006ed06d4a2b1c9b3c6f4a23c8d8902
+SHA256: 55ba7de5fe0e63ea978cf69c75b05652bf8ec5c249b849dfb34752832c1967e9
 Section: Libraries
 Priority: optional
 Homepage: https://www.mpfr.org
@@ -1657,14 +1657,14 @@ Version: 1500.0.12.3-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 408
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.3.1), libncursesw6 (>= 6.0), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libncursesw6 (>= 6.0)
 Conflicts: libtapi10
 Replaces: libtapi10
 Filename: ./debs/libtapi_1500.0.12.3_rootful_iphoneos-arm.deb
-Size: 148762
-MD5sum: 4cfe806269d1ac9c256312f64bc4ebf3
-SHA1: d2c92b9aa49bcae42bc667713cdfd54e81f81b42
-SHA256: 69cf548581dce8fb47fe331928f822bcf21f085455930f2d7e1fee76a92390e0
+Size: 148770
+MD5sum: e5c2b3a12a1ebff24450cb07d78ca894
+SHA1: a0a9b63d63bce8bc4af137749ef29d3d8279e386
+SHA256: 58c2e07cf9d794afe61e5266fbac4574f40133933d0cac8dcb87ddaccc2db3f0
 Section: Development
 Priority: optional
 Description: Text-based Application Programming Interface (library)
@@ -1676,14 +1676,14 @@ Version: 1500.0.12.3-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 408
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.3.1), libncursesw6 (>= 6.0), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libncursesw6 (>= 6.0)
 Conflicts: libtapi10
 Replaces: libtapi10
 Filename: ./debs/libtapi_1500.0.12.3_roothide_iphoneos-arm64e.deb
-Size: 148828
-MD5sum: ce1a921e4f7f54b24d953c4aad7c9756
-SHA1: fc27c65e2f2246d2a8e1e49a9558940870696c2b
-SHA256: fb18906f68a2081a1e0cda3180a581a472fcc1764496ad80e8de92724360976e
+Size: 148836
+MD5sum: 8b6dc8ba1fa746d5685ba6394c56c3ab
+SHA1: d28f1f56322723ac74ca6524c95862a3e97f0901
+SHA256: ed61733cd3d53937db030701cf6d8f5e99b7bd0d23d98d0d47d3f7fdc5cf306e
 Section: Development
 Priority: optional
 Description: Text-based Application Programming Interface (library)
@@ -1717,14 +1717,14 @@ Version: 1.6.2-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 108
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.2.2), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.2.2)
 Conflicts: uuid (<< 1.6.2-3)
 Replaces: uuid (<< 1.6.2-3)
 Filename: ./debs/libuuid16_1.6.2-3_roothide_iphoneos-arm64e.deb
-Size: 21272
-MD5sum: 90907aa10b4b7ddf76079e6df2de4b23
-SHA1: 219c1aaea72abd0e9f21b62a7e5a39db610e070e
-SHA256: 583069ccdd1089afaab03cf23dc632c91d2d855cc5ef6803330062b03996b3aa
+Size: 21276
+MD5sum: 9320a9aabb18232dde4bc4c622ad396e
+SHA1: 57d78d3acbe9e6eaed9c6dd20fda524e7e302226
+SHA256: ff182f331711cb6aee1839bf36e22b772720391e86ee68e3debb472db1d0b25e
 Section: Libraries
 Priority: important
 Description: Universally Unique ID library
@@ -1741,14 +1741,14 @@ Version: 1.6.2-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 108
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.2.2), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.2.2)
 Conflicts: uuid (<< 1.6.2-3)
 Replaces: uuid (<< 1.6.2-3)
 Filename: ./debs/libuuid16_1.6.2-3_rootful_iphoneos-arm.deb
-Size: 21318
-MD5sum: 3e6ecc177db4312f3e133e5902941338
-SHA1: 3906405434f86e9bb9499242f70836a4a622af12
-SHA256: f6347a80c712cb4c7a9023aa81cb29e04d1655fba29e0a2127fdb71c76f56b3a
+Size: 21314
+MD5sum: 4b796464ea16e94f7852277c612b440d
+SHA1: 5ebca4c6eecc194518cb9ee8b4e031c59b122d8d
+SHA256: 8d3ad388fda227f85b40d99a747b20f67e2ad5cb4cc741836e746fa885a8ec84
 Section: Libraries
 Priority: important
 Description: Universally Unique ID library
@@ -1783,14 +1783,14 @@ Version: 1.8.0.487.100.1-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 144
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.2.2), libssl3, firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.2.2), libssl3
 Conflicts: xar (<< 1.8.0.487.100.1-1)
 Replaces: xar (<< 1.8.0.487.100.1-1)
 Filename: ./debs/libxar1_1.8.0.487.100.1-1_rootful_iphoneos-arm.deb
-Size: 36216
-MD5sum: 2a96056d1f34b25f670be88294c59ad7
-SHA1: 134328de5ab41112e422caf42fff466750ca3aeb
-SHA256: e49f0941d0dc69ba6f66843958cf89bfd87b8a5a622e61060403b0b81f394acf
+Size: 36218
+MD5sum: 38b883f10915a6907c963168770098c6
+SHA1: 5d7a838d18fa891acacb321fcafede1e323da28d
+SHA256: addc5e6ec340c17a096673bd2406eb0e3c1042b2ca5d809ec7fae68b27d10628
 Section: Libraries
 Priority: optional
 Homepage: https://mackyle.github.io/xar/
@@ -1803,14 +1803,14 @@ Version: 1.8.0.487.100.1-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 144
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.2.2), libssl3, firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.2.2), libssl3
 Conflicts: xar (<< 1.8.0.487.100.1-1)
 Replaces: xar (<< 1.8.0.487.100.1-1)
 Filename: ./debs/libxar1_1.8.0.487.100.1-1_roothide_iphoneos-arm64e.deb
-Size: 36268
-MD5sum: 2d0d9889831d36f2ccdc48f675c959ce
-SHA1: b60792a493691f8ea0b55e0b87949bbba5cab122
-SHA256: e2561d4eec41c887150209a18bf72ff1a64f0e1998198f65e26f5f56ca05ffbc
+Size: 36262
+MD5sum: 2ae0d503674a6c7ae3c04171452ac593
+SHA1: 03b18d3af137ab953f9630bbbf072ca3f2a57075
+SHA256: 058797c8f519865715939a5b03cfd79d52d579048d7a16328cca3d83f70a6e85
 Section: Libraries
 Priority: optional
 Homepage: https://mackyle.github.io/xar/
@@ -1844,12 +1844,12 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 8
-Depends: roothide, ellekit, preferenceloader, llvm-16 (= 16.0.0~5.9.2~RELEASE-1), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), llvm-16 (= 16.0.0~5.9.2~RELEASE-1)
 Filename: ./debs/llvm_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb
-Size: 7418
-MD5sum: 2d1fcec4ad979ebbcaff50a27af71426
-SHA1: 0670666a68cfd0213280eccfecda8abea1a15488
-SHA256: 65d6ca6c122ca2815017678dc4990023ea7a221bf187037886abfb2f24f58f2d
+Size: 7406
+MD5sum: 3dfc03b312dcad2d3ffb362152a4c0b8
+SHA1: fc4621e44a523b410554137a023d22cc0a02a575
+SHA256: a8fa0894d60141912b12383583b1cd78ffed9af9991f13268f830846f20af2a5
 Section: Development
 Priority: optional
 Homepage: https://www.llvm.org/
@@ -1867,12 +1867,12 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 8
-Depends: mobilesubstrate, preferenceloader, llvm-16 (= 16.0.0~5.9.2~RELEASE-1), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), llvm-16 (= 16.0.0~5.9.2~RELEASE-1)
 Filename: ./debs/llvm_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb
-Size: 7412
-MD5sum: e57a5178ea8d45c487321a4253f60598
-SHA1: c7b55e8e7ee450fe8f6f371ac928a1ffdc9e2946
-SHA256: 4123d9488dc8cd5081fdfa7b31b8fbb681027e24a43f3fb77b8b746a13aa5950
+Size: 7408
+MD5sum: 406c7515f6bfa75003da855d3640528e
+SHA1: 70f9558c5fc19af53379cab05bb4806fd9034f3b
+SHA256: a34260747ed291aef5d015a283f4fbb2bc59c8b222be08046ead75f07a7f29e4
 Section: Development
 Priority: optional
 Homepage: https://www.llvm.org/
@@ -1927,12 +1927,12 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 109816
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1), llvm-16-linker-tools (= 16.0.0~5.9.2~RELEASE-1), llvm-16-runtime (= 16.0.0~5.9.2~RELEASE-1), libncursesw6, libxar1, firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1), llvm-16-linker-tools (= 16.0.0~5.9.2~RELEASE-1), llvm-16-runtime (= 16.0.0~5.9.2~RELEASE-1), libncursesw6, libxar1
 Filename: ./debs/llvm-16_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb
-Size: 25007918
-MD5sum: 8bfa375fae053b382871e33ea5816a29
-SHA1: 11317b3c76d261250a8d7626f92a53882159cda2
-SHA256: a28cb8a4fc2b223baf087779d24fe013d4995058e85b93285a8b4aabaaec23ff
+Size: 25007868
+MD5sum: fe8fed96388fcd697f1f6a222423e16f
+SHA1: affcbe13adf0e00c001173b892a9596003634e19
+SHA256: c90f8a52b9cb681987d4ec2191e431ff39f3376966d43c4b41fad1c06438f249
 Section: Development
 Priority: optional
 Homepage: https://www.llvm.org/
@@ -1966,12 +1966,12 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 109816
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1), llvm-16-linker-tools (= 16.0.0~5.9.2~RELEASE-1), llvm-16-runtime (= 16.0.0~5.9.2~RELEASE-1), libncursesw6, libxar1, firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1), llvm-16-linker-tools (= 16.0.0~5.9.2~RELEASE-1), llvm-16-runtime (= 16.0.0~5.9.2~RELEASE-1), libncursesw6, libxar1
 Filename: ./debs/llvm-16_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb
-Size: 25008620
-MD5sum: 449948e425a9b7630ae510afb9f36cf4
-SHA1: 5caab65508e96d4c850eccdeffafce5cc36614dd
-SHA256: ea398c9f0d4d40534cfdcfdf643424d80949fdf3bdaa0138de98eb2b780f4cad
+Size: 25008714
+MD5sum: 4e545d38c81abde4b2a2554b44759037
+SHA1: 3f498064690875a2493dddd3b32cfdd2f209f05e
+SHA256: 57694fc5d6a60f8ab71afb9fed28bd37011d19cc99c8cbdc4709020a86e92cf2
 Section: Development
 Priority: optional
 Homepage: https://www.llvm.org/
@@ -2027,13 +2027,13 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 4920
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1)
 Replaces: llvm-14-linker-tools
 Filename: ./debs/llvm-16-linker-tools_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb
-Size: 1473784
-MD5sum: cade2a65364b830e8c4af118f59b0432
-SHA1: 3a2971836e67ccbc5e499510c35e70944a1cc1b4
-SHA256: 32f8333d8003d0945a735f6ff97f3d30921c82d680d44eb8a7a3c46e21d4d8c9
+Size: 1473796
+MD5sum: c22b8837ca7a1ef9982d67421883fd3c
+SHA1: 285d3901118904fcf156e569768762ec724ce3a3
+SHA256: 55dc849f477674ab65391e3bf2819ff0d05776c8e08eb0e55413abadbf3e56df
 Section: Development
 Priority: optional
 Homepage: https://www.llvm.org/
@@ -2051,13 +2051,13 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 4920
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1)
 Replaces: llvm-14-linker-tools
 Filename: ./debs/llvm-16-linker-tools_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb
-Size: 1473778
-MD5sum: 118dc4d4d099784d0c796c750cd31489
-SHA1: ad1b1ee249a5187c6a8bda1c388bc3919eacb258
-SHA256: 2826b815f2f39cecb723133b4a5f8d26a9a27d7053dbe307e433a4606fe33fbd
+Size: 1473792
+MD5sum: d28876708e4d144da8340c1a91835831
+SHA1: e2c6f7671aa33299c00a6ae5a79cbd30d93fcabb
+SHA256: fac840d2661ebd8ae7ac756e90497477a682a9c3a55f14b74b1b1a6e24b3ff03
 Section: Development
 Priority: optional
 Homepage: https://www.llvm.org/
@@ -2105,12 +2105,12 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 256
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1)
 Filename: ./debs/llvm-16-runtime_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb
-Size: 66142
-MD5sum: 36e31c47f55343961963604ff96b7c67
-SHA1: c6d6a26d9763c401629b25ddfa6460c373533704
-SHA256: d85575ce053f028adccddb9afe8d8fb78ac85b2acf09feff037a26c864ccd0b8
+Size: 66146
+MD5sum: 1980ed9f284370cdf555f1d44cc8a0ad
+SHA1: 915175546b16c1c7617c9a518b4fa95e02499fde
+SHA256: 6804bdbe1ed47847f77be41b34559d779a466dfd7af50e849d55a5d132097ef6
 Section: Development
 Priority: optional
 Homepage: https://www.llvm.org/
@@ -2137,12 +2137,12 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 256
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libllvm16 (= 16.0.0~5.9.2~RELEASE-1)
 Filename: ./debs/llvm-16-runtime_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb
-Size: 66174
-MD5sum: 02d78586ec4f2291c2c8c06463ba7f98
-SHA1: 593af0a35edf9a4916eed93961c9aeee3a4419d4
-SHA256: 4b979aa9085410a93032e0d3c9d1d51b341665989ecae540bcefad2759acbf8e
+Size: 66170
+MD5sum: 23372b640d688030b322eb945fb2410b
+SHA1: 8ac712236c68eb8432d0617f7622fa033c8209af
+SHA256: 6aa8cd634990104ad4f9a0cf9c7b7360f9775ebcf73cdbecac18b36cdde81393
 Section: Development
 Priority: optional
 Homepage: https://www.llvm.org/
@@ -2193,15 +2193,15 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 8
-Depends: mobilesubstrate, preferenceloader, llvm-16-dev (= 16.0.0~5.9.2~RELEASE-1), llvm-16-linker-tools (= 16.0.0~5.9.2~RELEASE-1), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), llvm-16-dev (= 16.0.0~5.9.2~RELEASE-1), llvm-16-linker-tools (= 16.0.0~5.9.2~RELEASE-1)
 Conflicts: libto
 Replaces: liblto
 Provides: liblto
 Filename: ./debs/llvm-dev_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb
-Size: 6242
-MD5sum: 216bc701dd5ea53137eb1f2c50b0844e
-SHA1: e595df222f4e9841804ffb04c10accd165e6eb75
-SHA256: ea3a5f71cefec71ffe046f667f7dd44620cb0de50b4c971da7143ba1d92ef08b
+Size: 6240
+MD5sum: ebec5853ca568af3117a20b9a02cb479
+SHA1: 1a25567f84783ded762118dddfaab50ba44f5ac1
+SHA256: 03d120f4702fdf6bdc11e3d02a57fca6552f680cd9715ab8c2fd68e6de983736
 Section: Development
 Priority: optional
 Homepage: https://www.llvm.org/
@@ -2219,15 +2219,15 @@ Version: 16.0.0~5.9.2~RELEASE-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 8
-Depends: roothide, ellekit, preferenceloader, llvm-16-dev (= 16.0.0~5.9.2~RELEASE-1), llvm-16-linker-tools (= 16.0.0~5.9.2~RELEASE-1), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), llvm-16-dev (= 16.0.0~5.9.2~RELEASE-1), llvm-16-linker-tools (= 16.0.0~5.9.2~RELEASE-1)
 Conflicts: libto
 Replaces: liblto
 Provides: liblto
 Filename: ./debs/llvm-dev_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb
-Size: 6250
-MD5sum: 335a4b944c0fd560b97fc4f0f216551e
-SHA1: 1dd9c8e4652e59121ebbfee0d7a2ab5bb17ecd91
-SHA256: d91b641dd0d1498a8fb4b3fb4ac739e89dbb6a4450d5516edce04bc437387ae9
+Size: 6254
+MD5sum: 9a44cbc57a0cc743939f65264fc9a055
+SHA1: 9f3b5f0711c97d8bc262b6e50885cb5f65d81da6
+SHA256: 2fc2de2cf1aba5f2d98b4d4290ebda67e6a1afb2b1dda2729adbe5b7e5e9d9f0
 Section: Development
 Priority: optional
 Homepage: https://www.llvm.org/
@@ -2262,13 +2262,13 @@ Version: 1010.6-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 4652
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.3.1), libuuid16, libxar1, llvm-dev, libtapi, firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libuuid16, libxar1, llvm-dev, libtapi
 Conflicts: llvm (<= 16.0.0~5.9.2~RELEASE)
 Filename: ./debs/odcctools_1010.6-1_roothide_iphoneos-arm64e.deb
-Size: 700980
-MD5sum: 888e89f17981f4c6b86e6421f3506efd
-SHA1: b11be5409540cc759cdaff0af1e0195dfc492292
-SHA256: cd1a1f98a15905ac864621d22a53dcfebb111c05b2790e4e26dda27899e09737
+Size: 700986
+MD5sum: 69a6d2445cc9a8fc444a0f944158cb00
+SHA1: 14e013f442e8466522d2848674c3f91d5ecf79f6
+SHA256: 946ce2e40410ae1cfa199ae2b018788ddd985e7b5df23b3f6bc791054664c233
 Section: Development
 Priority: optional
 Homepage: https://github.com/tpoechtrager/cctools-port
@@ -2281,13 +2281,13 @@ Version: 1010.6-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 4652
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.3.1), libuuid16, libxar1, llvm-dev, libtapi, firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.3.1), libuuid16, libxar1, llvm-dev, libtapi
 Conflicts: llvm (<= 16.0.0~5.9.2~RELEASE)
 Filename: ./debs/odcctools_1010.6-1_rootful_iphoneos-arm.deb
-Size: 700732
-MD5sum: f9810e8f21585e96139d65c973105233
-SHA1: 88edfb1818777f7142fcbf7f810ea778f54ca476
-SHA256: 02730bdad243cf84e7a6fce072aaad5cbbf5a01283263dcc92097726354e55fc
+Size: 700830
+MD5sum: 28fd715b3e601b0e83b15fe8d3496b24
+SHA1: 04ede1003f7a2470e892b8f0444cd62c8fbb95eb
+SHA256: 978c8971e1a91b88bbe0d13510386e22e83f88def5b38d37b243ff87676141cc
 Section: Development
 Priority: optional
 Homepage: https://github.com/tpoechtrager/cctools-port
@@ -2329,12 +2329,12 @@ Version: 17.04-5
 Architecture: iphoneos-arm64e
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 9764
-Depends: roothide, ellekit, preferenceloader, libiosexec1 (>= 1.2.2), firmware (>= 11.0)
+Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.2.2)
 Filename: ./debs/p7zip_17.04_roothide_iphoneos-arm64e.deb
-Size: 2481706
-MD5sum: 526bae493b4fa311b2cbbcfb0586445f
-SHA1: 7a2fe2829157283bbfdfdd6bd3e70fbded2abf23
-SHA256: 354409fd9a4c05effa3e6311455568a95cb58e730125ca8f67be4d164e7ca798
+Size: 2481684
+MD5sum: 7107477af48eab43f95005a275a8c289
+SHA1: 36ed2fff3b9ed4b50a8377a04c87be1f71917393
+SHA256: 9668257711627201c4767a8a8fe1ff931cd6b1281209d553541910207e5cbd0f
 Section: Archiving
 Priority: optional
 Multi-Arch: foreign
@@ -2360,12 +2360,12 @@ Version: 17.04-5
 Architecture: iphoneos-arm
 Maintainer: Procursus Team <support@procurs.us>, TaoJB
 Installed-Size: 9764
-Depends: mobilesubstrate, preferenceloader, libiosexec1 (>= 1.2.2), firmware (>= 11.0)
+Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), libiosexec1 (>= 1.2.2)
 Filename: ./debs/p7zip_17.04_rootful_iphoneos-arm.deb
-Size: 2481332
-MD5sum: e1cceeed63ce034f25203b50de535303
-SHA1: 00b9b26b832a593f84695934f0facbd35b0f1e4b
-SHA256: d4e2da6a7ec4da51e48c61e5fcf526214cf820c9a710bb26df358e4dc62a5d10
+Size: 2481302
+MD5sum: 85ed7acdb2e68b3e138e3089f211b92f
+SHA1: 66f4b5b607413ea6a95ded05660fafad12a82f89
+SHA256: dd883184bdfd3b825d32c1732cc3d11b589f93a7565739d9aaf84607f39e65b3
 Section: Archiving
 Priority: optional
 Multi-Arch: foreign
@@ -2394,10 +2394,10 @@ Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), coreutils (>= 
 Conflicts: org.coolstar.sileo
 Provides: org.coolstar.sileo
 Filename: ./debs/xyz.cypwn.sileo_2.5.5-5_roothide_iphoneos-arm64e.deb
-Size: 3140174
-MD5sum: 45bc2376cfc00c2166b129dbeb44ed35
-SHA1: 5f39ffec13e3436c99724f98158bf8061009368a
-SHA256: 25303f740f1a3f59797bd4f572b17cdd01376c6a2c98dedcc58fb647c9378775
+Size: 3140136
+MD5sum: 309a9480be9d70204994cc2a81100405
+SHA1: 8371e2e4e1c1d9351d5c026c2eaafa25e5c1ed37
+SHA256: aedcc896e8ce49bf76de941185152578b92764af1e8d975d0f3c074fa31e3d14
 Section: Packaging
 Description: A modern APT package manager frontend.
  - ****`--- New in 2.5.5 ---`****
@@ -2514,10 +2514,10 @@ Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), coreutils (>= 8.
 Conflicts: org.coolstar.sileo
 Provides: org.coolstar.sileo
 Filename: ./debs/xyz.cypwn.sileo_2.5.5-5_rootful_iphoneos-arm.deb
-Size: 3140006
-MD5sum: 98d14ea00effa944bab6a7206c482a5d
-SHA1: e16b9ca7fc119b02269b366deaae9bbc2cab6a43
-SHA256: d50bc19c6efb90e8ab2c72ee6934fe11c0419067d24a192cd96d79b9be6b74cb
+Size: 3140168
+MD5sum: b68f2075b123d5dc79c5ef998f5c1ec3
+SHA1: 5ff1b26d12be2ae2a51ab1f470f5c2157b956ea5
+SHA256: dcdf9ca6011c52cd7860df0caf25fa1a1dae5e4c6d07a2ef7e0dc7ee24f58e90
 Section: Packaging
 Description: A modern APT package manager frontend.
  - ****`--- New in 2.5.5 ---`****
@@ -2574,14 +2574,14 @@ Depends: mobilesubstrate, preferenceloader, firmware (>= 11.0), gawk, gzip, libc
 Replaces: emt.paisseon.xinamine
 Provides: emt.paisseon.xinamine (= 99)
 Filename: ./debs/xyz.cypwn.xinam1ne_2.6-8_rootful_iphoneos-arm.deb
-Size: 1956846
-MD5sum: b249bd2bd402ce79bae3ebab7ffaeab0
-SHA1: 64f910b261cf67a299beb3df21307afcaace2775
-SHA256: d9d53476d8c291ce8ad693ea41c9a118c1806e40e1e86c7590096040107bb2e8
+Size: 1956882
+MD5sum: 4cf2c8a9f17e1d295f86dc4d2fbc34b8
+SHA1: 94ee30e99e93f8bd4527c720c524c68a6302c79b
+SHA256: 30591a42e888afa9db17b7dc3b58fde84fe6c78782495d22dba6dfab4606aca7
 Section: Utilities
 Description: Xinamine Official All-in-One bundle. Convert rootful tweaks to rootless (and rootless to rootful) with ease using the Xinam1nePatcher in Filza or use the included Xinaf1re app.
 Author: Paisseon, Sudo, NoW4U2Kid, Kixrd, TaoJB
-Icon: icon/xyz.cypwn.xinam1ne.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/xyz.cypwn.xinam1ne.png
 Name: Xinam1ne AIO (Rootful)
 
 Package: xyz.cypwn.xinam1ne
@@ -2592,14 +2592,14 @@ Depends: roothide, ellekit, preferenceloader, firmware (>= 11.0), gawk, gzip, li
 Replaces: emt.paisseon.xinamine
 Provides: emt.paisseon.xinamine (= 99)
 Filename: ./debs/xyz.cypwn.xinam1ne_2.6-8_roothide_iphoneos-arm64e.deb
-Size: 1960848
-MD5sum: 89403dec3628f7b008f79d5d81294b6d
-SHA1: 04373cb6b9e97979af16b0c6d8b129d9570174c9
-SHA256: 611b81c4f3082e38d2d424efcc9f57ad13d77290d344910cfef7f71fc72ee48b
+Size: 1960758
+MD5sum: 7fc2c31aad78b0713b7f566aafe00585
+SHA1: cea52b656dd549513efbc08b1fe7a2f39d501386
+SHA256: 1f474d85fe0de96088eb1c50bd79d2b3042d8b5550b061d13a6c8d2ab64317a2
 Section: Utilities
 Description: Xinamine Official All-in-One bundle. Convert rootful tweaks to rootless (and rootless to rootful) with ease using the Xinam1nePatcher in Filza or use the included Xinaf1re app.
 Author: Paisseon, Sudo, NoW4U2Kid, Kixrd, TaoJB
-Icon: icon/xyz.cypwn.xinam1ne.png
+Icon: https://duchaivcyv-design.github.io/duchaivcyv-design.github.io/icon/xyz.cypwn.xinam1ne.png
 Name: Xinam1ne AIO (Roothide)
 
 Package: xyz.cypwn.xinam1ne
