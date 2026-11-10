@@ -306,13 +306,19 @@ jobs:
                           except Exception:
                               pass
 
+          MAINT_SCRIPTS = ('preinst', 'postinst', 'prerm', 'postrm', 'extrainst_')
+
           def patch_text_files(directory, env_mode):
+              """Đổi /var/jb trong text file. File trong DEBIAN/ (control, script) LUÔN được xử lý,
+              script cài/gỡ được chmod 755 để dpkg chạy được."""
               TEXT_EXT = ('.sh', '.json', '.strings', '.conf', '.cfg', '.py', '.txt', '.xml', '.entitlements', '.rules', '.yaml', '.yml', '.plist', '.lproj', '.override')
-              TEXT_NAMES = ('Filter', 'control', 'postinst', 'prerm', 'postrm', 'extrainst_', 'preinst')
               for root, dirs, files in os.walk(directory):
+                  rel = os.path.relpath(root, directory)
+                  in_debian = rel.split(os.sep)[0] == 'DEBIAN'
                   for file in files:
                       path = os.path.join(root, file)
-                      if not (file.endswith(TEXT_EXT) or file in TEXT_NAMES or '.lproj/' in path.replace('\\','/')):
+                      is_script = in_debian or file in MAINT_SCRIPTS
+                      if not (is_script or file.endswith(TEXT_EXT) or '.lproj/' in path.replace('\\', '/')):
                           continue
                       try:
                           with open(path, 'rb') as f:
@@ -322,14 +328,20 @@ jobs:
                           content = raw_bytes.decode('utf-8', errors='replace')
                           if env_mode in ('rootful', 'roothide'):
                               new = content.replace('/var/jb/', '/')
-                              new = re.sub(r'(?<![\w/])/var/jb(?![\w/])', '/', new)
+                              new = re.sub(r'/var/jb(?![\w.-])', '/', new)
                           else:
                               new = content
                           if new != content:
                               with open(path, 'wb') as f:
                                   f.write(new.encode('utf-8'))
-                      except Exception:
-                          pass
+                      except Exception as e:
+                          sys.stderr.write("[text] %s: %r\n" % (path, e))
+                          continue
+                      if in_debian and file in MAINT_SCRIPTS:
+                          os.chmod(path, 0o755)
+                          print("=== SCRIPT %s (%s) — da patch ===" % (file, env_mode))
+                          print(new if new != content else content)
+                          print("=== END %s ===" % file)
 
           def verify_deb(deb_path, env_mode):
               import tempfile, shutil, subprocess
@@ -346,6 +358,7 @@ jobs:
                   if env_mode != 'rootless' and os.path.isdir(os.path.join(d, 'var', 'jb')):
                       print(f"[FAIL] {os.path.basename(deb_path)} VAN CON thu muc var/jb trong deb (chua relocate)")
                   bad = []
+                  text_bad = []
                   for root, dirs, files in os.walk(d):
                       for file in files:
                           p = os.path.join(root, file)
@@ -359,10 +372,20 @@ jobs:
                                           bad.append((os.path.basename(p), nm))
                                       if pt and '/var/jb' in pt:
                                           bad.append((os.path.basename(p), pt))
+                                  continue
                           except: pass
+                          if env_mode != 'rootless':
+                              try:
+                                  with open(p, 'rb') as tf:
+                                      data = tf.read()
+                                  if b'\x00' not in data and b'/var/jb' in data:
+                                      text_bad.append(os.path.relpath(p, d))
+                              except: pass
                   if bad:
                       print(f"[WARN] {os.path.basename(deb_path)} ({env_mode}) con /var/jb trong {len(bad)} load command(s): {bad[:2]}")
-                  else:
+                  if text_bad:
+                      print(f"[WARN] {os.path.basename(deb_path)} ({env_mode}) con /var/jb trong file text: {text_bad}")
+                  if not bad and not text_bad:
                       print(f"[PASS] {os.path.basename(deb_path)} ({env_mode}) — khong con /var/jb, size={sz} bytes")
               except Exception as e:
                   print(f"[FAIL] {deb_path} verify loi: {e}")
@@ -374,7 +397,6 @@ jobs:
           #   iphoneos-arm    -> rootful
           #   iphoneos-arm64  -> rootless
           #   iphoneos-arm64e -> roothide
-          ENV_BY_ARCH = {'iphoneos-arm': 'rootful', 'iphoneos-arm64': 'rootless', 'iphoneos-arm64e': 'roothide'}
           ENV_LABEL = {'rootful': 'Rootful', 'rootless': 'Rootless', 'roothide': 'Roothide'}
           ENV_TOKEN_RE = re.compile(r'\(\s*(rootful|rootless|roothide)\s*\)', re.I)
           ENV_DEPS = {
@@ -460,7 +482,11 @@ jobs:
                       cur = (cur + ', ' + OWNER) if cur else OWNER
                   _set(entries, key, [cur])
 
-              # 6. Depends: gộp tất cả dòng Depends, dựng lại theo môi trường, firmware >= 11.0
+              # 6. Depends:
+              #    - BỎ ràng buộc phiên bản (vd "libllvm16 (= 16.0.0~5.9.2~RELEASE-1)" -> "libllvm16").
+              #      Lý do: các gói được repack đã đổi Version thành -REVISION, nên pin cũ không còn khớp.
+              #    - Riêng firmware giữ >= 11.0
+              #    - Dựng lại đầu dòng theo môi trường
               deps_raw = ', '.join(' '.join(e[1]) for e in entries if e[0].lower() == 'depends')
               entries = [e for e in entries if e[0].lower() != 'depends']
               rest, seen = [], set()
@@ -468,11 +494,18 @@ jobs:
                   d = d.strip()
                   if not d:
                       continue
-                  key = re.split(r'[\s(]', d, 1)[0].strip().lower()
-                  if key in DROP_DEPS or key in seen:
+                  if '|' in d:
+                      if d not in seen:
+                          seen.add(d)
+                          rest.append(d)
                       continue
-                  seen.add(key)
-                  rest.append(d)
+                  key = re.split(r'[\s(]', d, 1)[0].strip()
+                  if not key:
+                      continue
+                  if key.lower() in DROP_DEPS or key.lower() in seen:
+                      continue
+                  seen.add(key.lower())
+                  rest.append(key)
               final = ENV_DEPS[env_mode] + [FIRMWARE_DEP] + rest
               _set(entries, 'Depends', [', '.join(final)])
 
@@ -498,7 +531,7 @@ jobs:
               with open(path, 'w', encoding='utf-8') as f:
                   f.writelines(out)
 
-              # 9. Kiểm tra lại: nếu không đúng thì làm job FAIL để thấy lỗi ngay
+              # 9. Kiểm tra lại
               chk = read_control(path)
               got_name = _val(chk, 'Name')
               got_ver = _val(chk, 'Version')
@@ -609,7 +642,7 @@ jobs:
               else
                 echo "  [2/5] Bỏ qua relocate (rootless giữ /var/jb)"
               fi
-              echo "  [3/5] Patch control + plists + text files..."
+              echo "  [3/5] Patch control + plists + text files + scripts..."
               python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', '$T_ARCH', '$T_ENV', '$ICON_URL')"
               python3 -c "import patch; patch.patch_plists('temp_dir', '$T_ENV')"
               python3 -c "import patch; patch.patch_text_files('temp_dir', '$T_ENV')"
