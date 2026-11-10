@@ -60,7 +60,7 @@ jobs:
           PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
         run: |
           cat << 'PYEOF' > patch.py
-          import sys, os, subprocess, re
+          import sys, os, subprocess, re, json, glob
           import lief
           import plistlib
 
@@ -309,7 +309,7 @@ jobs:
           MAINT_SCRIPTS = ('preinst', 'postinst', 'prerm', 'postrm', 'extrainst_')
 
           def patch_text_files(directory, env_mode):
-              """Đổi /var/jb trong text file. File trong DEBIAN/ (control, script) LUÔN được xử lý,
+              """Đổi /var/jb trong text file. File trong DEBIAN/ luôn được xử lý;
               script cài/gỡ được chmod 755 để dpkg chạy được."""
               TEXT_EXT = ('.sh', '.json', '.strings', '.conf', '.cfg', '.py', '.txt', '.xml', '.entitlements', '.rules', '.yaml', '.yml', '.plist', '.lproj', '.override')
               for root, dirs, files in os.walk(directory):
@@ -340,7 +340,7 @@ jobs:
                       if in_debian and file in MAINT_SCRIPTS:
                           os.chmod(path, 0o755)
                           print("=== SCRIPT %s (%s) — da patch ===" % (file, env_mode))
-                          print(new if new != content else content)
+                          print(new)
                           print("=== END %s ===" % file)
 
           def verify_deb(deb_path, env_mode):
@@ -408,10 +408,72 @@ jobs:
           FIRMWARE_DEP = 'firmware (>= 11.0)'
           REVISION = '5'
           OWNER = 'TaoJB'
+          VERSION_MAP_FILE = 'versions.json'
+          REL_RE = re.compile(r'^\s*([^\s(|]+)\s*\(\s*(<<|<=|<|>=|>|=)\s*([^)\s]+)\s*\)\s*$')
           STD_ORDER = ['Package', 'Name', 'Version', 'Architecture', 'Section', 'Priority',
                        'Depends', 'Pre-Depends', 'Conflicts', 'Replaces', 'Provides',
                        'Suggests', 'Recommends', 'Enhances', 'Description', 'Maintainer',
                        'Author', 'Homepage', 'Tag', 'Icon', 'Installed-Size']
+
+          def _new_version(v):
+              """Phiên bản sau khi repack: bỏ revision cũ, thêm -REVISION."""
+              return re.sub(r'-\d+$', '', v.strip()) + '-' + REVISION
+
+          def build_version_map(debs_dir='debs'):
+              """Quét deb GỐC (bỏ qua deb đã repack), lập bảng tên gói -> phiên bản sau repack."""
+              vmap = {}
+              for deb in sorted(glob.glob(os.path.join(debs_dir, '*.deb'))):
+                  base = os.path.basename(deb)
+                  if any(t in base for t in ('_rootful_', '_rootless_', '_roothide_')):
+                      continue
+                  name = subprocess.run(['dpkg-deb', '-f', deb, 'Package'], capture_output=True, text=True).stdout.strip()
+                  ver = subprocess.run(['dpkg-deb', '-f', deb, 'Version'], capture_output=True, text=True).stdout.strip()
+                  if name and ver:
+                      vmap[name] = _new_version(ver)
+              with open(VERSION_MAP_FILE, 'w') as f:
+                  json.dump(vmap, f, indent=2)
+              print("=== BANG PHIEN BAN REPO ===")
+              for k, v in sorted(vmap.items()):
+                  print("  %s = %s" % (k, v))
+
+          def _load_vmap():
+              try:
+                  with open(VERSION_MAP_FILE) as f:
+                      return json.load(f)
+              except Exception:
+                  return {}
+
+          def fix_relation(d, vmap, strip_external):
+              """d = 'pkg' hoặc 'pkg (op ver)'.
+              - pkg có trong repo: đặt ver = phiên bản repo, giữ toán tử.
+              - pkg ngoài repo: strip_external=True thì bỏ ver, False thì giữ nguyên."""
+              m = REL_RE.match(d)
+              pkg = m.group(1) if m else d.strip()
+              if pkg in vmap:
+                  if m:
+                      return '%s (%s %s)' % (pkg, m.group(2), vmap[pkg])
+                  return pkg
+              if m and strip_external:
+                  return pkg
+              return d.strip()
+
+          def _fix_list(text, vmap, strip_external):
+              out, seen = [], set()
+              for d in text.split(','):
+                  d = d.strip()
+                  if not d:
+                      continue
+                  if '|' in d:
+                      fixed = d
+                      key = d
+                  else:
+                      fixed = fix_relation(d, vmap, strip_external)
+                      key = re.split(r'[\s(]', fixed, 1)[0].strip().lower()
+                  if key in seen:
+                      continue
+                  seen.add(key)
+                  out.append(fixed)
+              return out
 
           def read_control(path):
               """Đọc control thành list [key, [giá trị/dòng tiếp theo]], giữ thứ tự."""
@@ -447,6 +509,7 @@ jobs:
           def patch_control(path, target_arch, env_mode, icon_url=''):
               entries = read_control(path)
               before = open(path, 'r', encoding='utf-8', errors='replace').read()
+              vmap = _load_vmap()
 
               # 1. Package: bỏ hậu tố môi trường cũ nếu có
               pkg = re.sub(r'\.(roothide|rootless|rootful)$', '', _val(entries, 'Package'))
@@ -472,8 +535,7 @@ jobs:
               # 4. Version: thay revision bằng -REVISION
               ver = _val(entries, 'Version')
               if ver:
-                  ver = re.sub(r'-\d+$', '', ver)
-                  _set(entries, 'Version', ['%s-%s' % (ver, REVISION)])
+                  _set(entries, 'Version', [_new_version(ver)])
 
               # 5. Maintainer / Author: thêm TaoJB nếu chưa có
               for key in ('Maintainer', 'Author'):
@@ -483,37 +545,31 @@ jobs:
                   _set(entries, key, [cur])
 
               # 6. Depends:
-              #    - BỎ ràng buộc phiên bản (vd "libllvm16 (= 16.0.0~5.9.2~RELEASE-1)" -> "libllvm16").
-              #      Lý do: các gói được repack đã đổi Version thành -REVISION, nên pin cũ không còn khớp.
-              #    - Riêng firmware giữ >= 11.0
-              #    - Dựng lại đầu dòng theo môi trường
+              #    - gói trong repo: đặt đúng phiên bản repo (giữ toán tử)
+              #    - gói ngoài repo: bỏ ràng buộc phiên bản
+              #    - giữ firmware >= 11.0, dựng lại đầu dòng theo môi trường
               deps_raw = ', '.join(' '.join(e[1]) for e in entries if e[0].lower() == 'depends')
               entries = [e for e in entries if e[0].lower() != 'depends']
-              rest, seen = [], set()
-              for d in deps_raw.split(','):
-                  d = d.strip()
-                  if not d:
-                      continue
-                  if '|' in d:
-                      if d not in seen:
-                          seen.add(d)
-                          rest.append(d)
-                      continue
-                  key = re.split(r'[\s(]', d, 1)[0].strip()
-                  if not key:
-                      continue
-                  if key.lower() in DROP_DEPS or key.lower() in seen:
-                      continue
-                  seen.add(key.lower())
-                  rest.append(key)
+              items = _fix_list(deps_raw, vmap, strip_external=True)
+              rest = [d for d in items
+                      if re.split(r'[\s(|]', d, 1)[0].strip().lower() not in DROP_DEPS]
               final = ENV_DEPS[env_mode] + [FIRMWARE_DEP] + rest
               _set(entries, 'Depends', [', '.join(final)])
 
-              # 7. Icon
+              # 7. Conflicts / Replaces / Breaks: giữ lại, chỉ sửa phiên bản cho gói có trong repo
+              for key in ('Conflicts', 'Replaces', 'Breaks'):
+                  raw = ', '.join(' '.join(e[1]) for e in entries if e[0].lower() == key.lower())
+                  if not raw:
+                      continue
+                  entries = [e for e in entries if e[0].lower() != key.lower()]
+                  items = _fix_list(raw, vmap, strip_external=False)
+                  entries.append([key, [', '.join(items)]])
+
+              # 8. Icon
               if icon_url:
                   _set(entries, 'Icon', [icon_url.strip()])
 
-              # 8. Ghi lại theo thứ tự chuẩn
+              # 9. Ghi lại theo thứ tự chuẩn
               def _rank(e):
                   for i, s in enumerate(STD_ORDER):
                       if s.lower() == e[0].lower():
@@ -531,7 +587,7 @@ jobs:
               with open(path, 'w', encoding='utf-8') as f:
                   f.writelines(out)
 
-              # 9. Kiểm tra lại
+              # 10. Kiểm tra lại
               chk = read_control(path)
               got_name = _val(chk, 'Name')
               got_ver = _val(chk, 'Version')
@@ -605,6 +661,9 @@ jobs:
             if [ "$f" != "$newname" ]; then mv -f "$f" "$newname"; echo "  -> doi ten: $f => $newname"; fi
           done
 
+          echo "=== LẬP BẢNG PHIÊN BẢN REPO (để sửa ràng buộc Depends/Conflicts) ==="
+          python3 -c "import patch; patch.build_version_map('debs')"
+
           echo "=== TỰ ĐỘNG PHÁT HIỆN MÔI TRƯỜNG GỐC → BUILD 2 VÙNG CÒN LẠI (đủ 3 vùng chuẩn) ==="
           for deb in debs/*.deb; do
             [ -f "$deb" ] || continue
@@ -660,7 +719,7 @@ jobs:
             echo "=== Hoàn thành $PKG_NAME (gốc $ORIG_ENV + 2 vùng tách) ==="
           done
 
-          rm -f patch.py roothide.entitlements
+          rm -f patch.py roothide.entitlements versions.json
 
       - name: Generate Packages (Clean)
         run: |
@@ -669,7 +728,7 @@ jobs:
           bzip2 -kf Packages
           xz -kf Packages
           echo "=== KIỂM TRA ==="
-          grep -E "^(Package|Name|Version|Architecture|Depends|Maintainer|Author|Size|Filename):" Packages
+          grep -E "^(Package|Name|Version|Architecture|Depends|Conflicts|Replaces|Maintainer|Author|Size|Filename):" Packages
 
       - name: Generate Release
         run: |
