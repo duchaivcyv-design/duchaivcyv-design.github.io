@@ -126,6 +126,59 @@ jobs:
           for _a, _b in SAME_LEN_REWRITES:
               assert len(_a) == len(_b), 'SAME_LEN_REWRITES phai cung do dai'
 
+          # ===== TU DONG TIM ALIAS /var/<ten la>/ =====
+          # Chỉ đổi khi đường dẫn đích THẬT SỰ CÓ trong chính deb (kiểm chứng, không đoán).
+          # Độ dài prefix phải bằng độ dài đích để không lệch offset Mach-O.
+          ALIAS_PREFIX_RE = re.compile(rb'/var/([A-Za-z0-9_.-]+)/([A-Za-z0-9_./+-]*)')
+          ALIAS_SKIP = {b'mobile', b'tmp', b'log', b'root', b'containers', b'db', b'run', b'folders', b'jb',
+                        b'vm', b'empty', b'preferences', b'Keychains', b'installd', b'spool', b'buddy', b'ran',
+                        b'networkd', b'MobileDevice', b'backups'}
+          ALIAS_TARGETS = [b'/Library/', b'/usr/bin/', b'/usr/lib/', b'/usr/share/', b'/usr/']
+          ALIAS_FILE = 'alias.json'
+
+          def build_alias_map(temp_dir, env_mode):
+              """Quét mọi Mach-O/file nhị phân trong deb, tìm /var/<X>/<tail>.
+              Nếu <target>/<tail> tồn tại trong deb và độ dài khớp thì ghi alias /var/<X>/ -> <target>."""
+              amap = {}
+              if env_mode == 'rootless':
+                  with open(ALIAS_FILE, 'w') as f:
+                      json.dump({}, f)
+                  return
+              for dp, dn, fn in os.walk(temp_dir):
+                  for f_ in fn:
+                      p = os.path.join(dp, f_)
+                      try:
+                          with open(p, 'rb') as fh:
+                              data = fh.read()
+                      except Exception:
+                          continue
+                      if b'\x00' not in data:
+                          continue
+                      for m in ALIAS_PREFIX_RE.finditer(data):
+                          name, tail = m.group(1), m.group(2)
+                          if name in ALIAS_SKIP or not tail:
+                              continue
+                          prefix = b'/var/' + name + b'/'
+                          if prefix.decode() in amap:
+                              continue
+                          for t in ALIAS_TARGETS:
+                              if len(t) != len(prefix):
+                                  continue
+                              cand = os.path.join(temp_dir, t[1:].decode(), tail.decode())
+                              if os.path.exists(cand):
+                                  amap[prefix.decode()] = t.decode()
+                                  print("[alias] %s -> %s (co %s)" % (prefix.decode(), t.decode(), tail.decode()))
+                                  break
+              with open(ALIAS_FILE, 'w') as f:
+                  json.dump(amap, f, indent=2)
+
+          def _load_alias_map():
+              try:
+                  with open(ALIAS_FILE) as f:
+                      return {k.encode(): v.encode() for k, v in json.load(f).items()}
+              except Exception:
+                  return {}
+
           def _patch_binary_strings(bin_path, env_mode):
               """Đổi chuỗi /var/jb trong strings binary (rootful & roothide).
               1) Chuỗi cùng độ dài (prefs) đổi trước, cho cả rootful và roothide.
@@ -138,6 +191,8 @@ jobs:
                       data = f.read()
                   new_data = data
                   for a, b in SAME_LEN_REWRITES:
+                      new_data = new_data.replace(a, b)
+                  for a, b in _load_alias_map().items():
                       new_data = new_data.replace(a, b)
                   if env_mode == 'rootful':
                       new_data = new_data.replace(b'/var/jb/', b'////////')
@@ -800,6 +855,8 @@ jobs:
               python3 -c "import patch; patch.patch_control('temp_dir/DEBIAN/control', '$T_ARCH', '$T_ENV', '$ICON_URL')"
               python3 -c "import patch; patch.patch_plists('temp_dir', '$T_ENV')"
               python3 -c "import patch; patch.patch_text_files('temp_dir', '$T_ENV')"
+              echo "  [3b] Tìm alias /var/<tên lạ>/ (chỉ đổi khi đích có thật trong deb)..."
+              python3 -c "import patch; patch.build_alias_map('temp_dir', '$T_ENV')"
               echo "  [4/5] Patch Mach-O binaries (LOAD_DYLIB/WEAK/REEXPORT + RPATH + resign)..."
               find temp_dir -type f -exec sh -c 'file -b "$1" | grep -q Mach-O && printf "%s\n" "$1"' _ {} \; | while IFS= read -r bin; do
                   python3 -c "import patch; patch.patch_binary('$bin', '$T_ENV')"
@@ -816,7 +873,7 @@ jobs:
             echo "=== Hoàn thành $PKG_NAME (gốc $ORIG_ENV + 2 vùng tách) ==="
           done
 
-          rm -f patch.py roothide.entitlements versions.json
+          rm -f patch.py roothide.entitlements versions.json alias.json
           echo "=== BÁO CÁO TƯƠNG THÍCH ==="
           cat COMPAT.txt
 
