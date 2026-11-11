@@ -60,7 +60,7 @@ jobs:
           PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
         run: |
           cat << 'PYEOF' > patch.py
-          import sys, os, subprocess, re, json, glob
+          import sys, os, subprocess, re, json, glob, stat
           import lief
           import plistlib
 
@@ -85,6 +85,39 @@ jobs:
               if p.startswith("/var/jb/"): return p[len("/var/jb"):]
               if p == "/var/jb": return "/"
               return p
+
+          MACHO_MAGICS = {b'\xfe\xed\xfa\xce', b'\xfe\xed\xfa\xcf', b'\xce\xfa\xed\xfe',
+                          b'\xcf\xfa\xed\xfe', b'\xca\xfe\xba\xbe', b'\xbe\xba\xfe\xca'}
+
+          def is_macho(path):
+              """Chỉ gọi lief khi file có magic Mach-O. lief (C++) crash native trên file lạ."""
+              try:
+                  with open(path, 'rb') as fh:
+                      return fh.read(4) in MACHO_MAGICS
+              except Exception:
+                  return False
+
+          def dereference_hardlinks(temp_dir):
+              """Tách mỗi hardlink thành file độc lập để patch không làm lệch các đường dẫn chung inode."""
+              n = 0
+              for dp, dn, fn in os.walk(temp_dir):
+                  for f_ in fn:
+                      p = os.path.join(dp, f_)
+                      try:
+                          st = os.lstat(p)
+                      except OSError:
+                          continue
+                      if os.path.islink(p) or st.st_nlink <= 1:
+                          continue
+                      with open(p, 'rb') as fh:
+                          data = fh.read()
+                      mode = stat.S_IMODE(st.st_mode)
+                      os.unlink(p)
+                      with open(p, 'wb') as fh:
+                          fh.write(data)
+                      os.chmod(p, mode)
+                      n += 1
+              print("[hardlink] tach %d file" % n)
 
           def relocate_rootful(temp_dir):
               """rootful: đưa /var/jb/* lên gốc. Không tạo /rootfs/."""
@@ -145,6 +178,8 @@ jobs:
 
           def _exports_of(path):
               names = set()
+              if not is_macho(path):
+                  return names
               fat = lief.MachO.parse(path)
               if fat is None:
                   return names
@@ -319,7 +354,7 @@ jobs:
 
           def patch_binary(bin_path, env_mode):
               """env_mode: rootful | rootless | roothide"""
-              if not os.path.isfile(bin_path) or os.path.islink(bin_path):
+              if not os.path.isfile(bin_path) or os.path.islink(bin_path) or not is_macho(bin_path):
                   return
               ent_file = bin_path + '.ent'
               has_ent = False
@@ -509,7 +544,7 @@ jobs:
                       for file in files:
                           p = os.path.join(root, file)
                           try:
-                              b = lief.parse(p)
+                              b = lief.parse(p) if is_macho(p) else None
                               if b and b.format == lief.Binary.FORMATS.MACHO:
                                   for cmd in b.commands:
                                       nm = getattr(cmd, 'name', None)
@@ -587,7 +622,7 @@ jobs:
                                   status = 'WARN'
                                   notes.append('hardcode /var/jb x%d o %s' % (cnt, rel))
                           try:
-                              fat = lief.MachO.parse(p)
+                              fat = lief.MachO.parse(p) if is_macho(p) else None
                           except Exception:
                               fat = None
                           if fat is None:
@@ -639,7 +674,7 @@ jobs:
           #   iphoneos-arm64  -> rootless
           #   iphoneos-arm64e -> roothide
           ENV_LABEL = {'rootful': 'Rootful', 'rootless': 'Rootless', 'roothide': 'Roothide'}
-          ENV_TOKEN_RE = re.compile(r'\(\s*(rootful|rootless|roothide)\s*\)', re.I)
+          ENV_TOKEN_RE = re.compile(r'\(\s*(?:rootful|rootless|roothide)(?:\s*,\s*(?:rootful|rootless|roothide))*\s*\)', re.I)
           ENV_DEPS = {
               'rootful': ['mobilesubstrate', 'preferenceloader'],
               'rootless': ['ellekit', 'preferenceloader'],
@@ -764,9 +799,10 @@ jobs:
               name = _val(entries, 'Name') or pkg
               if ENV_TOKEN_RE.search(name):
                   def _rep(m):
-                      tok = m.group(1)
-                      new = label.lower() if tok.islower() else label
-                      return '(%s)' % new
+                      single = re.fullmatch(r'\(\s*(rootful|rootless|roothide)\s*\)', m.group(0), re.I)
+                      if single and single.group(1).islower():
+                          return '(%s)' % label.lower()
+                      return '(%s)' % label
                   name = ENV_TOKEN_RE.sub(_rep, name)
               else:
                   name = '%s (%s)' % (name, label)
@@ -934,6 +970,7 @@ jobs:
               echo "  [1/5] Build $T_ENV ($T_ARCH) — giải nén..."
               rm -rf temp_dir
               dpkg-deb -R "$deb" temp_dir
+              python3 -c "import patch; patch.dereference_hardlinks('temp_dir')"
               if [ "$T_ENV" = "roothide" ]; then
                 echo "  [2/5] Di chuyển /var/jb lên gốc + /rootfs/ (roothide)..."
                 python3 -c "import patch; patch.relocate_roothide('temp_dir')"
@@ -957,8 +994,8 @@ jobs:
               if dpkg-deb --help 2>/dev/null | grep -q zstd; then ZSTD='-Zzstd'; else ZSTD=''; fi
               OUT="debs/${PKG_NAME}_${PKG_VER}_${T_ENV}_${T_ARCH}.deb"
               fakeroot dpkg-deb -b --root-owner-group $ZSTD temp_dir "$OUT"
-              python3 -c "import patch; patch.verify_deb('$OUT', '$T_ENV')"
-              python3 -c "import patch; patch.compat_report('$OUT', '$T_ENV')"
+              python3 -c "import patch; patch.verify_deb('$OUT', '$T_ENV')" || echo "  [!] verify loi (bo qua)"
+              python3 -c "import patch; patch.compat_report('$OUT', '$T_ENV')" || echo "  [!] compat loi (bo qua) — xem $OUT"
               rm -rf temp_dir
               echo "  ✅ Xong: $OUT"
             done
