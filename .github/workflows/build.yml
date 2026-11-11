@@ -501,7 +501,6 @@ jobs:
           }
           DROP_DEPS = {'mobilesubstrate', 'preferenceloader', 'roothide', 'ellekit', 'substrate', 'firmware'}
           FIRMWARE_DEP = 'firmware (>= 11.0)'
-          REVISION = '5'
           OWNER = 'TaoJB'
           VERSION_MAP_FILE = 'versions.json'
           REL_RE = re.compile(r'^\s*([^\s(|]+)\s*\(\s*(<<|<=|<|>=|>|=)\s*([^)\s]+)\s*\)\s*$')
@@ -511,8 +510,8 @@ jobs:
                        'Author', 'Homepage', 'Tag', 'Icon', 'Installed-Size']
 
           def _new_version(v):
-              """Phiên bản sau khi repack: bỏ revision cũ, thêm -REVISION."""
-              return re.sub(r'-\d+$', '', v.strip()) + '-' + REVISION
+              """Giữ nguyên phiên bản gốc (không thêm revision)."""
+              return v.strip()
 
           def build_version_map(debs_dir='debs'):
               """Quét deb GỐC (bỏ qua deb đã repack), lập bảng tên gói -> phiên bản sau repack."""
@@ -627,10 +626,10 @@ jobs:
                   name = '%s (%s)' % (name, label)
               _set(entries, 'Name', [name])
 
-              # 4. Version: thay revision bằng -REVISION
-              ver = _val(entries, 'Version')
-              if ver:
-                  _set(entries, 'Version', [_new_version(ver)])
+              # 4. Version: giữ nguyên phiên bản gốc
+              orig_ver = _val(entries, 'Version')
+              if orig_ver:
+                  _set(entries, 'Version', [_new_version(orig_ver)])
 
               # 5. Maintainer / Author: thêm TaoJB nếu chưa có
               for key in ('Maintainer', 'Author'):
@@ -691,7 +690,7 @@ jobs:
               print("--- TRUOC ---"); print(before)
               print("--- SAU ---"); print(open(path, encoding='utf-8').read())
               ok = (re.search(r'\(%s\)$' % label, got_name, re.I) is not None
-                    and got_ver.endswith('-' + REVISION)
+                    and got_ver == orig_ver
                     and got_arch == target_arch)
               if not ok:
                   print("[FAIL] control khong dung: Name=%r Version=%r Arch=%r" % (got_name, got_ver, got_arch))
