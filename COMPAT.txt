@@ -25,7 +25,7 @@ com.jb.rootless-patcher_1.0.0_roothide_iphoneos-arm64e.deb | roothide | WARN | h
 com.jtis.little12_1.2.3_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
 com.jtis.little12_1.2.3_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
 com.korboy.sileo_2.5.7_rootful_iphoneos-arm.deb | rootful | WARN | duong dan la /var/Liy/ o Applications/KorboySileo.app/Sileo; duong dan la /var/lib/ o Applications/KorboySileo.app/Sileo; duong dan la /var/cache/ o Applications/KorboySileo.app/Sileo
-com.korboy.sileo_2.5.7_roothide_iphoneos-arm64e.deb | roothide | WARN | duong dan la /var/cache/ o Applications/KorboySileo.app/Sileo; duong dan la /var/Liy/ o Applications/KorboySileo.app/Sileo; duong dan la /var/lib/ o Applications/KorboySileo.app/Sileo; hardcode /var/jb x7 o Applications/KorboySileo.app/Sileo
+com.korboy.sileo_2.5.7_roothide_iphoneos-arm64e.deb | roothide | WARN | duong dan la /var/lib/ o Applications/KorboySileo.app/Sileo; duong dan la /var/cache/ o Applications/KorboySileo.app/Sileo; duong dan la /var/Liy/ o Applications/KorboySileo.app/Sileo; hardcode /var/jb x7 o Applications/KorboySileo.app/Sileo
 com.opa334.libsandy_1.1.6-4_rootful_iphoneos-arm.deb | rootful | WARN | hardcode /var/jb x2 o usr/lib/libsandy.dylib; hardcode /var/jb x1 o usr/local/libexec/sandyd; hardcode /var/jb x2 o Library/MobileSubstrate/DynamicLibraries/SandyProxy.dylib
 com.opa334.libsandy_1.1.6-4_roothide_iphoneos-arm64e.deb | roothide | WARN | hardcode /var/jb x2 o usr/lib/libsandy.dylib; hardcode /var/jb x1 o usr/local/libexec/sandyd; hardcode /var/jb x2 o Library/MobileSubstrate/DynamicLibraries/SandyProxy.dylib
 com.ps.livetextenabler_1.3.1-5_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
@@ -84,7 +84,7 @@ odcctools_1010.6-1_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van
 odcctools_1010.6-1_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
 p7zip_17.04_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
 p7zip_17.04_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-xyz.cypwn.sileo_2.5.5-5_rootful_iphoneos-arm.deb | rootful | WARN | duong dan la /var/cache/ o Applications/Sileo.app/Sileo; duong dan la /var/Liy/ o Applications/Sileo.app/Sileo; duong dan la /var/lib/ o Applications/Sileo.app/Sileo
-xyz.cypwn.sileo_2.5.5-5_roothide_iphoneos-arm64e.deb | roothide | WARN | duong dan la /var/lib/ o Applications/Sileo.app/Sileo; duong dan la /var/cache/ o Applications/Sileo.app/Sileo; duong dan la /var/Liy/ o Applications/Sileo.app/Sileo; hardcode /var/jb x6 o Applications/Sileo.app/Sileo
+xyz.cypwn.sileo_2.5.5-5_rootful_iphoneos-arm.deb | rootful | WARN | duong dan la /var/Liy/ o Applications/Sileo.app/Sileo; duong dan la /var/cache/ o Applications/Sileo.app/Sileo; duong dan la /var/lib/ o Applications/Sileo.app/Sileo
+xyz.cypwn.sileo_2.5.5-5_roothide_iphoneos-arm64e.deb | roothide | WARN | duong dan la /var/Liy/ o Applications/Sileo.app/Sileo; duong dan la /var/lib/ o Applications/Sileo.app/Sileo; duong dan la /var/cache/ o Applications/Sileo.app/Sileo; hardcode /var/jb x6 o Applications/Sileo.app/Sileo
 xyz.cypwn.xinam1ne_2.6-8_rootful_iphoneos-arm.deb | rootful | WARN | hardcode /var/jb x1 o Applications/Xinaf1re.app/Xinaf1re
 xyz.cypwn.xinam1ne_2.6-8_roothide_iphoneos-arm64e.deb | roothide | WARN | hardcode /var/jb x2 o usr/local/bin/Xinam1ne; hardcode /var/jb x2 o Library/MobileSubstrate/DynamicLibraries/Xinam1ne.dylib; hardcode /var/jb x4 o Library/PreferenceBundles/Xinam1nePrefs.bundle/Xinam1nePrefs; hardcode /var/jb x3 o Applications/Xinaf1re.app/Xinaf1re
