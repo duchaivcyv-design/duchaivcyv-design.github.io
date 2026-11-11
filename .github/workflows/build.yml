@@ -126,6 +126,69 @@ jobs:
           for _a, _b in SAME_LEN_REWRITES:
               assert len(_a) == len(_b), 'SAME_LEN_REWRITES phai cung do dai'
 
+          # ===== CẤU HÌNH ELLEKIT ROOTHIDE (ellekit cài trên MÁY, không nằm trong debs/) =====
+          # Chạy trên máy roothide (SSH hoặc terminal): dpkg -L ellekit | grep dylib
+          # Điền đường dẫn dyld sẽ nạp, dạng @loader_path/.jbroot/<đường dẫn trong jbroot>.
+          # Ví dụ: '@loader_path/.jbroot/usr/lib/libellekit.dylib'
+          # Để None thì script giữ hành vi cũ (lấy từ deb ellekit trong debs/ nếu có, không thì WARN).
+          ROOTHIDE_HOOK_LINK = None
+
+          # ===== HOOK LIBRARY (ellekit / substrate) — xác định từ deb THẬT, không đoán =====
+          HOOK_FILE = 'hook.json'
+
+          def _load_hook():
+              try:
+                  with open(HOOK_FILE) as f:
+                      return json.load(f)
+              except Exception:
+                  return {}
+
+          def _exports_of(path):
+              names = set()
+              fat = lief.MachO.parse(path)
+              if fat is None:
+                  return names
+              for bb in fat:
+                  for s in bb.exported_symbols:
+                      names.add(s.name.lstrip('_'))
+              return names
+
+          def build_hook_map(debs_dir='debs'):
+              """Đọc deb GỐC của package 'ellekit' trong debs/.
+              - Nếu deb có libsubstrate.dylib -> roothide dùng libsubstrate.dylib.
+              - Nếu chỉ có libellekit.dylib  -> roothide dùng libellekit.dylib (đổi tên link).
+              - Lưu danh sách symbol export của thư viện đó để kiểm tra symbol MS* của tweak."""
+              import shutil
+              info = {'roothide_hook': None, 'exports': [], 'source': None}
+              for deb in sorted(glob.glob(os.path.join(debs_dir, '*.deb'))):
+                  base = os.path.basename(deb)
+                  if any(t in base for t in ('_rootful_', '_rootless_', '_roothide_')):
+                      continue
+                  pkg = subprocess.run(['dpkg-deb', '-f', deb, 'Package'], capture_output=True, text=True).stdout.strip()
+                  if pkg != 'ellekit':
+                      continue
+                  tmp = 'hook_tmp'
+                  shutil.rmtree(tmp, ignore_errors=True)
+                  subprocess.run(['dpkg-deb', '-x', deb, tmp], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                  found = {}
+                  for dp, dn, fn in os.walk(tmp):
+                      for f_ in fn:
+                          if f_ in ('libsubstrate.dylib', 'libellekit.dylib') and os.path.isfile(os.path.join(dp, f_)):
+                              found.setdefault(f_, os.path.join(dp, f_))
+                  if 'libsubstrate.dylib' in found:
+                      info['roothide_hook'] = 'libsubstrate.dylib'
+                      info['exports'] = sorted(_exports_of(found['libsubstrate.dylib']))
+                  elif 'libellekit.dylib' in found:
+                      info['roothide_hook'] = 'libellekit.dylib'
+                      info['exports'] = sorted(_exports_of(found['libellekit.dylib']))
+                  info['source'] = base
+                  shutil.rmtree(tmp, ignore_errors=True)
+                  break
+              with open(HOOK_FILE, 'w') as f:
+                  json.dump(info, f, indent=2)
+              print("=== HOOK ROOTHIDE: %s (tu %s), %d symbol export ===" % (
+                  info['roothide_hook'], info['source'], len(info['exports'])))
+
           # ===== TU DONG TIM ALIAS /var/<ten la>/ =====
           # Chỉ đổi khi đường dẫn đích THẬT SỰ CÓ trong chính deb (kiểm chứng, không đoán).
           # Độ dài prefix phải bằng độ dài đích để không lệch offset Mach-O.
@@ -217,10 +280,19 @@ jobs:
               base = os.path.basename(name)
               if env_mode == 'roothide':
                   if name.startswith('/var/jb/'):
-                      return '@loader_path/.jbroot' + name[len('/var/jb'):]
-                  if name.endswith('CydiaSubstrate.framework/CydiaSubstrate'):
-                      return '@loader_path/.jbroot/usr/lib/libsubstrate.dylib'
-                  return name
+                      out = '@loader_path/.jbroot' + name[len('/var/jb'):]
+                  elif name.endswith('CydiaSubstrate.framework/CydiaSubstrate'):
+                      out = '@loader_path/.jbroot/usr/lib/libsubstrate.dylib'
+                  else:
+                      out = name
+                  ob = os.path.basename(out)
+                  if not is_id and ob in ('libsubstrate.dylib', 'libellekit.dylib'):
+                      if ROOTHIDE_HOOK_LINK:
+                          return ROOTHIDE_HOOK_LINK
+                      hook = _load_hook().get('roothide_hook')
+                      if hook and ob != hook:
+                          out = out[:-len(ob)] + hook
+                  return out
               if is_blacklisted(name):
                   return name
               if env_mode == 'rootful':
@@ -479,6 +551,7 @@ jobs:
               """Quét deb đã repack: tìm /var/jb còn sót trong binary, link ellekit còn sót,
               dylib tweak không có .plist lọc. Ghi 1 dòng vào COMPAT.txt."""
               import tempfile, shutil
+              HOOK = _load_hook()
               pkg = os.path.basename(deb_path)
               notes = []
               status = 'OK'
@@ -514,14 +587,32 @@ jobs:
                                   status = 'WARN'
                                   notes.append('hardcode /var/jb x%d o %s' % (cnt, rel))
                           try:
-                              b = lief.parse(p)
+                              fat = lief.MachO.parse(p)
                           except Exception:
-                              b = None
-                          if not (b and b.format == lief.Binary.FORMATS.MACHO):
+                              fat = None
+                          if fat is None:
                               continue
+                          cmds = [c for bb in fat for c in bb.commands]
                           if rel.startswith('Library/MobileSubstrate/DynamicLibraries') and rel.endswith('.dylib'):
                               dylibs.append(rel)
-                          for cmd in b.commands:
+                              if env_mode == 'roothide':
+                                  hk = HOOK.get('roothide_hook')
+                                  exp = set(HOOK.get('exports', []))
+                                  if not hk:
+                                      status = 'WARN'
+                                      notes.append('khong co deb ellekit trong debs/ de xac dinh hook')
+                                  elif exp:
+                                      imps = set()
+                                      for bb in fat:
+                                          for s in bb.imported_symbols:
+                                              nm = s.name.lstrip('_')
+                                              if nm.startswith('MS'):
+                                                  imps.add(nm)
+                                      miss = sorted(imps - exp)
+                                      if miss:
+                                          status = 'WARN'
+                                          notes.append('thieu symbol trong %s o %s: %s' % (hk, rel, ','.join(miss[:8])))
+                          for cmd in cmds:
                               nm = getattr(cmd, 'name', None) or ''
                               if env_mode == 'rootful' and 'ellekit' in nm.lower():
                                   status = 'WARN'
@@ -812,6 +903,7 @@ jobs:
 
           echo "=== LẬP BẢNG PHIÊN BẢN REPO (để sửa ràng buộc Depends/Conflicts) ==="
           python3 -c "import patch; patch.build_version_map('debs')"
+          python3 -c "import patch; patch.build_hook_map('debs')"
           python3 -c "import patch; patch.compat_begin()"
 
           echo "=== TỰ ĐỘNG PHÁT HIỆN MÔI TRƯỜNG GỐC → BUILD 2 VÙNG CÒN LẠI (đủ 3 vùng chuẩn) ==="
@@ -873,7 +965,7 @@ jobs:
             echo "=== Hoàn thành $PKG_NAME (gốc $ORIG_ENV + 2 vùng tách) ==="
           done
 
-          rm -f patch.py roothide.entitlements versions.json alias.json
+          rm -f patch.py roothide.entitlements versions.json alias.json hook.json
           echo "=== BÁO CÁO TƯƠNG THÍCH ==="
           cat COMPAT.txt
 
