@@ -118,6 +118,10 @@ jobs:
           # /var/jb/vmo/Library/Preferences/ (32) -> /var/mobile/Library/Preferences/ (32): nơi lưu prefs của tweak.
           SAME_LEN_REWRITES = [
               (b'/var/jb/vmo/Library/Preferences/', b'/var/mobile/Library/Preferences/'),
+              # /var/LIY/ là alias của /var/jb/Library/ (bundle prefs, MobileSubstrate); /Library/ là đúng cho rootful & roothide
+              (b'/var/LIY/', b'/Library/'),
+              # /var/bin/ là alias của /var/jb/usr/bin/ (vd sbreload); /usr/bin/ là đúng cho rootful & roothide
+              (b'/var/bin/', b'/usr/bin/'),
           ]
           for _a, _b in SAME_LEN_REWRITES:
               assert len(_a) == len(_b), 'SAME_LEN_REWRITES phai cung do dai'
@@ -438,6 +442,16 @@ jobs:
                               continue
                           if b'\x00' not in data:
                               continue
+                          # đường dẫn /var/<tên lạ>/ còn sót (không phải thư mục hệ thống chuẩn)
+                          if env_mode != 'rootless':
+                              allowed = (b'/var/mobile', b'/var/tmp', b'/var/log', b'/var/root', b'/var/containers',
+                                         b'/var/db', b'/var/run', b'/var/folders', b'/var/jb', b'/var/vm', b'/var/empty',
+                                         b'/var/preferences', b'/var/Keychains', b'/var/installd', b'/var/spool',
+                                         b'/var/buddy', b'/var/ran', b'/var/networkd', b'/var/MobileDevice', b'/var/backups')
+                              for m in set(re.findall(rb'/var/[A-Za-z0-9_.-]+/', data)):
+                                  if not any(m.startswith(a) for a in allowed):
+                                      status = 'WARN'
+                                      notes.append('duong dan la %s o %s' % (m.decode('ascii', 'replace'), rel))
                           # hardcode /var/jb trong binary (rootless thì được phép)
                           if env_mode != 'rootless':
                               cnt = data.count(b'/var/jb')
