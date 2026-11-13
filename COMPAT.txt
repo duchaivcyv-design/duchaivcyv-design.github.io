@@ -2,8 +2,6 @@ BAO CAO TUONG THICH (tu dong, CHUA test tren may that)
 Cot: deb | moi truong | ket qua | ghi chu
 WARN = can build lai tu source (hardcode duong dan / link sai), OK = khong phat hien van de
 
-bzip2_1.0.8_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-bzip2_1.0.8_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
 com.bazik1337.ios2627anims_1.5.2_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
 com.bazik1337.ios2627anims_1.5.2_roothide_iphoneos-arm64e.deb | roothide | WARN | khong co deb ellekit trong debs/ de xac dinh hook; hardcode /var/jb x4 o Library/PreferenceBundles/iOS2627AnimsPrefs.bundle/iOS2627AnimsPrefs
 com.foxfort.foxforttools_1.4.16_rootful_iphoneos-arm.deb | rootful | WARN | duong dan la /var/lib/ o Library/MobileSubstrate/DynamicLibraries/FoxFortTools.dylib; hardcode /var/jb x2 o Library/MobileSubstrate/DynamicLibraries/FoxFortTools.dylib
@@ -14,11 +12,7 @@ com.gpt.alert_9.9.9-5+debug_rootful_iphoneos-arm.deb | rootful | OK | khong phat
 com.gpt.alert_9.9.9-5+debug_roothide_iphoneos-arm64e.deb | roothide | WARN | hardcode /var/jb x4 o Library/MobileSubstrate/DynamicLibraries/alert.dylib; khong co deb ellekit trong debs/ de xac dinh hook
 com.jb.aodreal_0.0.1_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
 com.jb.aodreal_0.0.1_roothide_iphoneos-arm64e.deb | roothide | WARN | khong co deb ellekit trong debs/ de xac dinh hook; hardcode /var/jb x6 o Library/PreferenceBundles/AODREALPrefs.bundle/AODREALPrefs
-com.jb.rootless-patcher_1.0.0_rootful_iphoneos-arm.deb | rootful | WARN | hardcode /var/jb x3 o usr/local/bin/rootless-patcher
-com.jb.rootless-patcher_1.0.0_roothide_iphoneos-arm64e.deb | roothide | WARN | hardcode /var/jb x3 o usr/local/bin/rootless-patcher
-com.jtis.little12_1.2.3_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-com.jtis.little12_1.2.3_roothide_iphoneos-arm64e.deb | roothide | WARN | khong co deb ellekit trong debs/ de xac dinh hook; khong co deb ellekit trong debs/ de xac dinh hook
-com.korboy.sileo_2.5.7_rootful_iphoneos-arm.deb | rootful | WARN | duong dan la /var/cache/ o Applications/KorboySileo.app/Sileo; duong dan la /var/Liy/ o Applications/KorboySileo.app/Sileo; duong dan la /var/lib/ o Applications/KorboySileo.app/Sileo
+com.korboy.sileo_2.5.7_rootful_iphoneos-arm.deb | rootful | WARN | duong dan la /var/Liy/ o Applications/KorboySileo.app/Sileo; duong dan la /var/lib/ o Applications/KorboySileo.app/Sileo; duong dan la /var/cache/ o Applications/KorboySileo.app/Sileo
 com.korboy.sileo_2.5.7_roothide_iphoneos-arm64e.deb | roothide | WARN | duong dan la /var/Liy/ o Applications/KorboySileo.app/Sileo; duong dan la /var/cache/ o Applications/KorboySileo.app/Sileo; duong dan la /var/lib/ o Applications/KorboySileo.app/Sileo; hardcode /var/jb x7 o Applications/KorboySileo.app/Sileo
 com.opa334.libsandy_1.1.6-4_rootful_iphoneos-arm.deb | rootful | WARN | hardcode /var/jb x2 o usr/lib/libsandy.dylib; hardcode /var/jb x1 o usr/local/libexec/sandyd; hardcode /var/jb x2 o Library/MobileSubstrate/DynamicLibraries/SandyProxy.dylib
 com.opa334.libsandy_1.1.6-4_roothide_iphoneos-arm64e.deb | roothide | WARN | hardcode /var/jb x2 o usr/lib/libsandy.dylib; hardcode /var/jb x1 o usr/local/libexec/sandyd; hardcode /var/jb x2 o Library/MobileSubstrate/DynamicLibraries/SandyProxy.dylib; khong co deb ellekit trong debs/ de xac dinh hook
@@ -39,38 +33,6 @@ com.wave12.suite_6.1.34_rootful_iphoneos-arm.deb | rootful | OK | khong phat hie
 com.wave12.suite_6.1.34_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
 com.wave12.unlockcode_6.0.7_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
 com.wave12.wall26_1.0.7-5_roothide_iphoneos-arm64e.deb | roothide | WARN | duong dan la /var/libexec/ o Library/MobileSubstrate/DynamicLibraries/W12-8-26wall.dylib; khong co deb ellekit trong debs/ de xac dinh hook
-file_5.45_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-file_5.45_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-gzip_1.13_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-gzip_1.13_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-libclang-cpp16_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-libclang-cpp16_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-libllvm16_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-libllvm16_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-libmagic1_5.45_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-libmagic1_5.45_roothide_iphoneos-arm64e.deb | roothide | WARN | hardcode /var/jb x1 o usr/lib/libmagic.1.dylib
-libmpfr6_4.1.0_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-libmpfr6_4.1.0_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-libtapi_1500.0.12.3_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-libtapi_1500.0.12.3_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-libuuid16_1.6.2-3_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-libuuid16_1.6.2-3_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-libxar1_1.8.0.487.100.1-1_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-libxar1_1.8.0.487.100.1-1_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-llvm-16-linker-tools_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-llvm-16-linker-tools_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-llvm-16-runtime_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-llvm-16-runtime_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-llvm-16_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-llvm-16_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb | roothide | WARN | hardcode /var/jb x4 o usr/bin/llc-16
-llvm-dev_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-llvm-dev_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-llvm_16.0.0~5.9.2~RELEASE-1_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-llvm_16.0.0~5.9.2~RELEASE-1_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-odcctools_1010.6-1_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-odcctools_1010.6-1_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
-p7zip_17.04_rootful_iphoneos-arm.deb | rootful | OK | khong phat hien van de
-p7zip_17.04_roothide_iphoneos-arm64e.deb | roothide | OK | khong phat hien van de
 xyz.cypwn.sileo_2.5.5-5_rootful_iphoneos-arm.deb | rootful | WARN | duong dan la /var/Liy/ o Applications/Sileo.app/Sileo; duong dan la /var/cache/ o Applications/Sileo.app/Sileo; duong dan la /var/lib/ o Applications/Sileo.app/Sileo
-xyz.cypwn.sileo_2.5.5-5_roothide_iphoneos-arm64e.deb | roothide | WARN | duong dan la /var/Liy/ o Applications/Sileo.app/Sileo; duong dan la /var/lib/ o Applications/Sileo.app/Sileo; duong dan la /var/cache/ o Applications/Sileo.app/Sileo; hardcode /var/jb x6 o Applications/Sileo.app/Sileo
+xyz.cypwn.sileo_2.5.5-5_roothide_iphoneos-arm64e.deb | roothide | WARN | duong dan la /var/cache/ o Applications/Sileo.app/Sileo; duong dan la /var/Liy/ o Applications/Sileo.app/Sileo; duong dan la /var/lib/ o Applications/Sileo.app/Sileo; hardcode /var/jb x6 o Applications/Sileo.app/Sileo
 xyz.cypwn.xinam1ne_2.6-8_roothide_iphoneos-arm64e.deb | roothide | WARN | hardcode /var/jb x2 o usr/local/bin/Xinam1ne; hardcode /var/jb x2 o Library/MobileSubstrate/DynamicLibraries/Xinam1ne.dylib; khong co deb ellekit trong debs/ de xac dinh hook; hardcode /var/jb x4 o Library/PreferenceBundles/Xinam1nePrefs.bundle/Xinam1nePrefs; hardcode /var/jb x3 o Applications/Xinaf1re.app/Xinaf1re
